@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="App" default="pre-build">
+
+
+    <target name="pre-build">
+    	<delete dir="${basedir}/assets/www"/>
+    	<copy todir="${basedir}/assets/www">
+    	    <fileset dir="${basedir}/../www"/>
+    	</copy>
+    	<copy file="${basedir}/assets/phonegap-1.2.0.js" tofile="${basedir}/assets/www/phonegap-1.2.0.js"/>
+    </target>
+
+</project>

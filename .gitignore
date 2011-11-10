@@ -1,0 +1,11 @@
+ITS-iOS.xcodeproj/xcuserdata/
+ITS-iOS.xcodeproj/project.xcworkspace/
+**.ipk
+**.apk
+**.ap_
+**.dex
+**.class
+ITS-Android/bin/
+ITS-Android/gen/
+ITS-Android/local.properties
+.metadata

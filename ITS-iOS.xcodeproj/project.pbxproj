@@ -33,6 +33,7 @@
 		84CABDB9146AF1FE0029CA7A /* Capture.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 84CABDB8146AF1FE0029CA7A /* Capture.bundle */; };
 		84CABDBB146AF1FE0029CA7A /* PhoneGap.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84CABDBA146AF1FE0029CA7A /* PhoneGap.plist */; };
 		84CABDBF146AF1FE0029CA7A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 84CABDBE146AF1FE0029CA7A /* AppDelegate.m */; };
+		84CABDCE146AF3390029CA7A /* www in Resources */ = {isa = PBXBuildFile; fileRef = 84CABDCD146AF3390029CA7A /* www */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,10 +51,10 @@
 		84CABD92146AF1FE0029CA7A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		84CABD94146AF1FE0029CA7A /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		84CABD96146AF1FE0029CA7A /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
-		84CABD9A146AF1FE0029CA7A /* ITS-iOS-Info.plist */ = {isa = PBXFileReference; path = "ITS-iOS-Info.plist"; sourceTree = "<group>"; };
+		84CABD9A146AF1FE0029CA7A /* ITS-iOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ITS-iOS-Info.plist"; sourceTree = "<group>"; };
 		84CABD9C146AF1FE0029CA7A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		84CABD9E146AF1FE0029CA7A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		84CABDA0146AF1FE0029CA7A /* ITS-iOS-Prefix.pch */ = {isa = PBXFileReference; path = "ITS-iOS-Prefix.pch"; sourceTree = "<group>"; };
+		84CABDA0146AF1FE0029CA7A /* ITS-iOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ITS-iOS-Prefix.pch"; sourceTree = "<group>"; };
 		84CABDA1146AF1FE0029CA7A /* PhoneGap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhoneGap.framework; path = /Users/Shared/PhoneGap/Frameworks/PhoneGap.framework; sourceTree = "<absolute>"; };
 		84CABDA6146AF1FE0029CA7A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Resources/en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84CABDAA146AF1FE0029CA7A /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Resources/es.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -64,9 +65,10 @@
 		84CABDB6146AF1FE0029CA7A /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "Resources/splash/Default@2x.png"; sourceTree = "<group>"; };
 		84CABDB8146AF1FE0029CA7A /* Capture.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Capture.bundle; path = Resources/Capture.bundle; sourceTree = "<group>"; };
 		84CABDBA146AF1FE0029CA7A /* PhoneGap.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PhoneGap.plist; sourceTree = "<group>"; };
-		84CABDBD146AF1FE0029CA7A /* AppDelegate.h */ = {isa = PBXFileReference; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
+		84CABDBD146AF1FE0029CA7A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
 		84CABDBE146AF1FE0029CA7A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
-		84CABDC1146AF1FE0029CA7A /* README */ = {isa = PBXFileReference; name = README; path = Plugins/README; sourceTree = "<group>"; };
+		84CABDC1146AF1FE0029CA7A /* README */ = {isa = PBXFileReference; lastKnownFileType = text; name = README; path = Plugins/README; sourceTree = "<group>"; };
+		84CABDCD146AF3390029CA7A /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 				84CABD98146AF1FE0029CA7A /* ITS-iOS */,
 				84CABD7D146AF1FE0029CA7A /* Frameworks */,
 				84CABD7B146AF1FE0029CA7A /* Products */,
+				84CABDCD146AF3390029CA7A /* www */,
 			);
 			sourceTree = "<group>";
 		};
@@ -290,6 +293,7 @@
 				84CABDB7146AF1FE0029CA7A /* Default@2x.png in Resources */,
 				84CABDB9146AF1FE0029CA7A /* Capture.bundle in Resources */,
 				84CABDBB146AF1FE0029CA7A /* PhoneGap.plist in Resources */,
+				84CABDCE146AF3390029CA7A /* www in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,6 +480,7 @@
 				84CABDC6146AF1FE0029CA7A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

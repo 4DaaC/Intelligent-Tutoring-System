@@ -1,0 +1,9 @@
+{
+	"id": "edu.radford.softeng.fdaac.its",
+	"version": "0.0.1",
+	"vendor": "Radford University",
+	"type": "web",
+	"main": "index.html",
+	"title": "ITS",
+	"uiRevision": 2
+}
