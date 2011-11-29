@@ -1,0 +1,20 @@
+<div data-role="page" id="update">
+  <div data-role="header">
+    <a href="index.html" data-icon"arrow-l">Back</a>
+    <h1>Update</h1>
+  </div>
+  <div data-role="content">
+    <div id="update-button" data-role="button">Get Updates</div>
+    
+  </div>
+  <script>
+  $('#update-button').bind('click',function(){
+    if(loggedIn()){
+      //do update
+      alert('do update!');
+    }else{
+      alert('You must be logged in to update.');
+    }
+  });
+  </script>
+</div>

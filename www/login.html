@@ -1,0 +1,47 @@
+<div data-role="page" id="update">
+  <div data-role="header">
+    <a href="index.html" data-icon"arrow-l">Back</a>
+    <h1>Login</h1>
+  </div>
+  <div data-role="content">
+    <iframe id="login-frame" src="" width="100%" onload="iframeOnload();"><p>Not Supported</p> </iframe>
+    <h2 id="logged" style="display:none;">Logged in as <span></span></h2>
+    <div id="logout-button" data-role="button" style="display:none;">Logout</div>
+    
+  </div>
+  <script>
+  
+    itsLogin = function(user){
+        setUsername(user);
+        $('#login-frame').attr('src','').hide();
+        $('#logged span').html(user);
+        $('#logged').show();
+        $('#logout-button').show();
+    }
+    
+    $('#update').bind('pageshow',function(){
+      var storage = window.localStorage;
+      if (!loggedIn()){
+        $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/login.php');
+      }else{
+        itsLogin(storage.getItem("ITS-Username"));
+      }
+    });
+
+    iframeOnload = function(){
+        var storage = window.localStorage;
+        var username= loggedIn() ? 
+          getUsername() : $('#login-frame').contents().find('#user').html();
+        if(username != null){
+          itsLogin(username);
+        }
+    }
+    
+    $('#logout-button').bind('click',function(){
+      logoutUser();
+      $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/logout.php').show();
+      $('#logged').hide();
+      $('#logout-button').hide();
+    }); 
+  </script>
+</div>
