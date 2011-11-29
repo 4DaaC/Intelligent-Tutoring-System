@@ -1,6 +1,5 @@
-<div data-role="page" id="update">
+<div data-role="page" id="login" data-add-back-btn="true">
   <div data-role="header">
-    <a href="index.html" data-icon"arrow-l">Back</a>
     <h1>Login</h1>
   </div>
   <div data-role="content">
@@ -19,7 +18,7 @@
         $('#logout-button').show();
     }
     
-    $('#update').bind('pageshow',function(){
+    $('#login').bind('pageshow',function(){
       var storage = window.localStorage;
       if (!loggedIn()){
         $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/login.php');

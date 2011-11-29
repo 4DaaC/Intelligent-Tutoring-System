@@ -1,0 +1,29 @@
+<div data-role="page" id="classes" data-add-back-btn="true">
+  <div data-role="header">
+    <a data-rel="back" data-icon="arrow-l">Back </a>
+    <h1>Update</h1>
+    <a href="login.html">Login</a>
+  </div>
+  <div data-role="content">
+    <ul data-role="listview" id="class-list"></ul>
+  </div>
+  <script>
+    $('#classes').bind('pageshow',function(){
+      if (!loggedIn()){
+        $('#class-list').before("<h2>You must be logged in to view classes</h2>");
+      }else{
+        var username = getUsername();
+        $('#class-list').before('<h2>' + username + '\'s Classes</h2>');
+        var classes = getClasses(username);
+        if(classes == null || classes.length <= 0){
+          $('#class-list').before("<h3>No Classes Found</h3>");
+          $('#class-list').after("<a href='update.html' data-role='button'>Download Classes</a>");
+        }else{
+          alert('TODO: show classes');
+        }
+      }
+      $("#class-list").listview("refresh");
+      $("[data-role='button']").button();
+    });
+  </script>
+</div>

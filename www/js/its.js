@@ -15,3 +15,11 @@ loggedIn = function(){
 logoutUser = function(){
   window.localStorage.removeItem('ITS-Username');
 }
+
+goBack = function(){
+  history.go(-1);
+}
+
+getClasses = function(username){
+  return new Array();
+}
