@@ -9,5 +9,4 @@ ITS-Android/bin/
 ITS-Android/gen/
 ITS-Android/local.properties
 .metadata
-server/node_modules
 server/public/stylesheets/*.css
