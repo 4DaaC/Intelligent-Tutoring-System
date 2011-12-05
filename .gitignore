@@ -10,3 +10,5 @@ ITS-Android/gen/
 ITS-Android/local.properties
 .metadata
 server/public/stylesheets/*.css
+server/node_modules
+**.log
