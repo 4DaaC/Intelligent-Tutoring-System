@@ -1,5 +1,6 @@
 h1= title
 p Welcome to #{title}
+p You are logged in as #{current_user}
  script
   function load() {
     $.post('/student', {username: 'joel'},
