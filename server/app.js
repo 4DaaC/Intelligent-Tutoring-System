@@ -6,6 +6,7 @@
 var express = require('express');
 var fs = require('fs');
 var mysql = require('mysql');
+var crypt = require('./crypt.js');
 var app = module.exports = express.createServer();
 var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
@@ -20,11 +21,15 @@ var client = mysql.createClient({
 });
 
 client.query('USE mjrohr');
+
+
 var current_user = function(req){
   if(req.cookies['its-login-username'] && !req.session.user){
-    req.session.user = req.cookies['its-login-username'];
-  }if(req.session.user){
-    return req.session.user
+    req.session.user = new Object();
+    req.session.user.username = req.cookies['its-login-username'];
+    //here we can setup more info about the user from the db, like if they are a professor
+  }if(req.session.user && req.session.user.username){
+    return req.session.user.username
   }else return undefined;
 }
 // Configuration
@@ -50,9 +55,16 @@ app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user
 });
+
+var isRequestMobile = function(req){
+  var paramArray = req.route.params[0].split('/');
+  if(paramArray.length >=2 && paramArray[1] == 'mobile'){
+    return true;
+  }else return false;
+}
 var requireLogin = function(req,res,next){
   console.log(req.route);
-  if(typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
+  if(isRequestMobile || typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
     next();
   }else{
     res.redirect("/login");
@@ -88,7 +100,6 @@ app.post('/prof', function(req, res) {
 });
 
 app.get('/', function(req, res){
-  
   res.render('index', {
     title: 'Express'
   });
