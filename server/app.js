@@ -75,20 +75,15 @@ app.put('*',requireLogin);
 app.post('*',requireLogin);
 
 // Routes
-app.post('/student', function(req, res) {
-  var user = req.body.username;
-  console.log(req.body.username);
-  client.query("INSERT INTO Users (username, auth_level) VALUES ('"+user+"', '8')",
-    function(err, result, fields) {
-      console.log("HERE");
-      if(err) {
-        console.log(err);
-        res.json({});
-      } else {
-	console.log(result);
-	res.json({id: result.insertId});
-      }
-  });
+app.get('/mobile/profs', function(req, res) {
+	var user = crypt.decrypt(req.query.user);
+	client.query("SELECT username, uid "+
+				 "FROM Users NATURAL JOIN Classes "+
+				 "WHERE cid IN (SELECT cid "+ 
+				 				"FROM (Class_List a NATURAL JOIN Users b) "+
+				 				"WHERE username = '"+user+"')", function(err, results, fields) {
+		res.send(results);
+	});
 });
 
 app.post('/admin', function(req, res) {
@@ -100,6 +95,7 @@ app.post('/prof', function(req, res) {
 });
 
 app.get('/', function(req, res){
+  console.log(crypt.encrypt("joel"));
   res.render('index', {
     title: 'Express'
   });
