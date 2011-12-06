@@ -8,11 +8,11 @@ var fs = require('fs');
 var mysql = require('mysql');
 var crypt = require('./crypt.js');
 var app = module.exports = express.createServer();
-var app = module.exports = express.createServer({
+/*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
 });
-
+*/
 var client = mysql.createClient({
   user: 'mjrohr',
   host: 'php.radford.edu',
@@ -172,5 +172,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3001);
+app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
