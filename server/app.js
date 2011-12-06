@@ -104,14 +104,16 @@ app.get('/mobile/profs', function(req, res) {
 });
 
 app.get('/mobile/quizzes', function(req, res) {
-  var cid = req.quiery.cid;
+  var cid = req.query.cid;
   var user = req.query.user;
-  if(user == undefined || prof == undefined){
+  if(user == undefined || cid == undefined){
     req.send(500);
   }else{
     user = crypt.decrypt(user);
-    client.query("SELECT qid,name FROM Quizzes NATURAL JOIN Classes WHERE cid = '" + cid + "' AND" + 
-      "cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')", function(err,results,fields){
+    var qString = "SELECT qid,name FROM Quizzes NATURAL JOIN Classes WHERE cid = '" + cid + "' AND " + 
+      "cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')";
+    console.log(qString);
+    client.query(qString, function(err,results,fields){
         console.log(results);
         res.send(results);
       });
