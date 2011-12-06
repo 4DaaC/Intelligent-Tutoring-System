@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
     <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
   <script src="js/jquery-1.7.min.js"></script>
+  <script src="js/phonegap-1.2.0.js"></script>
   <script src="js/crypt.js"></script>
   <script>
   $(document).bind("mobileinit", function(){
@@ -28,8 +29,8 @@
       <div data-role="content">
         <ul data-role="listview" id="main-menu-list">
             <li><a href="#about">About RUTutor</a></li>
-            <li><a href="classes.html">View Classes</a></li>
-            <li><a href="update.html" id="update-link">Download Updates</a></li>
+            <li><a href="classes.html" data-ajax="false">View Quizzes</a></li>
+            <li><a href="update.html" data-ajax="false" >Download Updates</a></li>
         </ul>
       </div>
   </div>

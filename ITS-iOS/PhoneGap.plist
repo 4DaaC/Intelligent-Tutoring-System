@@ -24,7 +24,8 @@
 	<true/>
 	<key>ExternalHosts</key>
 	<array>
-		<string>php.radford.edu</string>
+		<string>rucs.radford.edu:3000</string>
+		<string>*.radford.edu</string>
 	</array>
 	<key>Plugins</key>
 	<dict>

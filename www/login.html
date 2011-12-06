@@ -1,5 +1,6 @@
-<div data-role="page" id="login">
+<div data-role="page" id="login" data-add-back-btn="false">
   <div data-role="header">
+    <a href="#main" data-ajax="false">Home</a>
     <h1>Login</h1>
   </div>
   <div data-role="content">
@@ -23,7 +24,7 @@
       if (!loggedIn()){
         $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/login.php');
       }else{
-        itsLogin(storage.getItem("ITS-Username"));
+        itsLogin(getUsername());
       }
     });
 

@@ -8,6 +8,7 @@ ITS-iOS.xcodeproj/project.xcworkspace/
 ITS-Android/bin/
 ITS-Android/gen/
 ITS-Android/local.properties
+ITS-Android/assets/www
 .metadata
 server/public/stylesheets/*.css
 server/node_modules
