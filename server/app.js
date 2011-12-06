@@ -99,6 +99,12 @@ app.get('/mobile/profs', function(req, res) {
 app.get('/mobile/classes', function(req, res) {
 	var prof = req.query.prof;
 	var user = req.query.user;
+  if(user != undefined){
+    user = crypt.decrypt(user);
+  }
+  if(prof != undefined){
+    prof = crypt.decrypt(prof);
+  }
 	if(prof == undefined && user == undefined) {
 		client.query("SELECT name, cid, classlimit "+
 					 "FROM Classes", function(err, results, fields) {
