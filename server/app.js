@@ -189,12 +189,16 @@ app.get('/admin', function(req, res) {
 });
 
 app.get('/class', function(req, res) {
-  var qString = "SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'";
-  var q = client.query(qString,function(err,results,fields) {
-	  if(results.length == 1 && results[0].auth_level == 2) {
-		  res.render('add_class', {
-			  title: 'Class Add Panel'
-		  });
+	authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var qString = "SELECT username,uid FROM Users WHERE username = '" + current_user(req) + "'";
+      client.query(qString,function(err,results){
+        res.render('add_class', {
+			    title: 'Class Add Panel',
+          auth_level: auth_level,
+          tuid: results[0].uid
+		    });
+      });
 	  } else {
 		  res.send(403);
 	  }
@@ -281,12 +285,19 @@ app.get('/remClass',function(req,res){
 app.get('/quiz', function(req, res) {
   authCheck(req, function(auth_level) {
     if(auth_level > 0) {
-	  res.render('add_quiz', {
-		title: 'Add Quiz'
-	  });
-	} else {
-		res.send(403);
-	}
+	    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
+      if(auth_level < 2){
+        qString += " AND Users.username = '" + current_user(req) + "'";
+      }
+      client.query(qString, function(err,results,fields){
+        res.render('add_quiz',{
+          title:'Add Class Panel',
+          classes: results
+        });
+      });
+	  } else {
+		  res.send(403);
+	  }
   });
 });
 
@@ -329,8 +340,9 @@ app.get('/classes',function(req,res){
     if(auth_level > 0){
       qString = "select cid,username,name FROM Classes,Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2){
-        qString += "AND Users.username = '" + current_user(req) + "'";
+        qString += " AND Users.username = '" + current_user(req) + "'";
       }
+      console.log(qString);
       client.query(qString,function(err,results,fields){
         res.render('classes',{
           title: 'Classes',
