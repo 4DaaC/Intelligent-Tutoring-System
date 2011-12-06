@@ -4,4 +4,15 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js')
-  body!= body
+  body
+    #wrapper
+      #header
+        #title-wrap
+          a.title(href="/") RU Intelligent Tutoring System
+          .subtitle= title
+        #user-info
+          .user Logged in as #{current_user}
+          a(href="/logout") Logout
+        .clear
+      #bd!= body
+
