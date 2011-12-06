@@ -150,10 +150,9 @@ app.get('/mobile/classes', function(req, res) {
 });
 
 app.get('/admin', function(req, res) {
-	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+current_user(req)+"'");
-	q.on('row', function(row) {
-		//Check the user level here
-		if(row.auth_level == 2) {
+  var qString = "SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'";
+	var q = client.query(qString,function(err,results,fields) {
+    if(results.length == 1 && results[0].auth_level == 2) {
 			res.render('control_panel', {
 				title: 'Admin Panel'
 			});
