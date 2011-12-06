@@ -1,11 +1,3 @@
-script
- $(document).ready(function() {
-  $.get("/mobile/classes", function(data) {
-   for(var i = 0;i < data.length;i++) {
-    $('#cl').append("<option value='"+data[i].cid+"'>"+data[i].name+"</option>");
-   }
-  })
- });
 form(method="post", action="/quiz")
  table
   tr
@@ -14,6 +6,8 @@ form(method="post", action="/quiz")
   tr
    td Class:
     select(id="cl", name="cl")
+      for class in classes
+        option(value="E{class.cid})= class.name
   tr
    td
     input(type="submit", value="Add")

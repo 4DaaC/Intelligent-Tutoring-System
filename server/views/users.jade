@@ -1,0 +1,29 @@
+-if(users.length == 0)
+  h1 No Users Found
+-else
+  h1 Users
+  table.center
+    tr
+      th
+        |Id
+      th
+        |Username
+      th
+        |Auth Level
+      th
+    for user in users
+      tr
+        td
+          =user.uid
+        td
+          =user.username
+        td
+          -if (user.auth_level == 0)
+            |Student
+          -if (user.auth_level == 1)
+            |Professor
+          -if (user.auth_level == 2)
+            |Admin
+        td
+          a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+a(href="/admin") Add a User
