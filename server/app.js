@@ -8,6 +8,7 @@ var fs = require('fs');
 var mysql = require('mysql');
 var crypt = require('./crypt.js');
 var app = module.exports = express.createServer();
+
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
@@ -27,9 +28,9 @@ var current_user = function(req){
   if(req.cookies['its-login-username'] && !req.session.user){
     req.session.user = new Object();
     req.session.user.username = req.cookies['its-login-username'];
-    //here we can setup more info about the user from the db, like if they are a professor
+	//Here we can setup more info about the user from the db, like if they are a professor
   }if(req.session.user && req.session.user.username){
-    return req.session.user.username
+	  return req.session.user.username;
   }else return undefined;
 }
 // Configuration
@@ -51,10 +52,15 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
+
 app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user
 });
+
+var isAdmin = function(req) {
+	return req.session.user.auth == 2;
+}
 
 var isRequestMobile = function(req){
   var paramArray = req.route.params[0].split('/');
@@ -70,6 +76,7 @@ var requireLogin = function(req,res,next){
     res.redirect("/login");
   }
 }
+
 app.get('*',requireLogin);
 app.put('*',requireLogin);
 app.post('*',requireLogin);
@@ -142,16 +149,32 @@ app.get('/mobile/classes', function(req, res) {
 	}
 });
 
-app.post('/admin', function(req, res) {
-
+app.get('/admin', function(req, res) {
+	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'");
+	q.on('row', function(row) {
+		//Check the user level here
+		if(row.auth_level == 2) {
+			res.render('control_panel', {
+				title: 'Admin Panel'
+			});
+		} else {
+			res.send(403);
+		}
+	});
 });
 
-app.post('/prof', function(req, res) {
-
+app.post('/user', function(req, res) {
+  	var auth = req.body.priv;
+	var user = req.body.user;
+	client.query("INSERT INTO Users (username, auth_level) VALUES ('"+user+"','"+auth+"')", function(err) {
+		if(err) {
+			console.log(err);
+		}
+		res.redirect('/admin');
+	});
 });
 
 app.get('/', function(req, res){
-  console.log(crypt.encrypt("joel"));
   res.render('index', {
     title: 'Express'
   });
