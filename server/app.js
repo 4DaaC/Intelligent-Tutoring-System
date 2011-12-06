@@ -224,7 +224,22 @@ app.post('/class', function(req, res) {
 		res.redirect('/classes');
 	});
 });
+app.get('/remUser',function(req,res){
 
+  authCheck(req,function(auth_level){
+    if(auth_level > 1){
+      var uid = req.query.uid;
+      if(uid != undefined){
+        var qString = "DELETE FROM Users WHERE uid = '" + uid + "'";
+        console.log(qString);
+        client.query(qString,function(err){
+          if(err) console.log(err);
+        });
+      }
+      res.redirect('/users');
+    }else res.send(403);
+  });
+});
 app.get('/remClass',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level>0){
@@ -269,6 +284,23 @@ app.get('/', function(req, res){
   });
 });
 
+app.get('/users',function(req,res){
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var qString = "select * from Users";
+      console.log(qString);
+      client.query(qString,function(err,results,fields){
+        console.log('render');
+        res.render('users',{
+          title: 'Users',
+          users: results
+        });
+      });
+    }else{
+      res.send(403);
+    }
+  });
+});
 app.get('/classes',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level > 0){
