@@ -1,0 +1,18 @@
+-if(quizzes.length == 0)
+  h1 No Quizzes Found
+-else
+  h1= quizzes[0].className + "'s Quizzes"
+  table.center
+    tr
+      th
+        |Name
+      th
+        |Class
+        
+    for quiz in quizzes
+      tr
+        td
+          a(href="/viewQuiz?qid=#{quiz.qid}")=quiz.name
+        td
+          =quiz.className
+a(href="/quiz") Add a Quiz

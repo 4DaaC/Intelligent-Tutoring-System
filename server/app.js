@@ -221,8 +221,46 @@ app.post('/class', function(req, res) {
 		if(err) {
 			console.log(err);
 		}
-		res.redirect('/class');
+		res.redirect('/classes');
 	});
+});
+
+app.get('/remClass',function(req,res){
+  authCheck(req,function(auth_level){
+    if(auth_level>0){
+      var cid = req.query.cid;
+      if(cid != undefined){
+        var qString = "SELECT Classes.cid, Users.username From Classes,Users WHERE Classes.uid = Users.uid " +
+          "AND Classes.cid = '" + cid + "'";
+        if(auth_level < 2){
+          qString += " AND Users.username = '" + current_user(req) + "'";
+        }
+        console.log(qString);
+        client.query(qString,function(err,results,fields){
+          if(results.length >0){
+            if(results[0].username = current_user(req) || auth_level > 1){
+              var qString ="DELETE FROM Classes WHERE cid = '" + cid + "'";
+              console.log(qString);
+              client.query(qString,function(err){
+                if(err){
+                  console.log(err);
+                }
+                res.redirect('/classes');
+              });
+            }else{
+              res.send(403);
+            } 
+          }else{
+            res.redirect('/classes');
+          }
+        });
+      }else{
+        res.redirect('/classes');
+      }
+    }else{
+      res.send(403);
+    }
+  });
 });
 
 app.get('/', function(req, res){
@@ -250,6 +288,34 @@ app.get('/classes',function(req,res){
   });
 });
 
+app.get('/quizzes',function(req,res){
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var cid = req.query.cid;
+      if(cid != undefined){
+        var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
+          "AND Quizzes.cid = '" + cid + "'";
+        if(auth_level < 2){
+          qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
+          "AND Users.username = '" + current_user(req) + "')";
+        }
+        console.log(qString);
+        client.query(qString,function(err,results,fields){
+          console.log(results);
+          res.render('quizzes',{
+            title:"Quizzes",
+            quizzes: results
+          });
+        });
+      }else{
+        res.redirect('/');
+      }
+    }else{
+      res.send(403);
+    }
+  });
+});
+
 app.get('/login',function(req,res){
   console.log('req');
   if(typeof(current_user(req)) != 'undefined'){
@@ -271,5 +337,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3000);
+app.listen(3001);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
