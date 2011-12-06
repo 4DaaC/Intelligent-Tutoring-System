@@ -413,9 +413,16 @@ app.get('/quizzes',function(req,res){
         console.log(qString);
         client.query(qString,function(err,results,fields){
           console.log(results);
-          res.render('quizzes',{
-            title:"Quizzes",
-            quizzes: results
+          qString = "select Users.username FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
+          " Class_List.cid = '" + cid +  "'";
+          console.log(qString);
+          client.query(qString,function(err2,results2,fields2){
+            
+            res.render('quizzes',{
+              title:"Quizzes",
+              quizzes: results,
+              students: results2
+              });
           });
         });
       }else{
@@ -448,5 +455,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3003);
+app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
