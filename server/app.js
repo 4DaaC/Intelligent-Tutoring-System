@@ -282,6 +282,24 @@ app.get('/remClass',function(req,res){
   });
 });
 
+app.post('/student', function(req, res) {
+  var user = req.body.user;
+  var cid = req.body.cid;
+  client.query("SELECT uid FROM Users WHERE username = '"+user+"'", function(err, results) {
+    if(err) {
+		console.log(err);
+	} else {
+		var uid = results[0].uid;
+		client.query("INSERT INTO Class_List (uid, cid) VALUES ('"+uid+"', '"+cid+"')", function(err) {
+		  if(err) {
+			console.log(err);
+		  }
+		});
+	}
+	res.redirect('/student');
+  });
+});
+
 app.get('/quiz', function(req, res) {
   authCheck(req, function(auth_level) {
     if(auth_level > 0) {
@@ -404,5 +422,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3004);
+app.listen(3003);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
