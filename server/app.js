@@ -278,6 +278,29 @@ app.get('/remClass',function(req,res){
   });
 });
 
+app.get('/quiz', function(req, res) {
+  authCheck(req, function(auth_level) {
+    if(auth_level > 0) {
+	  res.render('add_quiz', {
+		title: 'Add Quiz'
+	  });
+	} else {
+		res.send(403);
+	}
+  });
+});
+
+app.post('/quiz', function(req, res) {
+ var qname = req.body.qname;
+ var cl = req.body.cl;
+ client.query("INSERT INTO Quizzes (name, cid) VALUES ('"+qname+"', '"+cl+"')", function(err) {
+	if(err) {
+	  console.log(err);
+	}
+	res.redirect('/quiz');
+ });
+});
+
 app.get('/', function(req, res){
   res.render('index', {
     title: 'Home'
@@ -369,5 +392,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3001);
+app.listen(3004);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

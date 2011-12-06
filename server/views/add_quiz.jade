@@ -1,0 +1,19 @@
+script
+ $(document).ready(function() {
+  $.get("/mobile/classes", function(data) {
+   for(var i = 0;i < data.length;i++) {
+    $('#cl').append("<option value='"+data[i].cid+"'>"+data[i].name+"</option>");
+   }
+  })
+ });
+form(method="post", action="/quiz")
+ table
+  tr
+   td Quiz Name:
+    input(type="text", name="qname")
+  tr
+   td Class:
+    select(id="cl", name="cl")
+  tr
+   td
+    input(type="submit", value="Add")
