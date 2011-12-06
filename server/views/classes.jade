@@ -1,0 +1,18 @@
+-if(classes.length == 0)
+  h1 No Classes Found
+-else
+  h1 Classes
+  table.center
+    tr
+      th
+        |Class
+      th
+        |Professor
+        
+    for class in classes
+      tr
+        td
+          a(href="/viewClass?cid=#{class.cid}")=class.name
+        td
+          =class.username
+a(href="/class") Add a Class

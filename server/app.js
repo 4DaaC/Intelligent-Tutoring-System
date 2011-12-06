@@ -165,11 +165,20 @@ app.get('/mobile/classes', function(req, res) {
 		});
 	}
 });
-
-app.get('/admin', function(req, res) {
+var authCheck = function(req,callback){
   var qString = "SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'";
 	var q = client.query(qString,function(err,results,fields) {
-    if(results.length == 1 && results[0].auth_level == 2) {
+    if(results.length == 1) {
+      callback(results[0].auth_level);
+    }else{
+      callback(0);
+    }
+  });
+}
+
+app.get('/admin', function(req, res) {
+  authCheck(req,function(auth_level){  
+    if(auth_level == 2) {
 			res.render('control_panel', {
 				title: 'Admin Panel'
 			});
@@ -193,6 +202,25 @@ app.post('/user', function(req, res) {
 app.get('/', function(req, res){
   res.render('index', {
     title: 'Home'
+  });
+});
+
+app.get('/classes',function(req,res){
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      qString = "select cid,username,name FROM Classes,Users WHERE Classes.uid = Users.uid";
+      if(auth_level < 2){
+        qString += "AND Users.username = '" + current_user(req) + "'";
+      }
+      client.query(qString,function(err,results,fields){
+        res.render('classes',{
+          title: 'Classes',
+          classes: results
+        });
+      });
+    }else{
+      res.send(403);
+    }
   });
 });
 
