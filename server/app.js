@@ -188,6 +188,19 @@ app.get('/admin', function(req, res) {
 	});
 });
 
+app.get('/class', function(req, res) {
+  var qString = "SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'";
+  var q = client.query(qString,function(err,results,fields) {
+	  if(results.length == 1 && results[0].auth_level == 2) {
+		  res.render('add_class', {
+			  title: 'Class Add Panel'
+		  });
+	  } else {
+		  res.send(403);
+	  }
+  });
+});
+
 app.post('/user', function(req, res) {
   	var auth = req.body.priv;
 	var user = req.body.user;
@@ -196,6 +209,19 @@ app.post('/user', function(req, res) {
 			console.log(err);
 		}
 		res.redirect('/admin');
+	});
+});
+
+app.post('/class', function(req, res) {
+	var name = req.body.cname;
+	var tuser = req.body.tuser;
+	var limit = req.body.limit;
+	var priv = req.body.priv;
+	client.query("INSERT INTO Classes (uid, name, classlimit, privacy) VALUES ('"+tuser+"','"+name+"','"+limit+"','"+priv+"')", function(err) {
+		if(err) {
+			console.log(err);
+		}
+		res.redirect('/class');
 	});
 });
 
