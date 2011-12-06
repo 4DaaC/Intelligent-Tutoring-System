@@ -192,7 +192,7 @@ app.post('/user', function(req, res) {
 
 app.get('/', function(req, res){
   res.render('index', {
-    title: 'Express'
+    title: 'Home'
   });
 });
 
