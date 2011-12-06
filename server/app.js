@@ -6,12 +6,13 @@
 var express = require('express');
 var fs = require('fs');
 var mysql = require('mysql');
+var crypt = require('./crypt.js');
 var app = module.exports = express.createServer();
-var app = module.exports = express.createServer({
+/*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
 });
-
+*/
 var client = mysql.createClient({
   user: 'mjrohr',
   host: 'php.radford.edu',
@@ -20,11 +21,15 @@ var client = mysql.createClient({
 });
 
 client.query('USE mjrohr');
+
+
 var current_user = function(req){
   if(req.cookies['its-login-username'] && !req.session.user){
-    req.session.user = req.cookies['its-login-username'];
-  }if(req.session.user){
-    return req.session.user
+    req.session.user = new Object();
+    req.session.user.username = req.cookies['its-login-username'];
+    //here we can setup more info about the user from the db, like if they are a professor
+  }if(req.session.user && req.session.user.username){
+    return req.session.user.username
   }else return undefined;
 }
 // Configuration
@@ -50,9 +55,16 @@ app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user
 });
+
+var isRequestMobile = function(req){
+  var paramArray = req.route.params[0].split('/');
+  if(paramArray.length >=2 && paramArray[1] == 'mobile'){
+    return true;
+  }else return false;
+}
 var requireLogin = function(req,res,next){
   console.log(req.route);
-  if(typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
+  if(isRequestMobile || typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
     next();
   }else{
     res.redirect("/login");
@@ -63,20 +75,71 @@ app.put('*',requireLogin);
 app.post('*',requireLogin);
 
 // Routes
-app.post('/student', function(req, res) {
-  var user = req.body.username;
-  console.log(req.body.username);
-  client.query("INSERT INTO Users (username, auth_level) VALUES ('"+user+"', '8')",
-    function(err, result, fields) {
-      console.log("HERE");
-      if(err) {
-        console.log(err);
-        res.json({});
-      } else {
-	console.log(result);
-	res.json({id: result.insertId});
-      }
-  });
+app.get('/mobile/profs', function(req, res) {
+	if(req.query.user == undefined) { 
+		client.query("SELECT username, uid "+
+				 "FROM Users "+
+				 "WHERE auth_level = 1", function(err, results, fields) {
+					console.log(results);
+					res.send(results);				
+				});
+	} else {
+		var user = crypt.decrypt(req.query.user);
+		client.query("SELECT username, uid "+
+					 "FROM Users NATURAL JOIN Classes "+
+					 "WHERE cid IN (SELECT cid "+ 
+					 				"FROM (Class_List a NATURAL JOIN Users b) "+
+				 					"WHERE username = '"+user+"')", function(err, results, fields) {
+			console.log(results);
+			res.send(results);
+		});
+	}
+});
+
+app.get('/mobile/classes', function(req, res) {
+	var prof = req.query.prof;
+	var user = req.query.user;
+  if(user != undefined){
+    user = crypt.decrypt(user);
+  }
+  if(prof != undefined){
+    prof = crypt.decrypt(prof);
+  }
+	if(prof == undefined && user == undefined) {
+		client.query("SELECT name, cid, classlimit "+
+					 "FROM Classes", function(err, results, fields) {
+						console.log(results);
+						res.send(results);
+					 });
+	} else if(user == undefined) {
+		client.query("SELECT name, cid, classlimit "+
+				 	 "FROM Classes "+
+				 	 "WHERE uid IN (SELECT uid "+
+				 			  	   "FROM Users "+
+							  	   "WHERE username = '"+prof+"')", function(err, results, fields) {
+						console.log(results);						  
+						res.send(results);
+					});
+	} else if(prof == undefined) {
+		client.query("SELECT name, cid, classlimit "+
+				 	 "FROM Classes "+
+					 "WHERE cid IN (SELECT cid "+
+					 			   "FROM Class_List NATURAL JOIN Users "+
+								   "WHERE username = '"+user+"')", function(err, results, fields) {
+						console.log(results);
+						res.send(results);
+					});
+	} else {
+		client.query("SELECT name, cid, classlimit "+
+					 "FROM Classes "+
+					 "WHERE cid IN (SELECT cid "+
+					 			   "FROM Class_List NATURAL JOIN Users "+
+					 			   "WHERE username = '"+user+"') AND uid IN (SELECT uid FROM Users WHERE username = '"+prof+"')"
+				 	 , function(err, results, fields) {
+			console.log(results);		
+			res.send(results);
+		});
+	}
 });
 
 app.post('/admin', function(req, res) {
@@ -88,7 +151,7 @@ app.post('/prof', function(req, res) {
 });
 
 app.get('/', function(req, res){
-  
+  console.log(crypt.encrypt("joel"));
   res.render('index', {
     title: 'Express'
   });
