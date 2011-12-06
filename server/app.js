@@ -103,6 +103,21 @@ app.get('/mobile/profs', function(req, res) {
 	}
 });
 
+app.get('/mobile/quizzes', function(req, res) {
+  var cid = req.quiery.cid;
+  var user = req.query.user;
+  if(user == undefined || prof == undefined){
+    req.send(500);
+  }else{
+    user = crypt.decrypt(user);
+    client.query("SELECT qid,name FROM Quizzes NATURAL JOIN Classes WHERE cid = '" + cid + "' AND" + 
+      "cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')", function(err,results,fields){
+        console.log(results);
+        res.send(results);
+      });
+  }
+});
+
 app.get('/mobile/classes', function(req, res) {
 	var prof = req.query.prof;
 	var user = req.query.user;
@@ -150,7 +165,7 @@ app.get('/mobile/classes', function(req, res) {
 });
 
 app.get('/admin', function(req, res) {
-	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+current_user(req)+"'");
+	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'");
 	q.on('row', function(row) {
 		//Check the user level here
 		if(row.auth_level == 2) {
