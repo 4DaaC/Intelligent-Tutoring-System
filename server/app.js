@@ -70,7 +70,7 @@ var isRequestMobile = function(req){
 }
 var requireLogin = function(req,res,next){
   console.log(req.route);
-  if(isRequestMobile || typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
+  if(isRequestMobile(req) || typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
     next();
   }else{
     res.redirect("/login");
@@ -150,7 +150,7 @@ app.get('/mobile/classes', function(req, res) {
 });
 
 app.get('/admin', function(req, res) {
-	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'");
+	var q = client.query("SELECT auth_level FROM Users WHERE username = '"+current_user(req)+"'");
 	q.on('row', function(row) {
 		//Check the user level here
 		if(row.auth_level == 2) {
