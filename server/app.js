@@ -306,6 +306,26 @@ app.post('/student', function(req, res) {
   });
 });
 
+app.get('/student', function(req, res) {
+  authCheck(req, function(auth_level) {
+	if(auth_level > 0) {
+	  var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
+	  if(auth_level < 2) {
+		qString += " AND Users.username = '"+current_user(req)+"'";
+	  }
+	  client.query(qString, function(err, results, fields) {
+		console.log(results);
+		res.render('student_class', {
+			title: 'Add student to class',
+			classes: results
+		});
+	  });
+	} else {
+	  res.send(403);
+	}
+  });
+});
+
 app.get('/quiz', function(req, res) {
   authCheck(req, function(auth_level) {
     if(auth_level > 0) {
@@ -407,6 +427,12 @@ app.get('/quizzes',function(req,res){
   });
 });
 
+app.get('/studentList', function(req, res) {
+  client.query("SELECT uid, username FROM Users", function(err, results) {
+	res.send(results);
+  });
+});
+
 app.get('/login',function(req,res){
   console.log('req');
   if(typeof(current_user(req)) != 'undefined'){
@@ -428,5 +454,5 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3003);
+app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
