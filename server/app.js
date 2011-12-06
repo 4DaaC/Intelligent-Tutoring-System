@@ -244,6 +244,32 @@ app.get('/remUser',function(req,res){
     }else res.send(403);
   });
 });
+
+app.get('/remQuiz',function(req,res){
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var qid = req.query.qid;
+      if(qid != undefined){
+        var qString = "SELECT qid, Classes.cid FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid" +
+          " AND qid = '" + qid + "'";
+        if(auth_level < 2){
+          qString += " AND cid IN (SELECT Classes.cid FROM Classes, Users WHERE Classes.uid = Users.uid AND Users.username = '" + current_user(req)  + "')";
+        }
+        console.log(qString);
+        client.query(qString,function(err,results,fields){
+          if(results.length > 0){
+            client.query("DELETE FROM Quizzes WHERE qid = '" + qid + "'",function(err){
+              console.log(err);
+              res.redirect('/');
+            });
+          }else res.redirect('/');
+        });
+      } else res.redirect('/');
+    }else{
+      res.send(403);
+    }
+  });
+});
 app.get('/remClass',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level>0){

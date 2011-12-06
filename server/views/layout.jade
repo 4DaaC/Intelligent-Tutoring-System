@@ -14,5 +14,27 @@ html
           .user Logged in as #{current_user}
           a(href="/logout") Logout
         .clear
+      #sidebar
+        ul
+          li
+            |Classes
+            ul
+              li
+                a(href="/classes") View Classes
+              li
+                a(href="/class") Add Class
+              li
+                a(href="/quiz") Add Quiz
+          li
+            |Users
+            ul
+              li
+                a(href="/quizzes") View Users
+              li
+                a(href="/admin") Add Users
       #bd!= body
-
+      .clear
+    script
+      $(document).ready(function(){
+      $('#sidebar').css('height',$('#wrapper').css('height'));
+      });
