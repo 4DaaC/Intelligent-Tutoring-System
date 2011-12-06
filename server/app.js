@@ -109,9 +109,9 @@ app.get('/mobile/quizzes', function(req, res) {
   if(user == undefined || cid == undefined){
     req.send(500);
   }else{
-    user = crypt.decrypt(user);
-    var qString = "SELECT qid,name FROM Quizzes NATURAL JOIN Classes WHERE cid = '" + cid + "' AND " + 
-      "cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')";
+    user = crypt.decrypt(user).toLowerCase();
+    var qString = "SELECT qid,Quizzes.name FROM Quizzes,Classes WHERE Quizzes.cid = Classes.cid AND Quizzes.cid = '" + cid + "' AND " + 
+      "Quizzes.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')";
     console.log(qString);
     client.query(qString, function(err,results,fields){
         console.log(results);
