@@ -1,0 +1,27 @@
+script
+ $(document).ready(function() {
+  $.get("/mobile/profs", function(data) {
+   for(var i = 0;i < data.length;i++) {
+    $('#teacher').append("<option value='"+data[i].uid+"'>"+data[i].username+"</option>");
+   }
+  })
+ });
+form(method="post")
+ table
+  tr
+   td Class name:
+    input(type="text", name="cname")
+  tr
+   td Teacher:
+    select(id="teacher", name="tuser")	
+  tr
+   td Limit:
+    input(type="text", name="limit")
+  tr
+   td Visibility
+    select(name="priv")
+     option(value="0") public
+     option(value="1") private
+  tr
+   td
+    input(type="submit", value="Add")
