@@ -15,13 +15,13 @@ var app = module.exports = express.createServer();
 });
 */
 var client = mysql.createClient({
-  user: 'mjrohr',
-  host: 'php.radford.edu',
-  password: 'rohrdb1',
-  database: 'mjrohr'
+  user: 'quiz',
+  host: 'localhost',
+  password: 'EaYY95dN724MaE5P',
+  database: 'quiz'
 });
 
-client.query('USE mjrohr');
+client.query('USE quiz');
 
 
 var current_user = function(req){
@@ -488,4 +488,5 @@ app.get('/logout',function(req,res){
  res.redirect('/');
 });
 app.listen(3000);
+console.log(app.address());
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
