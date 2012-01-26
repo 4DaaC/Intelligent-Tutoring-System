@@ -357,7 +357,8 @@ app.get('/quiz', function(req, res) {
       client.query(qString, function(err,results,fields){
         res.render('add_quiz',{
           title:'Add Class Panel',
-          classes: results
+          classes: results,
+          select: req.query.cid
         });
       });
 	  } else {
@@ -457,7 +458,8 @@ app.get('/quizzes',function(req,res){
             res.render('quizzes',{
               title:"Quizzes",
               quizzes: results,
-              students: results2
+              students: results2,
+              cid: cid
               });
           });
         });
