@@ -50,7 +50,7 @@ app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
-  isAdmin: function(req, res) { return req.session.user.auth == 2; }
+  isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; }
 });
 
 var isAdmin = function(req) {
@@ -414,6 +414,7 @@ app.post('/updateUser', function(req, res) {
     }
   });
 });
+
 app.get('/classes',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level > 0){
