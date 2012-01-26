@@ -18,6 +18,8 @@ client.query('USE ' + config.db.database);
 
 
 var current_user = function(req){
+  console.log('Cookies:');
+  console.log(req.cookies);
   if(req.cookies['its-login-username'] && !req.session.user){
     req.session.user = new Object();
     req.session.user.username = req.cookies['its-login-username'];
@@ -50,7 +52,8 @@ app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
-  isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; }
+  isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; },
+  requireLogin: function(){return config.requireLogin}
 });
 
 var isAdmin = function(req) {
@@ -64,8 +67,12 @@ var isRequestMobile = function(req){
   }else return false;
 }
 var requireLogin = function(req,res,next){
-  console.log(req.route);
-  if(isRequestMobile(req) || typeof(current_user(req)) !='undefined' || req.route.params[0] == '/login'){
+  console.log(req.route.params);
+  if(isRequestMobile(req) || 
+     typeof(current_user(req)) !='undefined' || 
+     req.route.params[0] == '/login' || 
+     req.route.params[0] == '/test-login' ||
+     req.route.params[0] == '/stylesheets/style.css'){
     next();
   }else{
     res.redirect("/login");
@@ -482,13 +489,27 @@ app.get('/login',function(req,res){
     res.redirect("/");
   }else{
     res.render('login',{
-      title:'Login'
+      title:'Login',
+      layout:false
     });
+  }
+});
+
+app.post('/test-login',function(req,res){
+  if(config.requireLogin){
+    res.redirect('/login');
+  }else{
+    console.log(req.body.username);
+    res.cookie('its-login-username',req.body.username);
+    res.redirect('/');
   }
 });
 
 app.get('/logout',function(req,res){
  res.cookie('its-login-username','',{
+   expires: new Date(Date.now() - 1000),
+  });
+  res.cookie('its-login-username','',{
    expires: new Date(Date.now() - 1000),
    path:'/',
    domain:'.radford.edu',

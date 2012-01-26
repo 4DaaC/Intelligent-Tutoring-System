@@ -1,5 +1,25 @@
-form(action="https://php.radford.edu/~it-auth/vsp09/login.php", method="post")
-  input(type="hidden",name="url",value=base_url)
-  input(type="hidden",name="cname",value="its-login-username")
-script
-  document.forms[0].submit();
+-if(requireLogin)
+  form(action="https://php.radford.edu/~it-auth/vsp09/login.php", method="post")
+    input(type="hidden",name="url",value=base_url)
+    input(type="hidden",name="cname",value="its-login-username")
+  script
+    document.forms[0].submit();
+-else
+  !!!
+  html
+    head
+      title= title
+      link(rel='stylesheet', href='/stylesheets/style.css')
+      script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js')
+    body
+      #wrapper
+        #bd
+          h1 Test Login
+          form(action="/test-login", method="post")
+            label
+              h3 Username
+              input(type="text",name="username")
+            input(type="submit", value="Login")
+
+        .clear
+
