@@ -8,7 +8,7 @@ form(method="post", action="/quiz")
    td Class:
     select(id="cl", name="cl")
       for class in classes
-        option(value="E{class.cid})= class.name
+        option(value="{class.cid}")= class.name
   tr
    td
     input(type="submit", value="Add")
