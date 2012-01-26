@@ -22,7 +22,7 @@
     $('#login').bind('pageshow',function(){
       var storage = window.localStorage;
       if (!loggedIn()){
-        $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/login.php');
+        $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/login.php');
       }else{
         itsLogin(getUsername());
       }
@@ -39,7 +39,7 @@
     
     $('#logout-button').bind('click',function(){
       logoutUser();
-      $('#login-frame').attr('src','https://php.radford.edu/~mjrohr/its/logout.php').show();
+      $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/logout.php').show();
       $('#logged').hide();
       $('#logout-button').hide();
     }); 

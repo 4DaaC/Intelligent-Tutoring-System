@@ -13,3 +13,4 @@ ITS-Android/assets/www
 server/public/stylesheets/*.css
 server/node_modules
 **.log
+server/config.js

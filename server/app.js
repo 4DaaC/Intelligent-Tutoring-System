@@ -8,20 +8,14 @@ var fs = require('fs');
 var mysql = require('mysql');
 var crypt = require('./crypt.js');
 var app = module.exports = express.createServer();
-
+var config = require('./config')
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
 });
 */
-var client = mysql.createClient({
-  user: 'quiz',
-  host: 'localhost',
-  password: 'EaYY95dN724MaE5P',
-  database: 'quiz'
-});
-
-client.query('USE quiz');
+var client = mysql.createClient(config.db);
+client.query('USE ' + config.db.database);
 
 
 var current_user = function(req){
@@ -55,7 +49,8 @@ app.configure('production', function(){
 
 app.dynamicHelpers({
   session: function(req,res){ return req.session},
-  current_user: current_user
+  current_user: current_user,
+  base_url: "http://itutor.radford.edu:" + config.port
 });
 
 var isAdmin = function(req) {
@@ -487,6 +482,6 @@ app.get('/logout',function(req,res){
  req.session.destroy();
  res.redirect('/');
 });
-app.listen(3000);
+app.listen(config.port);
 console.log(app.address());
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
