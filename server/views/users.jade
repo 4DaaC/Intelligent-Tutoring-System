@@ -2,28 +2,45 @@
   h1 No Users Found
 -else
   h1 Users
-  table.center
-    tr
-      th
-        |Id
-      th
-        |Username
-      th
-        |Auth Level
-      th
-    for user in users
+  form(action='/updateUser', method='POST')
+    table.center
       tr
-        td
-          =user.uid
-        td
-          =user.username
-        td
-          -if (user.auth_level == 0)
-            |Student
-          -if (user.auth_level == 1)
-            |Professor
-          -if (user.auth_level == 2)
-            |Admin
-        td
-          a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+        th
+          |Id
+        th
+          |Username
+        th
+          |Auth Level
+        th
+      for user in users
+        tr
+          td
+            =user.uid
+          td
+            =user.username
+          td
+            -if (isAdmin)
+              -if (user.auth_level == 0)
+                |Student
+              -if (user.auth_level == 1)
+                |Professor
+              -if (user.auth_level == 2)
+                |Admin
+            -else
+              select(name=user.username)
+                -if (user.auth_level == 2)
+                  option(selected='selected') Admin
+                -else
+                  option Admin
+                -if (user.auth_level == 1)
+                  option(selected='selected') Professor
+                -else
+                  option Professor
+                -if (user.auth_level == 0)
+                  option(selected='selected') Student
+                -else
+                  option Student
+          td
+            a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+    input(type='submit', value='Update')
 a(href="/admin") Add a User

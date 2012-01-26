@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -51,6 +50,7 @@ app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
+  isAdmin: function(req, res) { return req.session.user.auth == 2; }
 });
 
 var isAdmin = function(req) {
@@ -397,6 +397,20 @@ app.get('/users',function(req,res){
       });
     }else{
       res.send(403);
+    }
+  });
+});
+
+app.post('/updateUser', function(req, res) {
+  authCheck(req, function(auth_level) {
+    if(auth_level == 2) {
+      for(var uname in req.body) {
+        var level = req.body[uname] == 'Admin' ? 2 : (req.body[uname] == 'Professor' ? 1 : 0);
+        var qString = 'UPDATE Users SET auth_level='+level+' WHERE username="'+uname+'"';
+        client.query(qString);
+        console.log(qString);
+      }
+      res.redirect('/users');
     }
   });
 });
