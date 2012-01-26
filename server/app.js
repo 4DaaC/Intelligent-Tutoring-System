@@ -50,7 +50,6 @@ app.configure('production', function(){
 app.dynamicHelpers({
   session: function(req,res){ return req.session},
   current_user: current_user,
-  base_url: "http://itutor.radford.edu:" + config.port
 });
 
 var isAdmin = function(req) {
