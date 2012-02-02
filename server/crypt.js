@@ -462,7 +462,7 @@ Utf8.decode = function(strUtf) {
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 
-var password = "f9vVK8D/3%c}"
+var password = "abc123"
 var encrypt = function(input){
   return Aes.Ctr.encrypt(input, password, 256);
 }

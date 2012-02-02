@@ -1,6 +1,7 @@
 crypt = require('./crypt.js');
 var input = process.argv[2];
 console.log('ENCRYPTED:');
-console.log(crypt.encrypt(input));
+var encrypted = crypt.encrypt(input);
+console.log(encrypted);
 console.log('DECRYPTED:');
-console.log(crypt.decrypt(input));
+console.log(crypt.decrypt(encrypted));

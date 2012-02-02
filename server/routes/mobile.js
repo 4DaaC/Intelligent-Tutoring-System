@@ -49,7 +49,10 @@ app.get('/mobile/classes', function(req, res) {
   }
 	if(prof == undefined && user == undefined) {
 		client.query("SELECT name, cid, classlimit FROM Classes", function(err, results, fields) {
-						console.log(results);
+						if(err){
+
+            }
+            console.log(results);
 						res.send(results);
 					 });
 	} else if(user == undefined) {
