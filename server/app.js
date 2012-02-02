@@ -131,8 +131,7 @@ app.get('/mobile/classes', function(req, res) {
     prof = crypt.decrypt(prof);
   }
 	if(prof == undefined && user == undefined) {
-		client.query("SELECT name, cid, classlimit "+
-					 "FROM Classes", function(err, results, fields) {
+		client.query("SELECT name, cid, classlimit FROM Classes", function(err, results, fields) {
 						console.log(results);
 						res.send(results);
 					 });
@@ -194,11 +193,37 @@ app.get('/class', function(req, res) {
     if(auth_level > 0){
       var qString = "SELECT username,uid FROM Users WHERE username = '" + current_user(req) + "'";
       client.query(qString,function(err,results){
-        res.render('add_class', {
-			    title: 'Class Add Panel',
-          auth_level: auth_level,
-          tuid: results[0].uid
-		    });
+        if(req.query.cid){
+        var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
+        if(auth_level < 2){
+          sqlStr += " AND uid = ?";
+          sqlStr = client.format(sqlStr, [req.query.cid,results[0].uid]);
+        }else{
+          sqlStr = client.format(sqlStr, [req.query.cid]);
+        }
+        client.query(sqlStr,function(err2,classes){
+          if(err2){
+            req.flash("error",err2);
+            res.redirect('/classes');
+          }else if(classes.length == 0){
+            req.flash("error","Class does not exist or you do not have access to it");
+            res.redirect('/classes');
+          }else{
+            res.render('add_class',{
+              title:'Edit Class',
+              auth_level: auth_level,
+              tuid: results[0].uid,
+              theClass: classes[0]
+            });
+          }
+        });
+        }else{
+          res.render('add_class', {
+			      title: 'Class Add Panel',
+            auth_level: auth_level,
+            tuid: results[0].uid
+		      });
+        }
       });
 	  } else {
 		  res.send(403);
@@ -234,14 +259,26 @@ app.post('/class', function(req, res) {
   if(foundErr){
     res.redirect('/classes');
   }else{
-	  client.query("INSERT INTO Classes (uid, name, classlimit, privacy) " + 
+	  if(req.body.cid){
+      var cid = req.body.cid;
+      client.query("UPDATE Classes SET name = ?,classlimit = ?,privacy = ? ,uid= ? WHERE cid = ?",
+                   [name,limit,priv,tuser,cid],function(err){
+        if(err){
+          console.log(err);
+          req.flash("error",err);
+        }
+        res.redirect('/classes');
+      });
+    }else{
+      client.query("INSERT INTO Classes (uid, name, classlimit, privacy) " + 
                "VALUES (?,?,?,?)",[tuser,name,limit,priv], function(err) {
-		  if(err) {
-			  console.log(err);
-        req.flash("error",err);
-		  }
-		  res.redirect('/classes');
-	  });
+		    if(err) {
+			    console.log(err);
+          req.flash("error",err);
+		    }
+		    res.redirect('/classes');
+	    });
+    }
   }
 });
 app.get('/remUser',function(req,res){
@@ -400,6 +437,7 @@ app.get('/quiz', function(req, res) {
 });
 
 app.post('/quiz', function(req, res) {
+ authCheck(req, function(auth_level) {
  var qname = req.body.qname;
  var cl = req.body.cl;
  var foundErr = false;
@@ -410,8 +448,15 @@ app.post('/quiz', function(req, res) {
  if(foundErr){
   res.redirect('/quiz');
  }else{
- client.query("SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? AND username= ?",[cl,current_user(req)],function(err,results){
-  if(err){
+ var qString = "SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? ";
+ if(auth_level < 2){
+   qString += " AND username= ?";
+   qString = client.format(qString,[cl,current_user(req)]);
+ }else{
+  qString = client.format(qString,[cl]);
+ }
+ client.query(qString,function(err,results){
+   if(err){
     console.log(err);
     req.flash("error",err);
     res.redirect('/quiz');
@@ -433,6 +478,7 @@ app.post('/quiz', function(req, res) {
   }
  });
  }
+ });
 });
 
 app.get('/', function(req, res){
