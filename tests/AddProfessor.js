@@ -4,7 +4,6 @@ var userF = require("./userFunctions.js");
 var assert = require("assert");
 var Step = require("step");
 
-
 Step(
     function adminOpensAddForm() {
         console.log("TEST: Admin opens add form");
@@ -14,7 +13,7 @@ Step(
         console.log("TEST: Submit form with valid data");
         var next = this;
         var name = "namefortesting";
-        var type = "admin";
+        var type = "professor";
         login("testadmin", function(err, browser) {
             userF.addUser(name, type, function() {
                 assert.ok(browser.success, "Failed to add user");
@@ -34,11 +33,11 @@ Step(
         this();
     },
     function proffesorOpensForm() {
-        console.log("TEST: Professor tries to access add admin form");
+        console.log("TEST: Professor tries to access add professor form");
         assertUserCanLoadPage("testprof", "admin", false, this);
     },
     function studentOpensForm() {
-        console.log("TEST: Student tries to access add admin form");
+        console.log("TEST: Student tries to access add professor form");
         assertUserCanLoadPage("teststudent", "admin", false, this);
     },
     function userNameIsTooLong() {
