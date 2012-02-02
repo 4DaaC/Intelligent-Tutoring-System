@@ -36,7 +36,12 @@ html
                 a(href="/student") Add Student to Class
               li
                 a(href="/admin") Add Users
-      #bd!= body
+      #bd
+        ul#error-box
+          -errors.forEach(function(error){
+            li= error
+          -})
+        != body
       .clear
     script
       $(document).ready(function(){

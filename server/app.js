@@ -18,8 +18,6 @@ client.query('USE ' + config.db.database);
 
 
 var current_user = function(req){
-  console.log('Cookies:');
-  console.log(req.cookies);
   if(req.cookies['its-login-username'] && !req.session.user){
     req.session.user = new Object();
     req.session.user.username = req.cookies['its-login-username'];
@@ -53,7 +51,8 @@ app.dynamicHelpers({
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
   isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; },
-  requireLogin: function(){return config.requireLogin}
+  requireLogin: function(){return config.requireLogin},
+  errors: function(req,res){return req.flash("error")}
 });
 
 var isAdmin = function(req) {
@@ -98,7 +97,7 @@ app.get('/mobile/profs', function(req, res) {
 					 "FROM Users NATURAL JOIN Classes "+
 					 "WHERE cid IN (SELECT cid "+ 
 					 				"FROM (Class_List a NATURAL JOIN Users b) "+
-				 					"WHERE username = '"+user+"')", function(err, results, fields) {
+				 					"WHERE username = ?)",[user], function(err, results, fields) {
 			console.log(results);
 			res.send(results);
 		});
@@ -113,9 +112,9 @@ app.get('/mobile/quizzes', function(req, res) {
   }else{
     user = crypt.decrypt(user).toLowerCase();
     var qString = "SELECT qid,Quizzes.name FROM Quizzes,Classes WHERE Quizzes.cid = Classes.cid AND Quizzes.cid = '" + cid + "' AND " + 
-      "Quizzes.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = '" + user + "')";
+      "Quizzes.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = ?)";
     console.log(qString);
-    client.query(qString, function(err,results,fields){
+    client.query(qString,[user], function(err,results,fields){
         console.log(results);
         res.send(results);
       });
@@ -142,7 +141,7 @@ app.get('/mobile/classes', function(req, res) {
 				 	 "FROM Classes "+
 				 	 "WHERE uid IN (SELECT uid "+
 				 			  	   "FROM Users "+
-							  	   "WHERE username = '"+prof+"')", function(err, results, fields) {
+							  	   "WHERE username = ?)", [prof],function(err, results, fields) {
 						console.log(results);						  
 						res.send(results);
 					});
@@ -151,7 +150,7 @@ app.get('/mobile/classes', function(req, res) {
 				 	 "FROM Classes "+
 					 "WHERE cid IN (SELECT cid "+
 					 			   "FROM Class_List NATURAL JOIN Users "+
-								   "WHERE username = '"+user+"')", function(err, results, fields) {
+								   "WHERE username = ?)",[user], function(err, results, fields) {
 						console.log(results);
 						res.send(results);
 					});
@@ -160,16 +159,16 @@ app.get('/mobile/classes', function(req, res) {
 					 "FROM Classes "+
 					 "WHERE cid IN (SELECT cid "+
 					 			   "FROM Class_List NATURAL JOIN Users "+
-					 			   "WHERE username = '"+user+"') AND uid IN (SELECT uid FROM Users WHERE username = '"+prof+"')"
-				 	 , function(err, results, fields) {
+					 			   "WHERE username = ?) AND uid IN (SELECT uid FROM Users WHERE username = ?)"
+				 	 , [user,prof],function(err, results, fields) {
 			console.log(results);		
 			res.send(results);
 		});
 	}
 });
 var authCheck = function(req,callback){
-  var qString = "SELECT auth_level FROM Users WHERE username = '"+req.session.user.username+"'";
-	var q = client.query(qString,function(err,results,fields) {
+  var qString = "SELECT auth_level FROM Users WHERE username = ?";
+	var q = client.query(qString,[req.session.user.username],function(err,results,fields) {
     if(results.length == 1) {
       callback(results[0].auth_level);
     }else{
@@ -210,7 +209,7 @@ app.get('/class', function(req, res) {
 app.post('/user', function(req, res) {
   	var auth = req.body.priv;
 	var user = req.body.user;
-	client.query("INSERT INTO Users (username, auth_level) VALUES ('"+user+"','"+auth+"')", function(err) {
+	client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
 		if(err) {
 			console.log(err);
 		}
@@ -223,12 +222,27 @@ app.post('/class', function(req, res) {
 	var tuser = req.body.tuser;
 	var limit = req.body.limit;
 	var priv = req.body.priv;
-	client.query("INSERT INTO Classes (uid, name, classlimit, privacy) VALUES ('"+tuser+"','"+name+"','"+limit+"','"+priv+"')", function(err) {
-		if(err) {
-			console.log(err);
-		}
-		res.redirect('/classes');
-	});
+  var foundErr = false;
+  if(name.length <= 0 || name.length > 30){
+    req.flash("error","Class Name must be between 1 and 30 characters long");
+    foundErr = true;
+  }
+  if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
+    req.flash("error","Class Limit must be a positive number");
+    foundErr=true;
+  }
+  if(foundErr){
+    res.redirect('/classes');
+  }else{
+	  client.query("INSERT INTO Classes (uid, name, classlimit, privacy) " + 
+               "VALUES (?,?,?,?)",[tuser,name,limit,priv], function(err) {
+		  if(err) {
+			  console.log(err);
+        req.flash("error",err);
+		  }
+		  res.redirect('/classes');
+	  });
+  }
 });
 app.get('/remUser',function(req,res){
 
@@ -236,9 +250,9 @@ app.get('/remUser',function(req,res){
     if(auth_level > 1){
       var uid = req.query.uid;
       if(uid != undefined){
-        var qString = "DELETE FROM Users WHERE uid = '" + uid + "'";
+        var qString = "DELETE FROM Users WHERE uid = ?";
         console.log(qString);
-        client.query(qString,function(err){
+        client.query(qString,[uid],function(err){
           if(err) console.log(err);
         });
       }
@@ -255,14 +269,20 @@ app.get('/remQuiz',function(req,res){
         var qString = "SELECT qid, Classes.cid FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid" +
           " AND qid = '" + qid + "'";
         if(auth_level < 2){
-          qString += " AND cid IN (SELECT Classes.cid FROM Classes, Users WHERE Classes.uid = Users.uid AND Users.username = '" + current_user(req)  + "')";
+          qString += " AND Classes.cid IN (SELECT Classes.cid FROM Classes, Users WHERE Classes.uid = Users.uid AND Users.username = ?)";
+          qString = client.format(qString,[current_user(req)]);
         }
         console.log(qString);
         client.query(qString,function(err,results,fields){
-          if(results.length > 0){
-            client.query("DELETE FROM Quizzes WHERE qid = '" + qid + "'",function(err){
+          if(err){
+            console.log(err);
+            req.flash("error",err);
+            res.redirect('/');
+          }else if(results.length > 0){
+            console.log(results);
+            client.query("DELETE FROM Quizzes WHERE qid = ?",[qid],function(err){
               console.log(err);
-              res.redirect('/');
+              res.redirect('/quizzes?cid=' + results[0].cid);
             });
           }else res.redirect('/');
         });
@@ -278,17 +298,20 @@ app.get('/remClass',function(req,res){
       var cid = req.query.cid;
       if(cid != undefined){
         var qString = "SELECT Classes.cid, Users.username From Classes,Users WHERE Classes.uid = Users.uid " +
-          "AND Classes.cid = '" + cid + "'";
+          "AND Classes.cid = ?";
         if(auth_level < 2){
-          qString += " AND Users.username = '" + current_user(req) + "'";
+          qString += " AND Users.username = ?";
+          qString = client.format(qString,[cid,current_user(req)]);
+        }else{
+          qString = client.format(qString,[cid]);
         }
         console.log(qString);
         client.query(qString,function(err,results,fields){
           if(results.length >0){
             if(results[0].username = current_user(req) || auth_level > 1){
-              var qString ="DELETE FROM Classes WHERE cid = '" + cid + "'";
+              var qString ="DELETE FROM Classes WHERE cid = ?";
               console.log(qString);
-              client.query(qString,function(err){
+              client.query(qString,[cid],function(err){
                 if(err){
                   console.log(err);
                 }
@@ -315,12 +338,12 @@ app.post('/student', function(req, res) {
 	if(auth_level > 0 ) {
 	  var user = req.body.user;
       var cid = req.body.cid;
-      client.query("SELECT uid FROM Users WHERE username = '"+user+"'", function(err, results) {
+      client.query("SELECT uid FROM Users WHERE username = ?", [user],function(err, results) {
         if(err) {
 	  	  console.log(err);
 	    } else {
 		  var uid = results[0].uid;
-		  client.query("INSERT INTO Class_List (uid, cid) VALUES ('"+uid+"', '"+cid+"')", function(err) {
+		  client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid,cid],function(err) {
 		    if(err) {
 			  console.log(err);
 		    }
@@ -339,7 +362,8 @@ app.get('/student', function(req, res) {
 	if(auth_level > 0) {
 	  var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
 	  if(auth_level < 2) {
-		qString += " AND Users.username = '"+current_user(req)+"'";
+		qString += " AND Users.username = ?";
+    qString = client.format(qString,[current_user(req)]);
 	  }
 	  client.query(qString, function(err, results, fields) {
 		console.log(results);
@@ -359,7 +383,8 @@ app.get('/quiz', function(req, res) {
     if(auth_level > 0) {
 	    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2){
-        qString += " AND Users.username = '" + current_user(req) + "'";
+        qString += " AND Users.username = ?";
+        qString = client.format(qString,[current_user(req)]);
       }
       client.query(qString, function(err,results,fields){
         res.render('add_quiz',{
@@ -377,12 +402,37 @@ app.get('/quiz', function(req, res) {
 app.post('/quiz', function(req, res) {
  var qname = req.body.qname;
  var cl = req.body.cl;
- client.query("INSERT INTO Quizzes (name, cid) VALUES ('"+qname+"', '"+cl+"')", function(err) {
-	if(err) {
-	  console.log(err);
-	}
-	res.redirect('/quiz');
+ var foundErr = false;
+ if(qname.length <=0 || qname.length > 50){
+  req.flash('error','Quiz Name must be between 1 and 50 characters long');
+  foundErr = true;
+ }
+ if(foundErr){
+  res.redirect('/quiz');
+ }else{
+ client.query("SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? AND username= ?",[cl,current_user(req)],function(err,results){
+  if(err){
+    console.log(err);
+    req.flash("error",err);
+    res.redirect('/quiz');
+  }else{
+    console.log("+____________+");
+    console.log(results);
+    if(results.length <= 0){
+      req.flash("error","You can only create quizzes for your own classes");
+      res.redirect('/quiz');
+    }else{
+      client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
+	      if(err) {
+	        console.log(err);
+          req.flash("error",err);
+	      }
+	      res.redirect('/quizzes?cid='+ cl);
+      });
+    }
+  }
  });
+ }
 });
 
 app.get('/', function(req, res){
@@ -414,8 +464,8 @@ app.post('/updateUser', function(req, res) {
     if(auth_level == 2) {
       for(var uname in req.body) {
         var level = req.body[uname] == 'Admin' ? 2 : (req.body[uname] == 'Professor' ? 1 : 0);
-        var qString = 'UPDATE Users SET auth_level='+level+' WHERE username="'+uname+'"';
-        client.query(qString);
+        var qString = 'UPDATE Users SET auth_level= ? WHERE username= ?';
+        client.query(qString,[level,uname]);
         console.log(qString);
       }
       res.redirect('/users');
@@ -428,7 +478,8 @@ app.get('/classes',function(req,res){
     if(auth_level > 0){
       qString = "select cid,username,name FROM Classes,Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2){
-        qString += " AND Users.username = '" + current_user(req) + "'";
+        qString += " AND Users.username = ?";
+        qString = client.format(qString,[current_user(req)]);
       }
       console.log(qString);
       client.query(qString,function(err,results,fields){
@@ -458,9 +509,9 @@ app.get('/quizzes',function(req,res){
         client.query(qString,function(err,results,fields){
           console.log(results);
           qString = "select Users.username FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
-          " Class_List.cid = '" + cid +  "'";
+          " Class_List.cid = ?";
           console.log(qString);
-          client.query(qString,function(err2,results2,fields2){
+          client.query(qString,[cid],function(err2,results2,fields2){
             
             res.render('quizzes',{
               title:"Quizzes",
