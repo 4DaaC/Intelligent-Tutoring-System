@@ -25,7 +25,7 @@ function addUser(name, type, next) {
 
 function checkIfUserExists(name, type, next) {
     browser.visit("users", function() {
-        var row = browser.document.querySelector("select[name=" + name + "]").parentNode.parentNode;
+        var row = browser.querySelector("select[name=" + name + "]").parentNode.parentNode;
         var userLevel = row.querySelector("option[selected=true]").innerHTML;
         next(undefined, userLevel.toLowerCase() == type);
     });
@@ -33,7 +33,7 @@ function checkIfUserExists(name, type, next) {
 
 function removeUser(name, next) {
     browser.visit("users", function() {
-        var row = browser.document.querySelector("select[name=" + name + "]").parentNode.parentNode;
+        var row = browser.querySelector("select[name=" + name + "]").parentNode.parentNode;
         browser.visit(row.querySelector("td a").href, function() {
             next(undefined, browser.success);
         });
