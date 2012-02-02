@@ -427,31 +427,12 @@ app.get('/quiz', function(req, res) {
         if(err){
           req.flash("error",err);
           res.redirect('/classes');
-        }else if (results.length == 0){
-          req.flash('error', "class doesn't exist or does not belong to you");
-          res.redirect('back');
-        }else if(req.query.qid){
-          var sql = "SELECT * FROM Quizzes WHERE qid= ?" ;
-          client.query(sql, [req.query.qid],function(err2,quizzes){
-            if(err2){
-              req.flash("error",err2);
-              res.redirect('back');
-            }else{
-              res.render('add_quiz',{
-                title:'Edit Quiz',
-                classes: results,
-                select: req.query.cid,
-                quiz: quizzes[0]
-              });
-            }
-          });
-        }else{
-          res.render('add_quiz',{
-            title:'Add Quiz',
-            classes: results,
-            select: req.query.cid
-          });
-         }
+        }
+        res.render('add_quiz',{
+          title:'Add Class Panel',
+          classes: results,
+          select: req.query.cid
+        });
       });
 	  } else {
 		  res.send(403);
@@ -484,28 +465,19 @@ app.post('/quiz', function(req, res) {
     req.flash("error",err);
     res.redirect('/quiz');
   }else{
+    console.log("+____________+");
     console.log(results);
     if(results.length <= 0){
       req.flash("error","You can only create quizzes for your own classes");
       res.redirect('/quiz');
     }else{
-      if(req.body.qid){
-        client.query("UPDATE Quizzes SET name= ?, cid = ? WHERE qid = ?", [qname,cl,req.body.qid],function(err){
-          if(err){
-            console.log(err);
-            req.flash("error",err);
-          }
-          res.redirect('/quizzes?cid=' + cl);
-        });
-      }else{
-        client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
-	        if(err) {
-	          console.log(err);
-            req.flash("error",err);
-	        }
-	        res.redirect('/quizzes?cid='+ cl);
-        });
-      }
+      client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
+	      if(err) {
+	        console.log(err);
+          req.flash("error",err);
+	      }
+	      res.redirect('/quizzes?cid='+ cl);
+      });
     }
   }
  });

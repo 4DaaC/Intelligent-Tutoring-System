@@ -2,16 +2,21 @@ h1 Create a Quiz
 form(method="post", action="/quiz")
  table
   tr
-   td Quiz Name:
-    input(type="text", name="qname")
+    td Quiz Name:
+      if typeof(quiz) == 'undefined'
+        input(type="text", name="qname")
+      else
+        input(type="text",name="qname",value="#{quiz.name}")
   tr
    td Class:
     select(id="cl", name="cl")
       for class in classes
-        -if (class.cid == select)
+        -if (class.cid == select ||(typeof(quiz) != "undefined" && class.cid == quiz.cid))
           option(value="#{class.cid}", selected="selected")= class.name
         -else
           option(value="#{class.cid}")= class.name
   tr
-   td
-    input(type="submit", value="Add")
+    td
+      if typeof(quiz) != 'undefined'
+        input(type="hidden",name="qid", value="#{quiz.qid}")
+      input(type="submit", value="Add")
