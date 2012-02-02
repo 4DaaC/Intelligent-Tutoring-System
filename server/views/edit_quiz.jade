@@ -1,0 +1,40 @@
+h1 Edit #{title}
+select(id="type")
+  option(value="multi") Multiple Choice
+  option(value="tf") True/False
+  option(value="short") Short Answer
+button(onclick="add_question()") Add
+form(method="post", action="/question")
+  table(id="qtable")
+    tr
+      th Type
+      th Question
+      th Possible Answers
+      th Correct Answer
+    each question in questions
+      if question.type == 'multi'
+        tr
+          td Multiple Choice
+          td #{question.question}
+          td
+            table
+              each choice in JSON.parse(question.answers)
+                tr
+                  td #{choice} 
+          td !{JSON.parse(question.answers)[question.correct_answer]}
+      if question.type == 'tf'
+        tr
+          td True/False
+          td #{question.question}
+          td
+          td #{question.correct_answer}
+      if question.type == 'short'
+        tr
+          td Short Answer
+          td #{question.question}
+          td
+          td #{question.correct_answer}
+  button#submit(type="button") Update
+  input(type="hidden", value="add", name="action")
+  input(type="hidden", value="#{qid}", name="qid")
+  button#cb(type="button") Cancel     

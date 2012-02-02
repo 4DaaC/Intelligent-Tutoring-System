@@ -399,6 +399,57 @@ app.get('/quiz', function(req, res) {
   });
 });
 
+app.get('/viewQuiz', function(req, res) {
+  authCheck(req, function(auth_level) {
+    if(auth_level > 1) {
+      var qid = req.query.qid;
+      var edit = req.query.edit;
+      var qString = "SELECT name FROM Quizzes WHERE qid = ?";
+      qString = client.format(qString, [qid]);
+      if(auth_level < 2) {
+	
+      }
+      console.log(qString);
+      client.query(qString, function(err, quiz, fields) {
+	client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
+	  console.log(results);
+	  res.render('edit_quiz', {
+	    title: quiz[0].name,
+	    questions: results,
+	    qid: qid
+	  });
+	});
+      });
+    } else {
+      res.send(403);
+    }
+  });
+});
+
+app.post('/question', function(req, res) {
+  authCheck(req, function(auth_level) {
+    if(auth_level > 1) {
+      var action = req.body.action;
+      if(action == 'add') {
+	console.log(req.body);
+        var quest = req.body.quest;
+        var correct = req.body.correct;
+        var type = req.body.type;
+        var qid = req.body.qid;
+        var qString = "INSERT INTO Questions (qid, type, question, correct_answer) VALUES ";
+	for(var i = 0;i < quest.length;i++) {
+          qString += "('"+qid+"','"+type[i]+"','"+quest[i]+"','"+correct[i]+"'),";
+        }
+	qString = qString.slice(0,-1);
+	client.query(qString, function(err, results, fields) {
+	  if(err) console.log(err);
+	  else res.send(200);
+	});
+      }
+    }
+  });
+});
+
 app.post('/quiz', function(req, res) {
  var qname = req.body.qname;
  var cl = req.body.cl;
