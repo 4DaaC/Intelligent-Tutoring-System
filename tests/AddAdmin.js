@@ -1,7 +1,9 @@
 var login = require("./commonFunctions.js").login;
 var assertUserCanLoadPage = require("./commonFunctions.js").assertUserCanLoadPage;
+var userF = require("./userFunctions.js");
 var assert = require("assert");
 var Step = require("step");
+
 
 Step(
     function adminOpensAddForm() {
@@ -11,28 +13,23 @@ Step(
     function submitFormWithValidData() {
         console.log("TEST: Submit form with valid data");
         var next = this;
+        var name = "namefortesting";
+        var type = "admin";
         login("testadmin", function(err, browser) {
-            browser.visit("admin", function() {
-                browser
-                .fill("user", "testiss")
-                .choose("2")
-                .pressButton("Add", function() {
-                    assert.ok(browser.success);
-                    browser.visit("users", function() {
-                        // Check that row for new user exists
-                        var row = browser.document.querySelector("select[name=testiss]").parentNode.parentNode;
-                        var userLevel = row.querySelector("option[selected=true]").innerHTML;
-                        assert.equal(userLevel, "Admin");
-
-                        // Clean by deleting test user
-                        browser.visit(row.querySelector("td a").href);
-                        next();
-                    });
-                })
+            userF.addUser(name, type, function() {
+                assert.ok(browser.success, "Failed to add user");
+                userF.checkIfUserExists(name, type, function(err, doesExist) {
+                    assert.ok(doesExist);
+                    userF.removeUser(name, next);
+                });
             });
         });
     },
     function userLeavesUserNameBlank() {
+        // Not yet implemented
+        this();
+    },
+    function userTriesToAddDuplicateName() {
         // Not yet implemented
         this();
     },
