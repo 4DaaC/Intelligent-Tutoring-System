@@ -1,6 +1,7 @@
 exports.addUser = addUser;
 exports.checkIfUserExists = checkIfUserExists;
 exports.removeUser = removeUser;
+exports.getIDOfUser = getIDOfUser;
 
 function addUser(name, type, next) {
     browser.visit("admin", function() {
@@ -37,5 +38,13 @@ function removeUser(name, next) {
         browser.visit(row.querySelector("td a").href, function() {
             next(undefined, browser.success);
         });
+    });
+}
+
+function getIDOfUser(name, next) {
+    browser.visit("users", function() {
+        var row = browser.querySelector("select[name=" + name + "]").parentNode.parentNode;
+        var uid = row.querySelector("td:first").innerHTML;
+        next(undefined, uid);
     });
 }
