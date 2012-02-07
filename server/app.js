@@ -216,6 +216,22 @@ app.get('/remUser',function(req,res){
     }else res.send(403);
   });
 });
+app.get('/remStud',function(req, res){
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var cid = req.query.cid;
+      var uid = req.query.uid;
+      console.log(qString);
+      if(cid != undefined && uid != undefined){
+        var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
+        client.query(qString, [cid, uid], function(err) {
+          if(err) console.log(err);
+        });
+      }
+      res.redirect('/quizzes?cid=' + cid);
+    }else res.send(403);
+  });
+});
 
 app.get('/remQuiz',function(req,res){
   authCheck(req,function(auth_level){
@@ -556,7 +572,7 @@ app.get('/quizzes',function(req,res){
         console.log(qString);
         client.query(qString,function(err,results,fields){
           console.log(results);
-          qString = "select Users.username FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
+          qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
           " Class_List.cid = ?";
           console.log(qString);
           client.query(qString,[cid],function(err2,results2,fields2){

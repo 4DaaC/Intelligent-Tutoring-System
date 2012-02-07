@@ -32,3 +32,5 @@ a(href="/quiz?cid=#{cid}") Add a Quiz
       tr
         td
           =student.username
+        td
+          a(href="/remStud?cid=#{cid}&uid=#{student.uid}", onClick="return confirm('Are you sure you want to remove this student from the class');") Remove
