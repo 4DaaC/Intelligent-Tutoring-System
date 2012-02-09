@@ -3,7 +3,7 @@ select(id="type")
   option(value="multi") Multiple Choice
   option(value="tf") True/False
   option(value="short") Short Answer
-button(onclick="add_question()") Add
+button(onclick="window.location='/question?qid=#{qid}&type='+$('#type').val()") Add
 form(method="post", action="/question")
   table(id="qtable")
     tr
@@ -21,7 +21,7 @@ form(method="post", action="/question")
               each choice in JSON.parse(question.answers)
                 tr
                   td #{choice} 
-          td !{JSON.parse(question.answers)[question.correct_answer]}
+          td !{question.correct_answer}
       if question.type == 'tf'
         tr
           td True/False
