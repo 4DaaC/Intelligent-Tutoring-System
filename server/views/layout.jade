@@ -38,10 +38,11 @@ html
               li
                 a(href="/admin") Add Users
       #bd
-        ul#error-box
-          -errors.forEach(function(error){
-            li= error
-          -})
+        if errors.length > 0
+          ul#error-box
+            -errors.forEach(function(error){
+              li= error
+            -})
         != body
       .clear
     script
