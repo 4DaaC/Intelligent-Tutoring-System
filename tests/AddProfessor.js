@@ -24,14 +24,6 @@ Step(
       });
     });
   },
-  function userLeavesUserNameBlank() {
-    // Not yet implemented
-    this();
-  },
-  function userTriesToAddDuplicateName() {
-    // Not yet implemented
-    this();
-  },
   function proffesorOpensForm() {
     console.log("TEST: Professor tries to access add professor form");
     assertUserCanLoadPage("testprof", "admin", false, this);
@@ -39,10 +31,6 @@ Step(
   function studentOpensForm() {
     console.log("TEST: Student tries to access add professor form");
     assertUserCanLoadPage("teststudent", "admin", false, this);
-  },
-  function userNameIsTooLong() {
-    // Not yet implemented
-    this();
   },
   function success() {
     console.log("ALL TESTS SUCCESSFUL");
