@@ -21,6 +21,23 @@ app.get('/mobile/profs', function(req, res) {
 	}
 });
 
+app.get('/mobile/quiz', function(req,res){
+  var qid = req.query.qid;
+  if(qid == undefined){
+    res.send(500);
+  }else{
+    var qString = "SELECT * FROM Questions WHERE Questions.qid = ?";
+    client.query(qString,[qid],function(err,results){
+      if(err){
+        console.log(err);
+        res.send(500);
+      }else{
+        console.log(results);
+        res.send(results);
+      }
+    });
+  }
+});
 app.get('/mobile/quizzes', function(req, res) {
   var cid = req.query.cid;
   var user = req.query.user;
