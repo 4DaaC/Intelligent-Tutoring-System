@@ -154,7 +154,7 @@ app.post('/user', function(req, res) {
   	var auth = req.body.priv;
 	var user = req.body.user;
   var foundErr = false;
-  if(user.length <=0 || user.length > 20){
+  if(typeof(user) != 'string' || user.length <=0 || user.length > 20){
     req.flash("error","Username must be between 1 and 20 characters long");
     res.redirect('/admin');
   }else{
