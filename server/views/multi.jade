@@ -1,0 +1,13 @@
+h3 #{name}
+form(id="qform", action="question", method="POST")
+  textarea(name="question", rows="5", cols="40") #{name}
+  button#add(type="button") Add
+  ol#choices
+    each choice in JSON.parse(answers)
+      li
+        textarea(name="ans") #{choice}
+        input(type="checkbox", name="correct", value="#{choice}")
+  input(type="submit", value="Save")
+  input(type="hidden", name="type", value="multi")
+  input(type="hidden", name="qid", value="#{qid}")
+  input(type="hidden", name="questid", value="#{questid}")

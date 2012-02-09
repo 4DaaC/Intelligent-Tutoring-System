@@ -1,0 +1,12 @@
+h3 #{name}
+form(action="question", method="POST")
+  textarea(name="question", rows="5", cols="40") #{name}
+  button#addno(type="button") Add
+  ol#choices
+    each choice in JSON.parse(answers)
+      li
+        textarea(name="correct") #{choice}
+  input(type="submit", value="Save")
+  input(type="hidden", name="type", value="short")
+  input(type="hidden", name="qid", value="#{qid}")
+  input(type="hidden", name="questid", value="#{questid}")
