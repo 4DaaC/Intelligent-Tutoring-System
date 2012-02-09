@@ -153,12 +153,21 @@ app.get('/class', function(req, res) {
 app.post('/user', function(req, res) {
   	var auth = req.body.priv;
 	var user = req.body.user;
-	client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
-		if(err) {
-			console.log(err);
-		}
-		res.redirect('/admin');
-	});
+  var foundErr = false;
+  if(user.length <=0 || user.length > 20){
+    req.flash("error","Username must be between 1 and 20 characters long");
+    res.redirect('/admin');
+  }else{
+	  client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
+		  if(err) {
+			  console.log(err);
+        req.flash("error",err);
+        res.redirect('/admin');
+		  }else{
+		    res.redirect('/users');
+      }
+	  });
+  }
 });
 
 app.post('/class', function(req, res) {
