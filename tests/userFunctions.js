@@ -26,9 +26,8 @@ function addUser(name, type, next) {
 
 function checkIfUserExists(name, type, next) {
   browser.visit("users", function() {
-    var row = browser.querySelector("select[name=" + name + "]").parentNode.parentNode;
-    var userLevel = row.querySelector("option[selected=true]").innerHTML;
-    next(undefined, userLevel.toLowerCase() == type);
+    var cell = browser.querySelector("tr:contains(" + name + ") option[selected=true]");
+    next(undefined, typeof(cell) == 'object' && cell.innerHTML.toLowerCase() == type);
   });
 }
 
