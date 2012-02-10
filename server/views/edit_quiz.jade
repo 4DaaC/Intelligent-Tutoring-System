@@ -21,19 +21,27 @@ form(method="post", action="/question")
               each choice in JSON.parse(question.answers)
                 tr
                   td #{choice} 
-          td !{question.correct_answer}
+          td
+            table
+              each answer in JSON.parse(question.correct_answer)
+                tr
+                  td #{answer}
       if question.type == 'tf'
         tr
           td True/False
           td #{question.question}
           td
-          td #{question.correct_answer}
+          td #{JSON.parse(question.correct_answer)}
       if question.type == 'short'
         tr
           td Short Answer
           td #{question.question}
           td
-          td #{question.correct_answer}
+          td
+            table
+              each answer in JSON.parse(question.correct_answer)
+                tr
+                  td #{answer}
   button#submit(type="button") Update
   input(type="hidden", value="add", name="action")
   input(type="hidden", value="#{qid}", name="qid")

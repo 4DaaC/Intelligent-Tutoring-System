@@ -18,7 +18,10 @@ $(document).ready(function() {
     });
   });
   $('#add').click(function() {
-    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/></li>')
+    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/></li>');
+  });
+  $('#addno').click(function() {
+    $('#choices').append('<li><textarea name="correct"></textarea></li>');
   });
 });
 

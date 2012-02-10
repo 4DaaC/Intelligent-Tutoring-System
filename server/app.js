@@ -488,6 +488,16 @@ app.post('/question', function(req, res) {
       var qString;
       ans = JSON.stringify(ans); 
       cor = JSON.stringify(cor);
+      if(cor[0] == '"') {
+        cor = '['+cor+']';
+      }
+      if(ans != undefined && ans[0] == '"') {
+        ans = '['+ans+']';
+      } else if(ans == undefined) {
+        ans = '';
+      }
+      console.log(cor);
+      console.log(ans);
       if(questid == '-1') {
         qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer) VALUES (?, ?, ?, ?, ?)";
         qString = client.format(qString, [qid, type, quest, ans, cor]);
