@@ -644,13 +644,13 @@ app.get('/quizzes',function(req,res){
             }
             else{
             var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
-              "AND Quizzes.cid = '" + cid + "'";
+              "AND Quizzes.cid = ?";
             if(auth_level < 2){
               qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
               "AND Users.username = '" + current_user(req) + "')";
             }
             console.log(qString);
-            client.query(qString,function(err,results,fields){
+            client.query(qString,[cid],function(err,results,fields){
               console.log(results);
               qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
               " Class_List.cid = ?";
