@@ -430,26 +430,90 @@ app.get('/viewQuiz', function(req, res) {
   });
 });
 
+app.get('/question', function(req, res) {
+  authCheck(req, function(auth_level) {
+    var questid = req.query.questid;
+    var qid = req.query.qid;
+    if(qid == undefined) {
+      res.send(404);
+    } else {
+      if(questid == undefined) {
+        res.render(req.query.type, {
+          title: '',
+          qid: qid,
+          answers: '{}', 
+          questid: '-1',
+          quest: {},
+          name: ''          
+        });
+      } else {
+        var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
+        qString = client.format(qString, [qid, questid]);
+        console.log(qString);
+        client.query(qString, function(err, results, fields) {
+          var pass = {
+            title : '',
+            qid: qid,
+            answers: results[0].answers,
+            questid: questid,
+            quest: results[0],
+            name : results[0].question
+          };
+          if(results[0].type == 'short') {
+            res.render('short', pass);
+          } else if(results[0].type == 'multi') {
+            res.render('multiple', pass)
+          } else if(results[0].type == 'tf') {
+            res.render('truefalse', pass);
+          } else {
+            console.log('Could not find questid = '+questid+' and qid = '+qid);
+            res.send(503);
+          } 
+        });
+      }
+    }
+  });
+});
+
 app.post('/question', function(req, res) {
   authCheck(req, function(auth_level) {
     if(auth_level > 1) {
       var action = req.body.action;
-      if(action == 'add') {
-	console.log(req.body);
-        var quest = req.body.quest;
-        var correct = req.body.correct;
-        var type = req.body.type;
-        var qid = req.body.qid;
-        var qString = "INSERT INTO Questions (qid, type, question, correct_answer) VALUES ";
-	for(var i = 0;i < quest.length;i++) {
-          qString += "('"+qid+"','"+type[i]+"','"+quest[i]+"','"+correct[i]+"'),";
-        }
-	qString = qString.slice(0,-1);
-	client.query(qString, function(err, results, fields) {
-	  if(err) console.log(err);
-	  else res.send(200);
-	});
+      var quest = req.body.question;
+      var qid = req.body.qid;
+      var ans = req.body.ans;
+      var cor = req.body.correct;
+      var type = req.body.type; 
+      var questid = req.body.questid;
+      var qString;
+      ans = JSON.stringify(ans); 
+      cor = JSON.stringify(cor);
+      if(cor[0] == '"') {
+        cor = '['+cor+']';
       }
+      if(ans != undefined && ans[0] == '"') {
+        ans = '['+ans+']';
+      } else if(ans == undefined) {
+        ans = '';
+      }
+      console.log(cor);
+      console.log(ans);
+      if(questid == '-1') {
+        qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer) VALUES (?, ?, ?, ?, ?)";
+        qString = client.format(qString, [qid, type, quest, ans, cor]);
+      } else {
+        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?) WHERE questid = ?";
+        qString = client.format(qString, [quest, type, ans, questid]);
+      }
+      console.log(qString);
+      client.query(qString, function(err) {
+        if(err) { 
+          console.log(err);
+          res.send(503);
+        } else {
+          res.redirect('/viewQuiz?qid='+qid);
+        }
+      });
     }
   });
 });
@@ -572,28 +636,38 @@ app.get('/quizzes',function(req,res){
     if(auth_level > 0){
       var cid = req.query.cid;
       if(cid != undefined){
-        var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
-          "AND Quizzes.cid = '" + cid + "'";
-        if(auth_level < 2){
-          qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
-          "AND Users.username = '" + current_user(req) + "')";
-        }
-        console.log(qString);
-        client.query(qString,function(err,results,fields){
-          console.log(results);
-          qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
-          " Class_List.cid = ?";
-          console.log(qString);
-          client.query(qString,[cid],function(err2,results2,fields2){
-            
-            res.render('quizzes',{
-              title:"Quizzes",
-              quizzes: results,
-              students: results2,
-              cid: cid
+        if(auth_level == 1) {
+          var qString = "select cid from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ? AND Users.username = '" + current_user(req) + "'";
+          client.query(qString,[cid],function(err,results,fields){
+            if(results.length == 0){
+              res.send(403);
+            }
+            else{
+            var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
+              "AND Quizzes.cid = ?";
+            if(auth_level < 2){
+              qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
+              "AND Users.username = '" + current_user(req) + "')";
+            }
+            console.log(qString);
+            client.query(qString,[cid],function(err,results,fields){
+              console.log(results);
+              qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
+              " Class_List.cid = ?";
+              console.log(qString);
+              client.query(qString,[cid],function(err2,results2,fields2){
+                console.log(results2);
+                res.render('quizzes',{
+                  title:"Quizzes",
+                  quizzes: results,
+                  students: results2,
+                  cid: cid
+                  });
               });
+            });
+            }
           });
-        });
+        }
       }else{
         res.redirect('/');
       }

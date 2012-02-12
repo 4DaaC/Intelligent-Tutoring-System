@@ -11,6 +11,18 @@ $(document).ready(function() {
       }
     });
   });
+  $('#qform').submit(function() {
+    $('textarea[name="ans"]').each(function(index, element){
+      var text = $(element);
+      text.next().val(text.val());
+    });
+  });
+  $('#add').click(function() {
+    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/></li>');
+  });
+  $('#addno').click(function() {
+    $('#choices').append('<li><textarea name="correct"></textarea></li>');
+  });
 });
 
 function add_question() {
