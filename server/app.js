@@ -113,29 +113,29 @@ app.get('/class', function(req, res) {
       var qString = "SELECT username,uid FROM Users WHERE username = '" + current_user(req) + "'";
       client.query(qString,function(err,results){
         if(req.query.cid){
-        var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
-        if(auth_level < 2){
-          sqlStr += " AND uid = ?";
-          sqlStr = client.format(sqlStr, [req.query.cid,results[0].uid]);
-        }else{
-          sqlStr = client.format(sqlStr, [req.query.cid]);
-        }
-        client.query(sqlStr,function(err2,classes){
-          if(err2){
-            req.flash("error",err2);
-            res.redirect('/classes');
-          }else if(classes.length == 0){
-            req.flash("error","Class does not exist or you do not have access to it");
-            res.redirect('/classes');
+          var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
+          if(auth_level < 2){
+            sqlStr += " AND uid = ?";
+            sqlStr = client.format(sqlStr, [req.query.cid,results[0].uid]);
           }else{
-            res.render('add_class',{
-              title:'Edit Class',
-              auth_level: auth_level,
-              tuid: results[0].uid,
-              theClass: classes[0]
-            });
+            sqlStr = client.format(sqlStr, [req.query.cid]);
           }
-        });
+          client.query(sqlStr,function(err2,classes){
+            if(err2){
+              req.flash("error",err2);
+              res.redirect('/classes');
+            }else if(classes.length == 0){
+              req.flash("error","Class does not exist or you do not have access to it");
+              res.redirect('/classes');
+            }else{
+              res.render('add_class',{
+                title:'Edit Class',
+                auth_level: auth_level,
+                tuid: results[0].uid,
+                theClass: classes[0]
+              });
+            }
+          });
         }else{
           res.render('add_class', {
 			      title: 'Class Add Panel',
@@ -151,7 +151,7 @@ app.get('/class', function(req, res) {
 });
 
 app.post('/user', function(req, res) {
-  	var auth = req.body.priv;
+  var auth = req.body.priv;
 	var user = req.body.user;
   var foundErr = false;
   if(typeof(user) != 'string' || user.length <=0 || user.length > 20){
@@ -210,7 +210,6 @@ app.post('/class', function(req, res) {
   }
 });
 app.get('/remUser',function(req,res){
-
   authCheck(req,function(auth_level){
     if(auth_level > 1){
       var uid = req.query.uid;
@@ -316,46 +315,46 @@ app.get('/remClass',function(req,res){
 
 app.post('/student', function(req, res) {
   authCheck(req, function(auth_level) {
-	if(auth_level > 0 ) {
-	  var user = req.body.user;
+    if(auth_level > 0 ) {
+      var user = req.body.user;
       var cid = req.body.cid;
       client.query("SELECT uid FROM Users WHERE username = ?", [user],function(err, results) {
         if(err) {
-	  	  console.log(err);
-	    } else {
-		  var uid = results[0].uid;
-		  client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid,cid],function(err) {
-		    if(err) {
-			  console.log(err);
-		    }
-		  });
-	    }
-	    res.redirect('/student');
+          console.log(err);
+        } else {
+          var uid = results[0].uid;
+          client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid,cid],function(err) {
+            if(err) {
+              console.log(err);
+            }
+          });
+        }
+        res.redirect('/student');
       });
-	} else {
-	  res.send(403);
-	}
+    } else {
+      res.send(403);
+    }
   });
 });
 
 app.get('/student', function(req, res) {
   authCheck(req, function(auth_level) {
-	if(auth_level > 0) {
-	  var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
-	  if(auth_level < 2) {
-		qString += " AND Users.username = ?";
-    qString = client.format(qString,[current_user(req)]);
-	  }
-	  client.query(qString, function(err, results, fields) {
-		console.log(results);
-		res.render('student_class', {
-			title: 'Add student to class',
-			classes: results
-		});
-	  });
-	} else {
-	  res.send(403);
-	}
+    if(auth_level > 0) {
+      var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
+      if(auth_level < 2) {
+        qString += " AND Users.username = ?";
+        qString = client.format(qString,[current_user(req)]);
+      }
+      client.query(qString, function(err, results, fields) {
+        console.log(results);
+        res.render('student_class', {
+          title: 'Add student to class',
+          classes: results
+        });
+      });
+    } else {
+      res.send(403);
+    }
   });
 });
 
@@ -415,14 +414,14 @@ app.get('/viewQuiz', function(req, res) {
       }
       console.log(qString);
       client.query(qString, function(err, quiz, fields) {
-	client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
-	  console.log(results);
-	  res.render('edit_quiz', {
-	    title: quiz[0].name,
-	    questions: results,
-	    qid: qid
-	  });
-	});
+        client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
+          console.log(results);
+          res.render('edit_quiz', {
+            title: quiz[0].name,
+            questions: results,
+            qid: qid
+          });
+        });
       });
     } else {
       res.send(403);
@@ -519,57 +518,57 @@ app.post('/question', function(req, res) {
 });
 
 app.post('/quiz', function(req, res) {
- authCheck(req, function(auth_level) {
- var qname = req.body.qname;
- var cl = req.body.cl;
- var foundErr = false;
- if(qname.length <=0 || qname.length > 50){
-  req.flash('error','Quiz Name must be between 1 and 50 characters long');
-  foundErr = true;
- }
- if(foundErr){
-  res.redirect('/quiz');
- }else{
- var qString = "SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? ";
- if(auth_level < 2){
-   qString += " AND username= ?";
-   qString = client.format(qString,[cl,current_user(req)]);
- }else{
-  qString = client.format(qString,[cl]);
- }
- client.query(qString,function(err,results){
-   if(err){
-    console.log(err);
-    req.flash("error",err);
-    res.redirect('/quiz');
-  }else{
-    console.log(results);
-    if(results.length <= 0){
-      req.flash("error","You can only create quizzes for your own classes");
+  authCheck(req, function(auth_level) {
+    var qname = req.body.qname;
+    var cl = req.body.cl;
+    var foundErr = false;
+    if(qname.length <=0 || qname.length > 50){
+      req.flash('error','Quiz Name must be between 1 and 50 characters long');
+      foundErr = true;
+    }
+    if(foundErr){
       res.redirect('/quiz');
     }else{
-      if(req.body.qid){
-        client.query("UPDATE Quizzes SET name= ?, cid = ? WHERE qid = ?", [qname,cl,req.body.qid],function(err){
-          if(err){
-            console.log(err);
-            req.flash("error",err);
-          }
-          res.redirect('/quizzes?cid=' + cl);
-        });
+      var qString = "SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? ";
+      if(auth_level < 2){
+        qString += " AND username= ?";
+        qString = client.format(qString,[cl,current_user(req)]);
       }else{
-        client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
-	        if(err) {
-	          console.log(err);
-            req.flash("error",err);
-	        }
-	        res.redirect('/quizzes?cid='+ cl);
-        });
+        qString = client.format(qString,[cl]);
       }
+      client.query(qString,function(err,results){
+        if(err){
+          console.log(err);
+          req.flash("error",err);
+          res.redirect('/quiz');
+        }else{
+          console.log(results);
+          if(results.length <= 0){
+            req.flash("error","You can only create quizzes for your own classes");
+            res.redirect('/quiz');
+          }else{
+            if(req.body.qid){
+              client.query("UPDATE Quizzes SET name= ?, cid = ? WHERE qid = ?", [qname,cl,req.body.qid],function(err){
+                if(err){
+                  console.log(err);
+                  req.flash("error",err);
+                }
+                res.redirect('/quizzes?cid=' + cl);
+              });
+            }else{
+              client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
+                if(err) {
+                  console.log(err);
+                  req.flash("error",err);
+                }
+                res.redirect('/quizzes?cid='+ cl);
+              });
+            }
+          }
+        }
+      });
     }
-  }
- });
- }
- });
+  });
 });
 
 app.get('/', function(req, res){
@@ -641,30 +640,29 @@ app.get('/quizzes',function(req,res){
           client.query(qString,[cid],function(err,results,fields){
             if(results.length == 0){
               res.send(403);
-            }
-            else{
-            var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
-              "AND Quizzes.cid = ?";
-            if(auth_level < 2){
-              qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
-              "AND Users.username = '" + current_user(req) + "')";
-            }
-            console.log(qString);
-            client.query(qString,[cid],function(err,results,fields){
-              console.log(results);
-              qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
-              " Class_List.cid = ?";
+            }else{
+              var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
+                "AND Quizzes.cid = ?";
+              if(auth_level < 2){
+                qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
+                "AND Users.username = '" + current_user(req) + "')";
+              }
               console.log(qString);
-              client.query(qString,[cid],function(err2,results2,fields2){
-                console.log(results2);
-                res.render('quizzes',{
-                  title:"Quizzes",
-                  quizzes: results,
-                  students: results2,
-                  cid: cid
+              client.query(qString,[cid],function(err,results,fields){
+                console.log(results);
+                qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
+                " Class_List.cid = ?";
+                console.log(qString);
+                client.query(qString,[cid],function(err2,results2,fields2){
+                  console.log(results2);
+                  res.render('quizzes',{
+                    title:"Quizzes",
+                    quizzes: results,
+                    students: results2,
+                    cid: cid
                   });
+                });
               });
-            });
             }
           });
         }
@@ -679,7 +677,7 @@ app.get('/quizzes',function(req,res){
 
 app.get('/studentList', function(req, res) {
   client.query("SELECT uid, username FROM Users", function(err, results) {
-	res.send(results);
+    res.send(results);
   });
 });
 
@@ -706,17 +704,17 @@ app.post('/test-login',function(req,res){
 });
 
 app.get('/logout',function(req,res){
- res.cookie('its-login-username','',{
-   expires: new Date(Date.now() - 1000),
+  res.cookie('its-login-username','',{
+    expires: new Date(Date.now() - 1000),
   });
   res.cookie('its-login-username','',{
-   expires: new Date(Date.now() - 1000),
-   path:'/',
-   domain:'.radford.edu',
-   httponly:'1'
+    expires: new Date(Date.now() - 1000),
+    path:'/',
+    domain:'.radford.edu',
+    httponly:'1'
   });
- req.session.destroy();
- res.redirect('/');
+  req.session.destroy();
+  res.redirect('/');
 });
 app.listen(config.port);
 console.log(app.address());
