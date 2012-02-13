@@ -1,19 +1,46 @@
 h3 #{name}
 form(action="question", method="POST")
+  |Category
+  if add
+    input(type="text", name="cat")
+  else
+    input(type="text", name="cat", value="#{quest.category}")
+  br
+  |Difficulty
+  select(name="diff")
+    if quest.difficulty == 1
+      option(value=1, selected="selected") Easy
+    else
+      option(value=1) Easy
+    if quest.difficulty == 2
+      option(value=1, selected="selected") Medium
+    else
+      option(value=2) Medium
+    if quest.difficulty == 3
+      option(value=1, selected="selected") Hard
+    else
+      option(value=3) Hard
+  br
+  br
+  |Question
+  br
   textarea(name="question", rows="5", cols="40") #{name}
+  br
+  br
   button#addno(type="button") Add
+  |&nbsp;Answer
   ol#choices
     if add
       li
         textarea(name="correct")
         button(type="button", class="del")
-          |DelP
+          |Del
     else
       each choice in JSON.parse(quest.correct_answer)
         li
           textarea(name="correct") #{choice}
           button(type="button", class="del")
-            |DelQ
+            |Del
   input(type="submit", value="Save")
   input(type="hidden", name="type", value="short")
   input(type="hidden", name="qid", value="#{qid}")

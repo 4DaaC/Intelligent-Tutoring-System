@@ -530,6 +530,8 @@ app.post('/question', function(req, res) {
       var ans = req.body.ans;
       var cor = req.body.correct;
       var type = req.body.type; 
+      var cat = req.body.cat;
+      var diff = req.body.diff;
       var questid = req.body.questid;
       var qString;
       ans = JSON.stringify(ans); 
@@ -547,11 +549,11 @@ app.post('/question', function(req, res) {
       console.log(cor);
       console.log(ans);
       if(questid == '-1') {
-        qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer) VALUES (?, ?, ?, ?, ?)";
-        qString = client.format(qString, [qid, type, quest, ans, cor]);
+        qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
       } else {
-        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ? WHERE questid = ?";
-        qString = client.format(qString, [quest, type, ans, cor, questid]);
+        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
+        qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
       }
       console.log(qString);
       client.query(qString, function(err) {
