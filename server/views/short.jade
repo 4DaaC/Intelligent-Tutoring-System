@@ -3,9 +3,17 @@ form(action="question", method="POST")
   textarea(name="question", rows="5", cols="40") #{name}
   button#addno(type="button") Add
   ol#choices
-    each choice in JSON.parse(answers)
+    if add
       li
-        textarea(name="correct") #{choice}
+        textarea(name="correct")
+        button(type="button", class="del")
+          |DelP
+    else
+      each choice in JSON.parse(quest.correct_answer)
+        li
+          textarea(name="correct") #{choice}
+          button(type="button", class="del")
+            |DelQ
   input(type="submit", value="Save")
   input(type="hidden", name="type", value="short")
   input(type="hidden", name="qid", value="#{qid}")

@@ -443,7 +443,8 @@ app.get('/question', function(req, res) {
           qid: qid,
           answers: '{}', 
           questid: '-1',
-          quest: {},
+          quest: '[]',
+          add: true,
           name: ''          
         });
       } else {
@@ -457,20 +458,42 @@ app.get('/question', function(req, res) {
             answers: results[0].answers,
             questid: questid,
             quest: results[0],
-            name : results[0].question
+            name : results[0].question,
+            add: false
           };
           if(results[0].type == 'short') {
             res.render('short', pass);
           } else if(results[0].type == 'multi') {
-            res.render('multiple', pass)
+            res.render('multi', pass)
           } else if(results[0].type == 'tf') {
-            res.render('truefalse', pass);
+            res.render('tf', pass);
           } else {
             console.log('Could not find questid = '+questid+' and qid = '+qid);
             res.send(503);
           } 
         });
       }
+    }
+  });
+});
+
+app.del('/question', function(req, res) {
+  authCheck(req, function(auth_level) {
+    if(auth_level >= 1) {
+      var questid = req.body.questid;
+      console.log(questid);
+      var qString = 'DELETE FROM Questions WHERE questid = ?';
+      qString = client.format(qString, [questid]);
+      client.query(qString, function(err) {
+        if(err) {
+          console.log(err);
+          res.send(503);
+        } else {
+          res.send(200);
+        }
+      });
+    } else {
+      res.send(403);
     }
   });
 });
@@ -488,13 +511,15 @@ app.post('/question', function(req, res) {
       var qString;
       ans = JSON.stringify(ans); 
       cor = JSON.stringify(cor);
-      if(cor[0] == '"') {
+      if(cor != undefined && cor[0] == '"') {
         cor = '['+cor+']';
+      } else if(cor == undefined) {
+        cor = '[]';
       }
       if(ans != undefined && ans[0] == '"') {
         ans = '['+ans+']';
       } else if(ans == undefined) {
-        ans = '';
+        ans = '[]';
       }
       console.log(cor);
       console.log(ans);
@@ -502,8 +527,8 @@ app.post('/question', function(req, res) {
         qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer) VALUES (?, ?, ?, ?, ?)";
         qString = client.format(qString, [qid, type, quest, ans, cor]);
       } else {
-        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?) WHERE questid = ?";
-        qString = client.format(qString, [quest, type, ans, questid]);
+        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ? WHERE questid = ?";
+        qString = client.format(qString, [quest, type, ans, cor, questid]);
       }
       console.log(qString);
       client.query(qString, function(err) {
