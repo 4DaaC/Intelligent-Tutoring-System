@@ -470,3 +470,6 @@ var encrypt = function(input){
 var decrypt = function(input){
   return Aes.Ctr.decrypt(input, password, 256);
 }
+window.onerror = function error(errMsg,url,linenum){
+  alert(url + ",line " + linenum + ": " + errMsg);
+};

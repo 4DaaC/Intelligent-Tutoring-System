@@ -2,29 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>DetectPhoneNumber</key>
-	<true/>
 	<key>TopActivityIndicator</key>
 	<string>gray</string>
 	<key>EnableLocation</key>
 	<false/>
-	<key>EnableAcceleration</key>
-	<true/>
 	<key>EnableViewportScale</key>
 	<false/>
 	<key>AutoHideSplashScreen</key>
 	<true/>
-	<key>ShowSplashScreenSpinner</key>
-	<true/>
 	<key>MediaPlaybackRequiresUserAction</key>
-	<false/>
-	<key>AllowInlineMediaPlayback</key>
 	<false/>
 	<key>OpenAllWhitelistURLsInWebView</key>
 	<true/>
 	<key>ExternalHosts</key>
 	<array>
-		<string>rucs.radford.edu:3000</string>
+		<string>jsconsole.com</string>
 		<string>*.radford.edu</string>
 	</array>
 	<key>Plugins</key>
@@ -53,6 +45,8 @@
 		<string>PGCapture</string>
 		<key>com.phonegap.splashscreen</key>
 		<string>PGSplashScreen</string>
+		<key>com.phonegap.battery</key>
+		<string>PGBattery</string>
 	</dict>
 </dict>
 </plist>

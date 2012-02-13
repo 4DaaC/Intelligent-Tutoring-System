@@ -8,6 +8,7 @@
 
   <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
   <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <script src="js/jquery-1.7.min.js"></script>
   <script type="text/javascript">
     // Atrocious way of loading two diffent phonegap scripts, but other loading methods won't work.
     // also there shouldn't be two scripts to begin with -- so much for cross-platform.
@@ -17,17 +18,29 @@
   } else {
     document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-iphone.js'><\/script>");
   }
+  
+  $(document).bind("mobileinit", function(){
+    $.mobile.page.prototype.options.addBackBtn = true;
+  });
 </script>
-  <script src="js/jquery-1.7.min.js"></script>
   <script src="js/crypt.js"></script>
   <script src="js/jquery.mobile-1.0.min.js"></script>
   <script src="js/its.js"></script>
+  <script src="http://jsconsole.com/remote.js?C3089ED3-3F0F-430E-9722-4D3C09F486A9"></script>
 </head>
 <body>
 <div data-role="page" id="update" data-add-back-btn="true">
+  <div data-role="header">
+    <a data-rel="back" data-icon="arrow-l">Back </a>
+    <h1>Update</h1>
+  </div>
+  <div data-role="content">
+    <div id="update-button" data-role="button" style="font-size:80%">Download/Update Your Classes</div>
+    
+  </div>
   <script>
-  document.addEventListener("deviceready", function(){
-  $('#update-button').bind('click',function(){
+  $('#update').live("pageinit", function(){
+  $('#update-button').live('click',function(){
     if(loggedIn()){
       $.mobile.showPageLoadingMsg();
       var errored = false;
@@ -60,7 +73,7 @@
                     }else{
                       console.log(downloadedQuizzes);
                       quizzesObj[cid] = downloadedQuizzes;
-                      for(qidx in quizzes){
+                      for(qidx in downloadedQuizzes){
                         var qid = downloadedQuizzes[qidx].qid;
                         downloadQuiz(qid,function(downloadedQuiz,error4){
                           if(error4){
@@ -196,14 +209,6 @@
   }
   });
   </script>
-  <div data-role="header">
-    <a data-rel="back" data-icon="arrow-l">Back </a>
-    <h1>Update</h1>
-  </div>
-  <div data-role="content">
-    <div id="update-button" data-role="button" style="font-size:80%">Download/Update Your Classes</div>
-    <div id="view-all-button" data-role="button">View Individual Quizzes</div>
-  </div>
 </div>
 
 <div data-role="page" id="update-profs">

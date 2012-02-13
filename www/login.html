@@ -8,6 +8,7 @@
 
   <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
   <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <script src="js/jquery-1.7.min.js"></script>
   <script type="text/javascript">
     // Atrocious way of loading two diffent phonegap scripts, but other loading methods won't work.
     // also there shouldn't be two scripts to begin with -- so much for cross-platform.
@@ -17,8 +18,11 @@
   } else {
     document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-iphone.js'><\/script>");
   }
+  
+  $(document).bind("mobileinit", function(){
+    
+  });
 </script>
-  <script src="js/jquery-1.7.min.js"></script>
   <script src="js/crypt.js"></script>
   <script src="js/jquery.mobile-1.0.min.js"></script>
   <script src="js/its.js"></script>
