@@ -201,7 +201,7 @@ app.post('/class', function(req, res) {
         if(req.body.cid){
           var cid = req.body.cid;
           getOwnerOfClass(cid, function(err, currentOwner) {
-            if(auth_level == 1 && (current_user(req) != currentOwner || current_user_id(req) != tuser)) {
+            if(auth_level == 1 && (current_user(req) != currentOwner)) {
               req.flash("error", "You do not have permission to edit classes that do not belong to you");
               foundErr = true;
             }
