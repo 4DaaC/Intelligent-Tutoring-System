@@ -7,20 +7,195 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
-    <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <script type="text/javascript">
+    // Atrocious way of loading two diffent phonegap scripts, but other loading methods won't work.
+    // also there shouldn't be two scripts to begin with -- so much for cross-platform.
+    var userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.match(/android/)) {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-android.js'><\/script>");
+  } else {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-iphone.js'><\/script>");
+  }
+</script>
   <script src="js/jquery-1.7.min.js"></script>
-  <script src="js/phonegap-1.2.0.js"></script>
   <script src="js/crypt.js"></script>
-  <script>
-  $(document).bind("mobileinit", function(){
-    $.mobile.page.prototype.options.addBackBtn = true;
-  });
-  </script> 
   <script src="js/jquery.mobile-1.0.min.js"></script>
   <script src="js/its.js"></script>
 </head>
 <body>
 <div data-role="page" id="update" data-add-back-btn="true">
+  <script>
+  document.addEventListener("deviceready", function(){
+  $('#update-button').bind('click',function(){
+    if(loggedIn()){
+      $.mobile.showPageLoadingMsg();
+      var errored = false;
+      var profs = new Object();
+      var classes = new Object();
+      var quizzesObj = new Object();
+      var quizzes = new Object();
+      downloadProfs(function(downloadedProfs,error){
+        if(error){
+          console.log(error);
+          errored = true;
+        }else{
+          profs = downloadedProfs;
+          console.log(profs);
+          for(pidx in profs){
+            var profname = profs[pidx].username
+            downloadClasses(profname,function(downloadedClasses,error2){
+              if(error2){
+                errored = true;
+                console.log(error2);
+              }else{
+                console.log(downloadedClasses);
+                classes[profname] = downloadedClasses;
+                for(cidx in downloadedClasses){
+                  var cid = downloadedClasses[cidx].cid;
+                  downloadQuizzes(cid,function(downloadedQuizzes,error3){
+                    if(error3){
+                      errored = true;
+                      console.log(error3);
+                    }else{
+                      console.log(downloadedQuizzes);
+                      quizzesObj[cid] = downloadedQuizzes;
+                      for(qidx in quizzes){
+                        var qid = downloadedQuizzes[qidx].qid;
+                        downloadQuiz(qid,function(downloadedQuiz,error4){
+                          if(error4){
+                            errrored = true;
+                            console.log(error4);
+                          }else{
+                            console.log(downloadedQuiz);
+                            quizzes[qid] = downloadedQuiz;
+                          }
+                        });
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          }
+        }
+      });
+      $.mobile.hidePageLoadingMsg(); 
+      if(errored){
+        navigator.notification.alert("Problem downloading Quizzes");
+      }else{
+        setProfs(profs);
+        for(var profname in classes){
+          setClasses(profname,classes[profname]);
+        }
+        for(var cid in quizzesObj){
+          setQuizzes(cid,quizzesObj[cid]);
+        }
+        for(var qid in quizzes){
+          setQuiz(qid,quizzes[qid]);
+        }
+        navigator.notification.alert("Update Complete!");
+      }
+      
+    }else{
+      navigator.notification.alert('You must be logged in to update.');
+      console.log("Must be logged in");
+    }
+  });
+
+  $('#view-all-button').bind('click',function(){
+    if(loggedIn()){
+      downloadProfs(function(profs,error){
+        if(error){
+          navigator.notification.alert(error);
+        }else{
+          var page = $('#update-profs');
+          console.log(page.length);
+          var content = page.children(":jqmData(role=content)");
+          content.children('ul').html('');
+          if(profs.length == 0){
+            content.children('ul').html('<li>No Professors Found</li>');
+          }else{
+            var markup = "";
+            for(prof in profs){
+              markup+= "<li><a class='prof-update-link' href='#update-classes' its-uid='" + profs[prof].uid + "'>" + profs[prof].username + "</a></li>";
+            }
+            console.log(markup);
+            content.children('ul').html(markup);
+          }
+          $.mobile.changePage(page);
+          content.children('ul').listview('refresh');
+          bindClassLinks();
+        }
+      });
+    }else{
+      navigator.notification.alert('You must be logged in to view classes.');
+    }
+  });
+  var bindClassLinks = function(){
+    $('.prof-update-link').bind('click',function(){
+      var profName = $(this).html();
+      var profUid = $(this).attr('its-uid');
+      downloadClasses(profName,function(classes,error){
+        if(error){
+          navigator.notification.alert(error);
+        }else{
+          var page = $('#update-classes');
+          var head = page.children(":jqmData(role=header)");
+          var content = page.children(":jqmData(role=content)");
+          content.children('ul').html('');
+          head.children('h1').html(profName + "'s Classes");
+          if(classes.length == 0){
+            content.children('ul').html('<li>No Classes Found</li>');
+          }else{
+            var markup = "";
+            for(idx in classes){
+              markup+= "<li><a class='class-update-link' href='#update-quizzes' its-cid='" + classes[idx].cid + "'>" + classes[idx].name + "</a></li>";
+            }
+            console.log(markup);
+            content.children('ul').html(markup);
+          }
+          $.mobile.changePage(page);
+          content.children('ul').listview('refresh');
+          bindQuizLinks();
+        }
+      });
+    });
+  }
+
+  var bindQuizLinks = function(){
+    $('.class-update-link').bind('click',function(){
+      navigator.notification.alert("Test");
+      var className = $(this).html();
+      var cid = $(this).attr('its-cid');
+      downloadQuizzes(cid,function(quizzes,error){
+        if(error){
+          navigator.notification.alert(error);
+        }else{
+          var page = $('#update-quizzes');
+          var head = page.children(":jqmData(role=header)");
+          var content = page.children(":jqmData(role=content)");
+          content.children('ul').html('');
+          head.children('h1').html(className);
+          if(quizzes.length == 0){
+            content.children('ul').html('<li>No Quizzes Found</li>');
+          }else{
+            var markup = "";
+            for(idx in quizzes){
+              markup+= "<li>" + quizzes[idx].name +"<div class='quiz-update-link' data-role='button' its-qid='" 
+                + quizzes[idx].qid + "'>Download Quiz</div></li>";
+            }
+            console.log(markup);
+            content.children('ul').html(markup);
+          }
+          $.mobile.changePage(page);
+          content.children('ul').listview('refresh');
+        }
+      });
+    });
+  }
+  });
+  </script>
   <div data-role="header">
     <a data-rel="back" data-icon="arrow-l">Back </a>
     <h1>Update</h1>
@@ -60,133 +235,7 @@
     </ul>
   </div>
 </div>
-<script>
-$('#update-button').bind('click',function(){
-  if(loggedIn()){
-    var errored = false;
-    downloadProfs(function(profs,error){
-      if(error){
-        errored = true;
-      }else{
-        for(pidx in profs){
-          downloadClasses(profs[pidx].username,function(classes,error){
-            if(error){
-              errored = true;
-            }else{
-              for(cidx in classes){
-                downloadQuizzes(classes[cidx].cid,function(quizzes,error){
-                  if(error){
-                    errored = true
-                  }
-                  if(errored){
-                    alert("One or more downloads failed");
-                  }else{
-                    alert("Update Complete!");
-                  }
-                });
-              }
-            }
-          });
-        }
-      }
-
-    });
-    console.log('clicked');
-  }else{
-    alert('You must be logged in to update.');
-  }
-});
-
-$('#view-all-button').bind('click',function(){
-  if(loggedIn()){
-    downloadProfs(function(profs,error){
-      if(error){
-        alert(error);
-      }else{
-        var page = $('#update-profs');
-        console.log(page.length);
-        var content = page.children(":jqmData(role=content)");
-        content.children('ul').html('');
-        if(profs.length == 0){
-          content.children('ul').html('<li>No Professors Found</li>');
-        }else{
-          var markup = "";
-          for(prof in profs){
-            markup+= "<li><a class='prof-update-link' href='#update-classes' its-uid='" + profs[prof].uid + "'>" + profs[prof].username + "</a></li>";
-          }
-          console.log(markup);
-          content.children('ul').html(markup);
-        }
-        $.mobile.changePage(page);
-        content.children('ul').listview('refresh');
-        bindClassLinks();
-      }
-    });
-  }else{
-    alert('You must be logged in to view classes.');
-  }
-});
-var bindClassLinks = function(){
-  $('.prof-update-link').bind('click',function(){
-    var profName = $(this).html();
-    var profUid = $(this).attr('its-uid');
-    downloadClasses(profName,function(classes,error){
-      if(error){
-        alert(error);
-      }else{
-        var page = $('#update-classes');
-        var head = page.children(":jqmData(role=header)");
-        var content = page.children(":jqmData(role=content)");
-        content.children('ul').html('');
-        head.children('h1').html(profName + "'s Classes");
-        if(classes.length == 0){
-          content.children('ul').html('<li>No Classes Found</li>');
-        }else{
-          var markup = "";
-          for(idx in classes){
-            markup+= "<li><a class='class-update-link' href='#update-quizzes' its-cid='" + classes[idx].cid + "'>" + classes[idx].name + "</a></li>";
-          }
-          console.log(markup);
-          content.children('ul').html(markup);
-        }
-        $.mobile.changePage(page);
-        content.children('ul').listview('refresh');
-        bindQuizLinks();
-      }
-    });
-  });
-}
-
-var bindQuizLinks = function(){
-  $('.class-update-link').bind('click',function(){
-    var className = $(this).html();
-    var cid = $(this).attr('its-cid');
-    downloadQuizzes(cid,function(quizzes,error){
-      if(error){
-        alert(error);
-      }else{
-        var page = $('#update-quizzes');
-        var head = page.children(":jqmData(role=header)");
-        var content = page.children(":jqmData(role=content)");
-        content.children('ul').html('');
-        head.children('h1').html(className);
-        if(quizzes.length == 0){
-          content.children('ul').html('<li>No Quizzes Found</li>');
-        }else{
-          var markup = "";
-          for(idx in quizzes){
-            markup+= "<li>" + quizzes[idx].name +"<div class='quiz-update-link' data-role='button' its-qid='" 
-              + quizzes[idx].qid + "'>Download Quiz</div></li>";
-          }
-          console.log(markup);
-          content.children('ul').html(markup);
-        }
-        $.mobile.changePage(page);
-        content.children('ul').listview('refresh');
-      }
-    });
-  });
-}
-</script>
 </body>
 </html>
+
+

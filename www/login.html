@@ -1,6 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+  <title>jQuery Mobile page</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
+  <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <script type="text/javascript">
+    // Atrocious way of loading two diffent phonegap scripts, but other loading methods won't work.
+    // also there shouldn't be two scripts to begin with -- so much for cross-platform.
+    var userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.match(/android/)) {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-android.js'><\/script>");
+  } else {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-iphone.js'><\/script>");
+  }
+</script>
+  <script src="js/jquery-1.7.min.js"></script>
+  <script src="js/crypt.js"></script>
+  <script src="js/jquery.mobile-1.0.min.js"></script>
+  <script src="js/its.js"></script>
+</head>
+<body>
 <div data-role="page" id="login" data-add-back-btn="false">
+  <script>
+      console.log(location.url);
+      
+
+      $('#login').bind('pageshow',function(){
+        var storage = window.localStorage;
+        if (!loggedIn()){
+          $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/login.php');
+        }else{
+          itsLogin(getUsername());
+        }
+      });
+
+      $('#logout-button').bind('click',function(){
+        logoutUser();
+        $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/logout.php').show();
+        $('#logged').hide();
+        $('#logout-button').hide();
+      }); 
+    </script>
+  
   <div data-role="header">
-    <a href="#main" data-ajax="false">Home</a>
+    <a href="index.html" data-ajax="false">Home</a>
     <h1>Login</h1>
   </div>
   <div data-role="content">
@@ -9,39 +56,6 @@
     <div id="logout-button" data-role="button" style="display:none;">Logout</div>
     
   </div>
-  <script>
-  
-    itsLogin = function(user){
-        setUsername(user);
-        $('#login-frame').attr('src','').hide();
-        $('#logged span').html(user);
-        $('#logged').show();
-        $('#logout-button').show();
-    }
-    
-    $('#login').bind('pageshow',function(){
-      var storage = window.localStorage;
-      if (!loggedIn()){
-        $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/login.php');
-      }else{
-        itsLogin(getUsername());
-      }
-    });
-
-    iframeOnload = function(){
-        var storage = window.localStorage;
-        var username= loggedIn() ? 
-          getUsername() : $('#login-frame').contents().find('#user').html();
-        if(username != null){
-          itsLogin(username);
-        }
-    }
-    
-    $('#logout-button').bind('click',function(){
-      logoutUser();
-      $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/logout.php').show();
-      $('#logged').hide();
-      $('#logout-button').hide();
-    }); 
-  </script>
 </div>
+</body>
+</html>

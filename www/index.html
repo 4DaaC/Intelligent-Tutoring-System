@@ -7,15 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" /> 
-    <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <link rel="stylesheet" href="css/jquery-mobile-theme-ru.css" />
+  <script type="text/javascript">
+    // Atrocious way of loading two diffent phonegap scripts, but other loading methods won't work.
+    // also there shouldn't be two scripts to begin with -- so much for cross-platform.
+    var userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.match(/android/)) {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-android.js'><\/script>");
+  } else {
+    document.write("<script type='text/javascript' src='js\/phonegap-1.4.1-iphone.js'><\/script>");
+  }
+</script>
   <script src="js/jquery-1.7.min.js"></script>
-  <script src="js/phonegap-1.2.0.js"></script>
   <script src="js/crypt.js"></script>
-  <script>
-  $(document).bind("mobileinit", function(){
-    $.mobile.page.prototype.options.addBackBtn = true;
-  });
-  </script> 
   <script src="js/jquery.mobile-1.0.min.js"></script>
   <script src="js/its.js"></script>
 </head>
@@ -28,21 +32,10 @@
       </div>
       <div data-role="content">
         <ul data-role="listview" id="main-menu-list">
-            <li><a href="#about">About RUTutor</a></li>
-            <li><a href="classes.html" data-ajax="false">View Quizzes</a></li>
-            <li><a href="update.html" data-ajax="false" >Download Updates</a></li>
+            <li><a href="classes.html">View Quizzes</a></li>
+            <li><a href="update.html">Download Updates</a></li>
         </ul>
       </div>
   </div>
-  
-  <div data-role="page" id="about">
-    <div data-role="header">
-      <h1>RU Tutor</h1>
-    </div>
-    <div data-role="content">	
-      <h2>Hello World!</h2>	
-    </div>
-  </div>
-
 </body>
 </html>

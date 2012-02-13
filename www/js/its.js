@@ -1,5 +1,23 @@
 var cname = 'its-login-username'; 
-var baseUrl = "http://rucs.radford.edu:3000";
+var baseUrl = "http://itutor.radford.edu:3002";
+
+itsLogin = function(user){
+    setUsername(user);
+    $('#login-frame').attr('src','').hide();
+    $('#logged span').html(user);
+    $('#logged').show();
+    $('#logout-button').show();
+}
+
+iframeOnload = function(){
+    var storage = window.localStorage;
+    var username= loggedIn() ? 
+      getUsername() : $('#login-frame').contents().find('#user').html();
+    if(username != null){
+      itsLogin(username);
+    }
+}
+
 getUsername = function(){
   var storage = window.localStorage;
   return storage.getItem(cname);
@@ -32,15 +50,17 @@ getProfs = function(){
   return JSON.parse(storage.getItem(getUsername() + ":Professors"));
 }
 downloadProfs = function(callback){
-  var url = baseUrl + "/mobile/profs?user=" + escape(encrypt(getUsername()));
+  var url = baseUrl + "/mobile/profs?user=" + encodeURIComponent(encrypt(getUsername()));
   console.log("GET:" + url);
   $.ajax({
     url:url,
+    async:false,
     success:function(data){
-      setProfs(data);
+      console.log("Passed AJAX");
       callback(data);
     },
     error:function(){
+      console.log("errored AJAX");
       callback(null,"Problem Downloading Professors");
     }
   });
@@ -57,12 +77,12 @@ getClasses = function(profName){
 }
 
 downloadClasses = function(profName,callback){
-  var url = baseUrl + "/mobile/classes?prof=" + escape(encrypt(profName)) + "&user=" + escape(encrypt(getUsername()));
+  var url = baseUrl + "/mobile/classes?prof=" + encodeURIComponent(encrypt(profName)) + "&user=" + encodeURIComponent(encrypt(getUsername()));
   console.log("GET:" + url);
   $.ajax({
     url:url,
+    async:false,
     success:function(data){
-      setClasses(profName,data);
       callback(data);
     },
     error:function(){
@@ -83,12 +103,12 @@ getQuizzes = function(cid){
 }
 
 downloadQuizzes = function(cid,callback){
-  var url = baseUrl + "/mobile/quizzes?cid=" + escape(cid) + "&user=" + escape(encrypt(getUsername()));
+  var url = baseUrl + "/mobile/quizzes?cid=" + encodeURIComponent(cid) + "&user=" + encodeURIComponent(encrypt(getUsername()));
   console.log("GET:" + url);
   $.ajax({
     url:url,
+    async:false,
     success:function(data){
-      setQuizzes(cid,data);
       callback(data);
     },
     error:function(){
@@ -96,6 +116,31 @@ downloadQuizzes = function(cid,callback){
     }
   });
   
+}
+
+setQuiz = function(qid,quizObject){
+  var storage = window.localStorage;
+  storage.setItem(getUsername() + ":Quiz:" + qid);
+}
+
+getQuiz = function(qid){
+  var storage = window.localStorage;
+  return JSON.parse(storage.getItem(getUsername() + ":Quiz:" + qid));
+}
+
+downloadQuiz = function(qid,callback){
+  var url = baseUrl + "/mobile/quiz?qid=" + encodeURIComponent(qid) + "&user=" + encodeURIComponent(encrypt(getUsername()));
+  console.log("GET:" + url);
+  $.ajax({
+    url:url,
+    async:false,
+    success:function(data){
+      callback(data);
+    },
+    error:function(){
+      callback(null,"Problem Downloading Quiz");
+    }
+  });
 }
 
 

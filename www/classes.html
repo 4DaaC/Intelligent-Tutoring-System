@@ -28,10 +28,9 @@
     <div data-role="content">
       <ul data-role="listview" id="class-list"></ul>
     </div>
-  </div>
   <script>
   
-    $('#classes').bind('pageinit',function(){
+    $('#classes').bind('pageshow',function(){
       console.log('init');
       if (!loggedIn()){
         $('#class-list').html('<li>Login to View</li>');
@@ -59,7 +58,7 @@
                 }else{
                   for(idx3 in quizzes){
                     var quizName = quizzes[idx3].name;
-                    markup += "<li>" + quizName + '</li';
+                    markup += "<li>" + quizName + '</li>';
                   }
                 }
                 markup += "</ul></li>";
@@ -75,6 +74,7 @@
     });
     
   </script>
+  </div>
 </body>
   
 </html>
