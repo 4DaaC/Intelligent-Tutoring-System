@@ -87,6 +87,15 @@ var authCheck = function(req,callback){
     }
   });
 }
+
+var getOwnerOfClass = function(class_id, callback) {
+  var qString = "select Users.username from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
+  client.query(qString,[class_id],function(err,results){
+    if(err)                       callback(err);
+    else if(results.length == 0)  callback(new Error("No results for get owner of class query"));
+    else                          callback(err, results[0].username);
+  });
+}
 // Routes
 
 app.get('*',requireLogin);
@@ -171,44 +180,59 @@ app.post('/user', function(req, res) {
 });
 
 app.post('/class', function(req, res) {
-	var name = req.body.cname;
-	var tuser = req.body.tuser;
-	var limit = req.body.limit;
-	var priv = req.body.priv;
-  var foundErr = false;
-  if(name.length <= 0 || name.length > 30){
-    req.flash("error","Class Name must be between 1 and 30 characters long");
-    foundErr = true;
-  }
-  if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
-    req.flash("error","Class Limit must be a positive number");
-    foundErr=true;
-  }
-  if(foundErr){
-    res.redirect('/classes');
-  }else{
-	  if(req.body.cid){
-      var cid = req.body.cid;
-      client.query("UPDATE Classes SET name = ?,classlimit = ?,privacy = ? ,uid= ? WHERE cid = ?",
-                   [name,limit,priv,tuser,cid],function(err){
-        if(err){
-          console.log(err);
-          req.flash("error",err);
-        }
+  authCheck(req,function(auth_level){
+    if(auth_level > 0){
+      var name = req.body.cname;
+      var tuser = req.body.tuser;
+      var limit = req.body.limit;
+      var priv = req.body.priv;
+      var foundErr = false;
+      if(name.length <= 0 || name.length > 30){
+        req.flash("error","Class Name must be between 1 and 30 characters long");
+        foundErr = true;
+      }
+      if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
+        req.flash("error","Class Limit must be a positive number");
+        foundErr=true;
+      }
+      if(foundErr){
         res.redirect('/classes');
-      });
-    }else{
-      client.query("INSERT INTO Classes (uid, name, classlimit, privacy) " + 
-               "VALUES (?,?,?,?)",[tuser,name,limit,priv], function(err) {
-		    if(err) {
-			    console.log(err);
-          req.flash("error",err);
-		    }
-		    res.redirect('/classes');
-	    });
-    }
-  }
+      }else{
+        if(req.body.cid){
+          var cid = req.body.cid;
+          getOwnerOfClass(cid, function(err, currentOwner) {
+            if(auth_level == 1 && current_user(req) != currentOwner) {
+              req.flash("error", "You do not have permission to edit classes that do not belong to you");
+              foundErr = true;
+            }
+            if(foundErr){
+              res.redirect('/classes');
+            }else{
+              client.query("UPDATE Classes SET name = ?,classlimit = ?,privacy = ? ,uid= ? WHERE cid = ?",
+                           [name,limit,priv,tuser,cid],function(err){
+                if(err){
+                  console.log(err);
+                  req.flash("error",err);
+                }
+                res.redirect('/classes');
+              });
+            }
+          });
+        }else{
+          client.query("INSERT INTO Classes (uid, name, classlimit, privacy) " + 
+                   "VALUES (?,?,?,?)",[tuser,name,limit,priv], function(err) {
+            if(err) {
+              console.log(err);
+              req.flash("error",err);
+            }
+            res.redirect('/classes');
+          });
+        }
+      }
+    } else res.send(403);
+  });
 });
+
 app.get('/remUser',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level > 1){
