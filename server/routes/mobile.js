@@ -79,12 +79,13 @@ app.get('/mobile/quizzes', function(req, res) {
   }
 });
 
-app.get('/mobile/answers', function(req, res) {
-  var user = req.query.user;
+app.get('/mobile/answer', function(req, res) {
+  var user = req.query.username;
   var answer = req.query.answer;
   var questid = req.query.questid;
   //no response needed, 200 will remove the request from the Q, 500 will return it
   if(user == undefined || answer == undefined || questid == undefined){
+    console.log("Something is undefined");
     res.send(200);
   }else{
     user = crypt.decrypt(user);
@@ -96,11 +97,18 @@ app.get('/mobile/answers', function(req, res) {
         console.log("No user found");
         res.send(200);
       }else{
-        client.query("INSERT INTO Answers(uid,questid,saved_answer) VALUES(?,?,?)",[results.uid,questid,answer],function(err2,results){
+        client.query("INSERT INTO Answers(uid,questid,saved_answer) VALUES(?,?,?)",[results[0].uid,questid,answer],function(err2,results){
           if(err2){
             console.log(err2);
+            if(err2.number = 1062){
+              //TODO: UPDATE INSTEAD OF INSERT
+              console.log('duplicate key, just ignore');
+              res.send(200);
+            }else{
             res.send(500);
+            }
           }else{
+            console.log("answer saved");
             res.send(200);
           }
         });
