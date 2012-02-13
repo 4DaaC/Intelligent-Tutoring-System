@@ -1,13 +1,29 @@
 h3 #{name}
 form(id="qform", action="question", method="POST")
-  textarea(name="question")
-  ul
-    li
-      |True
-      input(type="radio", name="correct", value="true") 
-    li
-      |False
-      input(type="radio", name="correct", value="false") 
+  if add
+    textarea(name="question")
+    ul
+      li
+        |True
+        input(type="radio", name="correct", value="true") 
+      li
+        |False
+        input(type="radio", name="correct", value="false")
+  else
+    textarea(name="question") #{quest.question}
+    ul
+      li
+        |True
+        if JSON.parse(quest.correct_answer)[0] == 'true'
+          input(type="radio", name="correct", value="true", checked="checked")
+        else
+          input(type="radio", name="correct", value="true")
+      li
+        |False
+        if JSON.parse(quest.correct_answer)[0] == 'false'
+          input(type="radio", name="correct", value="false", checked="checked")
+        else
+          input(type="radio", name="correct", value="false")
   input(type="submit", value="Save")
   input(type="hidden", name="ans", value="")
   input(type="hidden", name="type", value="tf")

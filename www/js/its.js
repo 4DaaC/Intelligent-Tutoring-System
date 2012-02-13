@@ -1,6 +1,5 @@
 var cname = 'its-login-username'; 
 var baseUrl = "http://itutor.radford.edu:3002";
-
 itsLogin = function(user){
     setUsername(user);
     $('#login-frame').attr('src','').hide();
@@ -43,7 +42,12 @@ goBack = function(){
 
 setProfs = function(profObject){
   var storage = window.localStorage;
-  storage.setItem(getUsername() + ":Professors",JSON.stringify(profObject));
+  var profs = new Object();
+  for(var idx in profObject){
+    var prof = profObject[idx];
+    profs[prof.username] = prof; 
+  }
+  storage.setItem(getUsername() + ":Professors",JSON.stringify(profs));
 }
 getProfs = function(){
   var storage = window.localStorage;
@@ -68,7 +72,12 @@ downloadProfs = function(callback){
 
 setClasses = function(profName,classesObject){
   var storage = window.localStorage;
-  storage.setItem(getUsername() + ":" + profName + ":Classes",JSON.stringify(classesObject));
+  var classes = new Object();
+  for(var idx in classesObject){
+    var theClass = classesObject[idx];
+    classes[theClass.cid] = theClass; 
+  }
+  storage.setItem(getUsername() + ":" + profName + ":Classes",JSON.stringify(classes));
 }
 
 getClasses = function(profName){
@@ -94,7 +103,12 @@ downloadClasses = function(profName,callback){
 
 setQuizzes = function(cid,quizzesObject){
   var storage = window.localStorage;
-  storage.setItem(getUsername() + ":" + cid + ":Quizzes",JSON.stringify(quizzesObject));
+  var quizzes = new Object();
+  for(var idx in quizzesObject){
+    var quiz = quizzesObject[idx];
+    quizzes[quiz.qid] = quiz; 
+  }
+  storage.setItem(getUsername() + ":" + cid + ":Quizzes",JSON.stringify(quizzes));
 }
 
 getQuizzes = function(cid){
@@ -120,8 +134,23 @@ downloadQuizzes = function(cid,callback){
 
 setQuiz = function(qid,quizObject){
   var storage = window.localStorage;
-  storage.setItem(getUsername() + ":Quiz:" + qid);
+  console.log(quizObject);
+  var answers = new Object();
+  var questions = new Object();
+  for(var idx in quizObject.answers){
+    var answer = quizObject.answers[idx];
+    answers[answer.questid] = answer;
+  }
+  for(var idx in quizObject.questions){
+    var question = quizObject.questions[idx];
+    questions[question.questid] = question;
+  }
+  quizObject.answers = answers;
+  quizObject.questions = questions;
+  console.log(JSON.stringify(quizObject,null,2));
+  storage.setItem(getUsername() + ":Quiz:" + qid,JSON.stringify(quizObject));
 }
+
 
 getQuiz = function(qid){
   var storage = window.localStorage;
@@ -141,6 +170,106 @@ downloadQuiz = function(qid,callback){
       callback(null,"Problem Downloading Quiz");
     }
   });
+}
+
+getQuizQuestions = function(quiz){
+  var questions = new Object();
+  questions.easy = new Object();
+  questions.medium  = new Object();
+  questions.hard = new Object();
+  for(var idx in quiz.questions){
+    var question = quiz.questions[idx];
+    if(typeof(quiz.answers[question.questid]) == "undefined"){
+      if(question.difficulty == 1){
+        questions.easy[question.cid] = question;
+      }else if(question.difficulty == 2){
+        questions.medium[question.cid] = question;
+      }else{
+        questions.hard[question.cid] = question;
+      }
+    }
+  }
+  return questions;
+}
+
+setAnswer = function(qid,questid,answer,correct){
+  var quiz = getQuiz(qid);
+  quiz.answers[questid] = new Object();
+  quiz.answers[questid]["saved_answer"] = answer;
+  quiz.answers[questid]["questid"] = questid;
+  if(correct){
+    quiz.currentDiff = quiz.currentDiff + 1;
+    if(quiz.currentDiff > 13){
+      quiz.currentDiff = 13;
+    }
+  }else{
+    quiz.currentDiff = quiz.currentDiff - 1;
+    if(quiz.currentDiff < 1){
+      quiz.currentDiff = 1;
+    }
+  }
+  var url = baseUrl + "/mobile/answer?username=" + encodeURIComponent(getUsername()) +
+    "&questid=" + encodeURIComponent(questid) + "&answer=" + encodeURIComponent(answer);
+  pushUpdateQueue(url);
+  setQuiz(qid,quiz);
+  return quiz;
+}
+
+getUpdateQueue = function(){
+  var storage = window.localStorage;
+  return JSON.parse(storage.getItem(getUsername() + "updateQ"));
+}
+
+pushUpdateQueue = function(update){
+  var storage = window.localStorage;
+  var queueString = storage.getItem(getUsername() + "updateQ");
+  var queue;
+  if(queueString == null){
+    queue = new Array();
+  }else{
+    queue = JSON.parse(queueString);
+  }
+  queue.push(update);
+  storage.setItem(getUsername() + "updateQ",JSON.stringify(queue));
+  runUpdateQueue();
+}
+
+popUpdateQueue = function(){
+  var queue = getUpdateQueue();
+  var update = queue.pop();
+  storage.setItem(getUsername() + "updateQ",JSON.stringify(queue));
+  return update;
+}
+
+runUpdateQueue = function(){
+  var queue = getUpdateQueue();
+  console.log(JSON.stringify(queue,null,2));
+  if(queue.length > 0){
+    var update = queue[queue.length - 1];
+    $.ajax({
+      url:update,
+      success:function(data){
+        var updatedQ = popUpdateQueue();
+        runUpdateQueue();
+      },
+      error:function(){
+        console.log("Problem with update");
+      }
+    });
+  }
+  
+}
+
+function getParameterByName(name)
+{
+  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regexS = "[\\?&]" + name + "=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(window.location.search);
+  if(results == null)
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 
