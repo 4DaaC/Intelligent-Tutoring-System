@@ -466,7 +466,7 @@ app.get('/question', function(req, res) {
           qid: qid,
           answers: '{}', 
           questid: '-1',
-          quest: '[]',
+          quest: '{}',
           add: true,
           name: ''          
         });

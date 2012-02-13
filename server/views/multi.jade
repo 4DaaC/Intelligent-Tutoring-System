@@ -3,7 +3,7 @@ form(id="qform", action="question", method="POST")
   textarea(name="question", rows="5", cols="40") #{name}
   button#add(type="button") Add
   ol#choices
-    if answers == '{}'
+    if add
       li
         textarea(name="ans")
         input(type="checkbox", name="correct")
