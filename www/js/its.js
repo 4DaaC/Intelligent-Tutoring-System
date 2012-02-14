@@ -208,7 +208,7 @@ setAnswer = function(qid,questid,answer,correct){
       quiz.currentDiff = 1;
     }
   }
-  var url = baseUrl + "/mobile/answer?username=" + encodeURIComponent(getUsername()) +
+  var url = baseUrl + "/mobile/answer?username=" + encodeURIComponent(encrypt(getUsername())) +
     "&questid=" + encodeURIComponent(questid) + "&answer=" + encodeURIComponent(answer);
   pushUpdateQueue(url);
   setQuiz(qid,quiz);
@@ -237,6 +237,7 @@ pushUpdateQueue = function(update){
 popUpdateQueue = function(){
   var queue = getUpdateQueue();
   var update = queue.pop();
+  var storage = window.localStorage;
   storage.setItem(getUsername() + "updateQ",JSON.stringify(queue));
   return update;
 }
@@ -246,9 +247,11 @@ runUpdateQueue = function(){
   console.log(JSON.stringify(queue,null,2));
   if(queue.length > 0){
     var update = queue[queue.length - 1];
+    console.log(update);
     $.ajax({
       url:update,
       success:function(data){
+        console.log('successful update');
         var updatedQ = popUpdateQueue();
         runUpdateQueue();
       },
