@@ -9,7 +9,10 @@ if (auth_level > 1)
       $('#teacher').val(tuid);
     })
     });
-h1 Create a Class
+if(title == 'Edit Class')
+  h1 Edit Class
+else
+  h1 Create a Class
 form(method="post")
  table
   tr
@@ -47,4 +50,7 @@ form(method="post")
    td
     if(typeof(theClass) != 'undefined')
      input(type="hidden", name="cid", value="#{theClass.cid}")
-    input(type="submit", value="Add")
+    if(title == 'Edit Class')
+     input(type="submit", value="Save Changes")
+    else
+     input(type="submit", value="Add")
