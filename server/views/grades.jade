@@ -39,10 +39,11 @@ table
             -if (answer.questid == question.questid)
               -numAttempted ++
               -var answersLowered = new Array()
-              -correctAnswers.forEach(function(corr){
+              -for(var index in correctAnswers){
+                -corr=correctAnswers[index]
                 -answersLowered.push(corr.toLowerCase())
-              -})
-              -if (correctAnswers.indexOf(answer['saved_answer'].toLowerCase()) != -1)
+              -}
+              -if (answersLowered.indexOf(answer['saved_answer'].toLowerCase()) != -1)
                 -numCorrect ++
                 tr.correct
                   td #{answer.username}

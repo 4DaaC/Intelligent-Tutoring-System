@@ -567,7 +567,7 @@ app.del('/question', function(req, res) {
 
 app.post('/question', function(req, res) {
   authCheck(req, function(auth_level) {
-    if(auth_level > 1) {
+    if(auth_level >= 1) {
       var action = req.body.action;
       var quest = req.body.question;
       var qid = req.body.qid;
@@ -608,6 +608,8 @@ app.post('/question', function(req, res) {
           res.redirect('/viewQuiz?qid='+qid);
         }
       });
+    }else{
+      res.send(403);
     }
   });
 });
@@ -746,7 +748,7 @@ app.get('/quizzes',function(req,res){
           if(results.length == 0){
             res.send(403);
           }else{
-            var qString = "select qid,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
+            var qString = "select qid,Quizzes.question_amount,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
               "AND Quizzes.cid = ?";
             if(auth_level < 2){
               qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
