@@ -55,6 +55,35 @@ app.get('/mobile/quizzes', function(req, res) {
   }
 });
 
+app.get('/mobile/answers', function(req, res) {
+  var user = req.query.user;
+  var answer = req.query.answer;
+  var questid = req.query.questid;
+  //no response needed, 200 will remove the request from the Q, 500 will return it
+  if(user == undefined || answer == undefined || questid == undefined){
+    res.send(200);
+  }else{
+    user = crypt.decrypt(user);
+    client.query("SELECT uid FROM Users WHERE username = ?",[user],function(err,results,fields){
+      if(err){
+        console.log(err);
+        res.send(500);
+      }else if(results.length == 0){
+        console.log("No user found");
+        res.send(200);
+      }else{
+        client.query("INSERT INTO Answers(uid,questid,saved_answer) VALUES(?,?,?)",[results.uid,questid,answer],function(err2,results){
+          if(err2){
+            console.log(err2);
+            res.send(500);
+          }else{
+            res.send(200);
+          }
+        });
+      }
+    });
+  }
+});
 app.get('/mobile/classes', function(req, res) {
 	var prof = req.query.prof;
 	var user = req.query.user;
