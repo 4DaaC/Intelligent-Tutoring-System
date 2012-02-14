@@ -1,0 +1,60 @@
+h1 Grades
+table
+  tr
+    th Question
+    th Type
+    th Category
+    th Difficulty
+    th Answer
+    th Attempts
+    th % Correct
+  -for(var idx in questions){
+    question = questions[idx]
+    tr
+      td #{question.question}
+      td #{question.type}
+      td #{question.category}
+      -if (question.difficulty == 1)
+        td Easy
+      -else if(question.difficulty == 2)
+        td Medium
+      -else
+        td Hard
+      correctAnswers = JSON.parse(question['correct_answer'])
+      td
+        table
+          -correctAnswers.forEach(function(answer){
+            tr
+              td #{answer}
+          -})
+      -var numAttempted = 0;
+      -var numCorrect = 0;
+      td
+        table
+          tr
+            th Username
+            th Answer
+          
+          -answers.forEach(function(answer){
+            -if (answer.questid == question.questid)
+              -numAttempted ++
+              -var answersLowered = new Array()
+              -correctAnswers.forEach(function(corr){
+                -answersLowered.push(corr.toLowerCase())
+              -})
+              -if (correctAnswers.indexOf(answer['saved_answer'].toLowerCase()) != -1)
+                -numCorrect ++
+                tr.correct
+                  td #{answer.username}
+                  td #{answer['saved_answer']}
+              -else
+                tr.incorrect
+                  td #{answer.username}
+                  td #{answer['saved_answer']}
+          -})
+      td
+        -if (numAttempted > 0)
+          |#{(numCorrect/numAttempted) * 100}%
+        -else
+          |Not Taken
+  -}

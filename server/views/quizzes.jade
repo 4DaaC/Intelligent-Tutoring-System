@@ -8,13 +8,17 @@
         |Name
       th
         |Class
-      th       
+      th Question Amount  
+      th 
+      th
     for quiz in quizzes
       tr
         td
           a(href="/viewQuiz?qid=#{quiz.qid}")=quiz.name
+        td=quiz.className
+        td=quiz['question_amount']
         td
-          =quiz.className
+          a(href="quizGrades?qid=#{quiz.qid}")Grades
         td
           a(href="/quiz?qid=#{quiz.qid}") Edit
           span |

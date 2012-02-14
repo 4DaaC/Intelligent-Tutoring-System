@@ -1,4 +1,7 @@
-h1 Create a Quiz
+if typeof(quiz) == 'undefined'
+  h1 Create a Quiz
+else
+  h1 Edit Quiz
 form(method="post", action="/quiz")
  table
   tr
@@ -15,6 +18,15 @@ form(method="post", action="/quiz")
           option(value="#{class.cid}", selected="selected")= class.name
         -else
           option(value="#{class.cid}")= class.name
+  tr
+    td 
+      |Question Amount:
+      br
+      |(Number of questions students answer)
+      if typeof(quiz) == 'undefined'
+        input(type="text", name="question_amount")
+      else
+        input(type="text",name="question_amount",value="#{quiz['question_amount']}")
   tr
     td
       if typeof(quiz) != 'undefined'

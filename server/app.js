@@ -426,6 +426,42 @@ app.get('/quiz', function(req, res) {
   });
 });
 
+app.get('/quizGrades',function(req,res) {
+  var qid = req.query.qid;
+  if(qid == undefined){
+    req.flash('error','No Quiz ID Provided');
+    res.redirect('back');
+  }else{
+    client.query("SELECT * FROM Questions WHERE qid = ?", [qid],function(err,results){
+      if(err){
+        console.log(err);
+        req.flash('error',err);
+        res.redirect('back');
+      }else{
+        var questions = new Object();
+        for(var idx in results){
+          questions[results[idx].questid] = results[idx];
+        }
+        var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer FROM Users,Answers" +
+          " WHERE Users.uid = Answers.uid AND Answers.questid IN (SELECT questid FROM Questions WHERE qid = ?)";
+        client.query(sql,[qid],function(err2,answers){
+          if(err2){
+            console.log(err2);
+            req.flash('error',err);
+            res.redirect('back');
+          }else{
+            res.render('grades',{
+              title:"Grade View",
+              questions: questions,
+              answers: answers
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
 app.get('/viewQuiz', function(req, res) {
   authCheck(req, function(auth_level) {
     if(auth_level > 1) {
@@ -572,10 +608,18 @@ app.post('/quiz', function(req, res) {
   authCheck(req, function(auth_level) {
     var qname = req.body.qname;
     var cl = req.body.cl;
+    var question_amount = req.body.question_amount;
     var foundErr = false;
     if(qname.length <=0 || qname.length > 50){
       req.flash('error','Quiz Name must be between 1 and 50 characters long');
       foundErr = true;
+    }
+    question_amount = parseInt(question_amount,10);
+    if(isNaN(question_amount)){
+      req.flash('error', 'Question Amount must be a number');
+      foundErr = true;
+    }else if(question_amount <= 0){
+      req.flash('error', 'Question Amount must be a positive number');
     }
     if(foundErr){
       res.redirect('/quiz');
@@ -599,7 +643,7 @@ app.post('/quiz', function(req, res) {
             res.redirect('/quiz');
           }else{
             if(req.body.qid){
-              client.query("UPDATE Quizzes SET name= ?, cid = ? WHERE qid = ?", [qname,cl,req.body.qid],function(err){
+              client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname,cl,question_amount,req.body.qid],function(err){
                 if(err){
                   console.log(err);
                   req.flash("error",err);
@@ -607,7 +651,7 @@ app.post('/quiz', function(req, res) {
                 res.redirect('/quizzes?cid=' + cl);
               });
             }else{
-              client.query("INSERT INTO Quizzes (name, cid) VALUES (?,?)", [qname,cl],function(err) {
+              client.query("INSERT INTO Quizzes (name, cid,question_amount) VALUES (?,?,?)", [qname,cl,question_amount],function(err) {
                 if(err) {
                   console.log(err);
                   req.flash("error",err);
