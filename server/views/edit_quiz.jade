@@ -15,7 +15,8 @@ form(method="post", action="/question")
       if question.type == 'multi'
         tr
           td Multiple Choice
-          td #{question.question}
+          td
+            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
           td
             table
               each choice in JSON.parse(question.answers)
@@ -26,23 +27,33 @@ form(method="post", action="/question")
               each answer in JSON.parse(question.correct_answer)
                 tr
                   td #{answer}
+          td
+            button.rem(type="button", value="#{question.questid}")
+              |Del
       if question.type == 'tf'
         tr
           td True/False
-          td #{question.question}
+          td
+            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
           td
           td #{JSON.parse(question.correct_answer)}
+          td
+            button.rem(type="button", value="#{question.questid}")
+              |Del
       if question.type == 'short'
         tr
           td Short Answer
-          td #{question.question}
+          td
+            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
           td
           td
             table
               each answer in JSON.parse(question.correct_answer)
                 tr
                   td #{answer}
-  button#submit(type="button") Update
+          td
+            button.rem(type="button", value="#{question.questid}")
+              |Del
+      
   input(type="hidden", value="add", name="action")
   input(type="hidden", value="#{qid}", name="qid")
-  button#cb(type="button") Cancel     

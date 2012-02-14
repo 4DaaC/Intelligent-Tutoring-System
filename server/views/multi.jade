@@ -3,10 +3,41 @@ form(id="qform", action="question", method="POST")
   textarea(name="question", rows="5", cols="40") #{name}
   button#add(type="button") Add
   ol#choices
-    each choice in JSON.parse(answers)
+    if add
       li
-        textarea(name="ans") #{choice}
-        input(type="checkbox", name="correct", value="#{choice}")
+        textarea(name="ans")
+        input(type="checkbox", name="correct")
+        button(type="button", class="del")
+          |Del
+      li
+        textarea(name="ans")
+        input(type="checkbox", name="correct")
+        button(type="button", class="del")
+          |Del
+      li
+        textarea(name="ans")
+        input(type="checkbox", name="correct")
+        button(type="button", class="del")
+          |Del
+      li
+        textarea(name="ans")
+        input(type="checkbox", name="correct")
+        button(type="button", class="del")
+          |Del
+    else
+      each choice in JSON.parse(answers)
+        li
+          textarea(name="ans") #{choice}
+          - var check = 'false'
+          each ans in JSON.parse(quest.correct_answer)
+            if ans == choice
+              -check = 'true'
+          if check == 'true'
+            input(type="checkbox", name="correct", value="#{choice}", checked="checked")
+          else 
+            input(type="checkbox", name="correct", value="#{choice}")
+          button(type="button", class="del")
+            |Del
   input(type="submit", value="Save")
   input(type="hidden", name="type", value="multi")
   input(type="hidden", name="qid", value="#{qid}")

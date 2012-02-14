@@ -18,10 +18,26 @@ $(document).ready(function() {
     });
   });
   $('#add').click(function() {
-    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/></li>');
+    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/><button type="button" class="del">Del</button></li>');
   });
   $('#addno').click(function() {
-    $('#choices').append('<li><textarea name="correct"></textarea></li>');
+    $('#choices').append('<li><textarea name="correct"></textarea><button type="button", class="del">Del</button></li>');
+  });
+  $('.del').live("click", function() {
+    $(this).parent().empty().remove(); 
+  });
+  $('.rem').click(function() {
+    if(confirm("Are you sure you want to delete this question?")) {
+      $.ajax({
+        url: "question",
+        data: {questid: $(this).val()},
+        type: "DELETE",
+        success: function() {
+          $(this).parent().empty().remove();
+	  location.reload();
+        }
+      });
+    }
   });
 });
 
