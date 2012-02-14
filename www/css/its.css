@@ -1,0 +1,38 @@
+#question{
+  border: 3px inset #CCC;
+  padding:15px;
+  margin-bottom:10px;
+}
+.right{
+  float:right;
+}
+#diff-display{
+  position:absolute;
+  top:-20px;
+  left:0;
+}#quest-left{
+  position:absolute;
+  top:-20px;
+  right:0;
+}
+#category-div,#answer-label,#answer{
+  padding:0;
+  margin:0;
+}
+#quiz-content{
+  position:relative;
+}
+.correct{
+  background:#DFD;
+}
+.incorrect{
+  background:#E77;
+}
+.answer-wrap{
+  padding:15px;
+  border-radius:10px;
+}
+#quest-left{
+  float:right;
+  display:inline-block;
+}
