@@ -464,24 +464,32 @@ app.get('/quizGrades',function(req,res) {
 
 app.get('/viewQuiz', function(req, res) {
   authCheck(req, function(auth_level) {
-    if(auth_level > 1) {
+    if(auth_level > 0) {
       var qid = req.query.qid;
       var edit = req.query.edit;
-      var qString = "SELECT name FROM Quizzes WHERE qid = ?";
+      var qString = "SELECT name, cid FROM Quizzes WHERE qid = ?";
       qString = client.format(qString, [qid]);
-      if(auth_level < 2) {
-	
-      }
       console.log(qString);
       client.query(qString, function(err, quiz, fields) {
-        client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
-          console.log(results);
-          res.render('edit_quiz', {
-            title: quiz[0].name,
-            questions: results,
-            qid: qid
+        if(quiz.length != 0) {
+          getOwnerOfClass(quiz[0].cid, function(err, owner) {
+            if(auth_level == 2 || owner == current_user(req)) {
+              client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
+                console.log(results);
+                res.render('edit_quiz', {
+                  title: quiz[0].name,
+                  questions: results,
+                  qid: qid
+                });
+              });
+            }
+            else {
+              res.send(403);
+            }
           });
-        });
+        } else {
+          res.send(404);
+        }
       });
     } else {
       res.send(403);
