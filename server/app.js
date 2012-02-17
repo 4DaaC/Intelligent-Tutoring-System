@@ -17,7 +17,7 @@ var client = mysql.createClient(config.db);
 client.query('USE ' + config.db.database);
 
 var ADMIN = 2;
-var PROFESSOR = 1;
+var PROF = 1;
 var STUDENT = 0;
 
 var current_user = function(req){
