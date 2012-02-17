@@ -28,8 +28,8 @@ var loadSessionInfo = function(req, callback) {
     if(rows.length == 1) {
       req.session.user = new Object();
       req.session.user.username = req.body.username;
-      req.session.user.userid = rows[0].uid;
-      req.session.user.auth = rows[0].auth_level;
+      req.session.user.userid = parseInt(rows[0].uid);
+      req.session.user.auth = parseInt(rows[0].auth_level);
     }
     else {
       err = new Error("No matching username");
