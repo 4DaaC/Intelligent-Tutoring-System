@@ -338,23 +338,19 @@ app.post('/student', function(req, res) {
 });
 
 app.get('/student', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level > 0) {
-      var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
-      if(auth_level < 2) {
-        qString += " AND Users.username = ?";
-        qString = client.format(qString,[current_user(req).username]);
-      }
-      client.query(qString, function(err, results, fields) {
-        console.log(results);
-        res.render('student_class', {
-          title: 'Add student to class',
-          classes: results
-        });
-      });
-    } else {
-      res.send(403);
+  checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
+    var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
+    if(!isAdmin(req)) {
+      qString += " AND Users.username = ?";
+      qString = client.format(qString, [current_user(req).username]);
     }
+    client.query(qString, function(err, results, fields) {
+      console.log(results);
+      res.render('student_class', {
+        title: 'Add student to class',
+        classes: results
+      });
+    });
   });
 });
 

@@ -5,7 +5,7 @@ var async = require('async');
 var config = require('./config');
 var client = require('mysql').createClient(config.db);
 
-var allowedProf = 'add_class';
+var allowedProf = 'add_class, view_edit_class';
 var allowedStudent = '';
 
 var checkPermissions = function(current_user, perms, res, callback) {
