@@ -266,36 +266,29 @@ app.get('/remStud',function(req, res){
 });
 
 app.get('/remQuiz',function(req,res){
-  authCheck(req,function(auth_level){
-    if(auth_level > 0){
-      var qid = req.query.qid;
-      if(qid != undefined){
-        var qString = "SELECT qid, Classes.cid FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid" +
-          " AND qid = '" + qid + "'";
-        if(auth_level < 2){
-          qString += " AND Classes.cid IN (SELECT Classes.cid FROM Classes, Users WHERE Classes.uid = Users.uid AND Users.username = ?)";
-          qString = client.format(qString,[current_user(req).username]);
+  var qid = parseInt(req.query.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    if(qid !== undefined){
+      var qString = "SELECT cid, qid FROM Quizzes WHERE qid = ?";
+      console.log(qString);
+      client.query(qString, [qid], function(err, results, fields){
+        if(err){
+          console.log(err);
+          req.flash("error",err);
+          res.redirect('/');
         }
-        console.log(qString);
-        client.query(qString,function(err,results,fields){
-          if(err){
+        else if(results.length === 1){
+          console.log(results);
+          client.query("DELETE FROM Quizzes WHERE qid = ?", [qid], function(err){
             console.log(err);
-            req.flash("error",err);
-            res.redirect('/');
-          }else if(results.length > 0){
-            console.log(results);
-            client.query("DELETE FROM Quizzes WHERE qid = ?",[qid],function(err){
-              console.log(err);
-              res.redirect('/quizzes?cid=' + results[0].cid);
-            });
-          }else res.redirect('/');
-        });
-      } else res.redirect('/');
-    }else{
-      res.send(403);
-    }
+            res.redirect('/quizzes?cid=' + results[0].cid);
+          });
+        }else res.redirect('/');
+      });
+    } else res.redirect('/');
   });
 });
+
 app.get('/remClass',function(req,res){
   authCheck(req,function(auth_level){
     if(auth_level>0){
