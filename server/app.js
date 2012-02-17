@@ -318,26 +318,22 @@ app.get('/remClass',function(req,res){
 });
 
 app.post('/student', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level > 0 ) {
-      var user = req.body.user;
-      var cid = req.body.cid;
-      client.query("SELECT uid FROM Users WHERE username = ?", [user],function(err, results) {
-        if(err) {
-          console.log(err);
-        } else {
-          var uid = results[0].uid;
-          client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid,cid],function(err) {
-            if(err) {
-              console.log(err);
-            }
-          });
-        }
-        res.redirect('/student');
-      });
-    } else {
-      res.send(403);
-    }
+  var cid = parseInt(req.body.cid);
+  var user = parseInt(req.body.user);
+  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
+    client.query("SELECT uid FROM Users WHERE username = ?", [user], function(err, results) {
+      if(err) {
+        console.log(err);
+      } else {
+        var uid = results[0].uid;
+        client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid, cid] ,function(err) {
+          if(err) {
+            console.log(err);
+          }
+        });
+      }
+      res.redirect('/student');
+    });
   });
 });
 
