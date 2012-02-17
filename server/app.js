@@ -640,20 +640,16 @@ app.get('/', function(req, res){
 });
 
 app.get('/users',function(req,res){
-  authCheck(req,function(auth_level){
-    if(auth_level > 0){
-      var qString = "select * from Users";
-      console.log(qString);
-      client.query(qString,function(err,results,fields){
-        console.log('render');
-        res.render('users',{
-          title: 'Users',
-          users: results
-        });
+  checkPermissions(req.session.user, {view_all_users: true}, res, function(err) {
+    var qString = "select * from Users";
+    console.log(qString);
+    client.query(qString, function(err,results,fields) {
+      console.log('render');
+      res.render('users', {
+        title: 'Users',
+        users: results
       });
-    }else{
-      res.send(403);
-    }
+    });
   });
 });
 
