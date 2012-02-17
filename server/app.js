@@ -533,51 +533,47 @@ app.del('/question', function(req, res) {
 });
 
 app.post('/question', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level >= 1) {
-      var action = req.body.action;
-      var quest = req.body.question;
-      var qid = req.body.qid;
-      var ans = req.body.ans;
-      var cor = req.body.correct;
-      var type = req.body.type; 
-      var cat = req.body.cat;
-      var diff = req.body.diff;
-      var questid = req.body.questid;
-      var qString;
-      ans = JSON.stringify(ans); 
-      cor = JSON.stringify(cor);
-      if(cor != undefined && cor[0] == '"') {
-        cor = '['+cor+']';
-      } else if(cor == undefined) {
-        cor = '[]';
-      }
-      if(ans != undefined && ans[0] == '"') {
-        ans = '['+ans+']';
-      } else if(ans == undefined) {
-        ans = '[]';
-      }
-      console.log(cor);
-      console.log(ans);
-      if(questid == '-1') {
-        qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
-      } else {
-        qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
-        qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
-      }
-      console.log(qString);
-      client.query(qString, function(err) {
-        if(err) { 
-          console.log(err);
-          res.send(503);
-        } else {
-          res.redirect('/viewQuiz?qid='+qid);
-        }
-      });
-    }else{
-      res.send(403);
+  var qid = parseInt(req.body.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    var action = req.body.action;
+    var quest = req.body.question;
+    var ans = req.body.ans;
+    var cor = req.body.correct;
+    var type = req.body.type;
+    var cat = req.body.cat;
+    var diff = req.body.diff;
+    var questid = req.body.questid;
+    var qString;
+    ans = JSON.stringify(ans);
+    cor = JSON.stringify(cor);
+    if(cor != undefined && cor[0] == '"') {
+      cor = '['+cor+']';
+    } else if(cor == undefined) {
+      cor = '[]';
     }
+    if(ans != undefined && ans[0] == '"') {
+      ans = '['+ans+']';
+    } else if(ans == undefined) {
+      ans = '[]';
+    }
+    console.log(cor);
+    console.log(ans);
+    if(questid == '-1') {
+      qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
+    } else {
+      qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
+      qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
+    }
+    console.log(qString);
+    client.query(qString, function(err) {
+      if(err) {
+        console.log(err);
+        res.send(503);
+      } else {
+        res.redirect('/viewQuiz?qid='+qid);
+      }
+    });
   });
 });
 
