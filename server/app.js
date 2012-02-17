@@ -144,24 +144,20 @@ app.get('/class', function(req, res) {
     var title = 'Class Add Panel';
   }
 
-  checkPermissions(user, perms, function(err, permitted) {
-    if(permitted){
-      var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
-      client.query(sqlStr, [req.query.cid], function(err2, classes){
-        if(err2){
-          req.flash("error",err2);
-          res.redirect('/classes');
-        }
-        res.render('add_class', {
-          title: title,
-          auth_level: user.auth,
-          tuid: user.userid,
-          theClass: classes[0]
-        });
+  checkPermissions(user, perms, res, function(err) {
+    var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
+    client.query(sqlStr, [req.query.cid], function(err2, classes){
+      if(err2){
+        req.flash("error",err2);
+        res.redirect('/classes');
+      }
+      res.render('add_class', {
+        title: title,
+        auth_level: user.auth,
+        tuid: user.userid,
+        theClass: classes[0]
       });
-    } else {
-      res.send(403);
-    }
+    });
   });
 });
 
@@ -197,46 +193,44 @@ app.post('/class', function(req, res) {
     var perms = {add_class: true};
   }
 
-  checkPermissions(user, perms, function(err, permitted) {
-    if(permitted) {
-      var name = req.body.cname;
-      var tuser = req.body.tuser;
-      var limit = req.body.limit;
-      var priv = req.body.priv;
-      var foundErr = false;
-      if(name.length <= 1 || name.length >= 30){
-        req.flash("error","Class Name must be between 1 and 30 characters long");
-        foundErr = true;
+  checkPermissions(user, perms, res, function(err) {
+    var name = req.body.cname;
+    var tuser = req.body.tuser;
+    var limit = req.body.limit;
+    var priv = req.body.priv;
+    var foundErr = false;
+    if(name.length <= 1 || name.length >= 30){
+      req.flash("error","Class Name must be between 1 and 30 characters long");
+      foundErr = true;
+    }
+    if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
+      req.flash("error","Class Limit must be a positive number");
+      foundErr=true;
+    }
+    if(foundErr){
+      res.redirect('/classes');
+    }else{
+      if(req.body.cid) {
+        var cid = req.body.cid;
+        qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
+        client.query(qString, [name,limit,priv,tuser,cid],function(err) {
+          if(err){
+            console.log(err);
+            req.flash("error",err);
+          }
+          res.redirect('/classes');
+        });
+      } else {
+        qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)"
+        client.query(qString, [tuser,name,limit,priv], function(err) {
+          if(err) {
+            console.log(err);
+            req.flash("error",err);
+          }
+          res.redirect('/classes');
+        });
       }
-      if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
-        req.flash("error","Class Limit must be a positive number");
-        foundErr=true;
-      }
-      if(foundErr){
-        res.redirect('/classes');
-      }else{
-        if(req.body.cid) {
-          var cid = req.body.cid;
-          qString = "UPDATE Classes SET name = ?,classlimit = ?,privacy = ? ,uid= ? WHERE cid = ?"; 
-          client.query(qString, [name,limit,priv,tuser,cid],function(err) {
-            if(err){
-              console.log(err);
-              req.flash("error",err);
-            }
-            res.redirect('/classes');
-          });
-        } else {
-          qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)"
-          client.query(qString, [tuser,name,limit,priv], function(err) {
-            if(err) {
-              console.log(err);
-              req.flash("error",err);
-            }
-            res.redirect('/classes');
-          });
-        }
-      }
-    } else res.send(403);
+    }
   });
 });
 
@@ -257,18 +251,16 @@ app.get('/remUser',function(req,res){
 app.get('/remStud',function(req, res){
   var cid = parseInt(req.query.cid);
   var uid = parseInt(req.query.uid);
-  checkPermissions(req.session.user, {edit_class: cid}, function(err, permitted) {
-    if(permitted) {
-      if(cid !== undefined && uid !== undefined) {
-        var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
-        client.query(qString, [cid, uid], function(err) {
-          if(err) {
-            console.log(err);
-            req.flash("error", err);
-          }
-          res.redirect('/quizzes?cid=' + cid);
-        });
-      } else res.send(403);
+  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
+    if(cid !== undefined && uid !== undefined) {
+      var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
+      client.query(qString, [cid, uid], function(err) {
+        if(err) {
+          console.log(err);
+          req.flash("error", err);
+        }
+        res.redirect('/quizzes?cid=' + cid);
+      });
     } else res.send(403);
   });
 });

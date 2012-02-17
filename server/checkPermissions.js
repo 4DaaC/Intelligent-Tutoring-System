@@ -8,12 +8,12 @@ var client = require('mysql').createClient(config.db);
 var allowedProf = 'add_class';
 var allowedStudent = '';
 
-var checkPermissions = function(current_user, perms, callback) {
+var checkPermissions = function(current_user, perms, res, callback) {
   var checks = [];
   var err;
 
   if(current_user.auth === ADMIN) {
-    callback(undefined, true);
+    callback();
   }
   else {
     var funcs = [];
@@ -49,15 +49,20 @@ var checkPermissions = function(current_user, perms, callback) {
     }
 
     if(err) {
-      callback(err, false);
+      res.send(403);
     }
     else if(checks.length > 0) {
       async.series(checks, function(err) {
-        callback(err, typeof(err) === 'undefined');
+        if(err) {
+          res.send(403);
+        }
+        else {
+          callback();
+        }
       });
     }
     else {
-      callback(undefined, true);
+      callback();
     }
   }
 }
