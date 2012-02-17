@@ -463,12 +463,13 @@ app.get('/viewQuiz', function(req, res) {
 });
 
 app.get('/question', function(req, res) {
-  authCheck(req, function(auth_level) {
-    var questid = req.query.questid;
-    var qid = req.query.qid;
-    if(qid == undefined) {
-      res.send(404);
-    } else {
+  var questid = req.query.questid;
+  var qid = req.query.qid;
+  if(qid == undefined) {
+    res.send(404);
+  }
+  else {
+    checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
       if(questid == undefined) {
         res.render(req.query.type, {
           title: '',
@@ -479,7 +480,8 @@ app.get('/question', function(req, res) {
           add: true,
           name: ''          
         });
-      } else {
+      }
+      else {
         var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
         qString = client.format(qString, [qid, questid]);
         console.log(qString);
@@ -495,18 +497,21 @@ app.get('/question', function(req, res) {
           };
           if(results[0].type == 'short') {
             res.render('short', pass);
-          } else if(results[0].type == 'multi') {
+          }
+          else if(results[0].type == 'multi') {
             res.render('multi', pass)
-          } else if(results[0].type == 'tf') {
+          }
+          else if(results[0].type == 'tf') {
             res.render('tf', pass);
-          } else {
+          }
+          else {
             console.log('Could not find questid = '+questid+' and qid = '+qid);
             res.send(503);
           } 
         });
       }
-    }
-  });
+    });
+  }
 });
 
 app.del('/question', function(req, res) {
