@@ -6,7 +6,8 @@ var express = require('express');
 var fs = require('fs');
 var mysql = require('mysql');
 var app = module.exports = express.createServer();
-var config = require('./config')
+var config = require('./config');
+var checkPermissions = require('./checkPermissions.js');
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
