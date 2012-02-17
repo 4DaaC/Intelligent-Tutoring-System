@@ -440,37 +440,25 @@ app.get('/quizGrades',function(req,res) {
 });
 
 app.get('/viewQuiz', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level > 0) {
-      var qid = req.query.qid;
-      var edit = req.query.edit;
-      var qString = "SELECT name, cid FROM Quizzes WHERE qid = ?";
-      qString = client.format(qString, [qid]);
-      console.log(qString);
-      client.query(qString, function(err, quiz, fields) {
-        if(quiz.length != 0) {
-          getOwnerOfClass(quiz[0].cid, function(err, owner) {
-            if(auth_level == 2 || owner == current_user(req).username) {
-              client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
-                console.log(results);
-                res.render('edit_quiz', {
-                  title: quiz[0].name,
-                  questions: results,
-                  qid: qid
-                });
-              });
-            }
-            else {
-              res.send(403);
-            }
+  var qid = parseInt(req.query.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    var qString = "SELECT name, cid FROM Quizzes WHERE qid = ?";
+    console.log(qString);
+    client.query(qString, [qid], function(err, quiz, fields) {
+      if(quiz.length != 0) {
+        client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
+          console.log(results);
+          res.render('edit_quiz', {
+            title: quiz[0].name,
+            questions: results,
+            qid: qid
           });
-        } else {
-          res.send(404);
-        }
-      });
-    } else {
-      res.send(403);
-    }
+        });
+      }
+      else {
+        res.send(404);
+      }
+    });
   });
 });
 
