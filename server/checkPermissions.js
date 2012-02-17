@@ -22,7 +22,7 @@ var checkPermissions = function(current_user, perms, callback) {
       funcs['edit_class'] = function(callback) {
         qStr = 'SELECT uid FROM Classes WHERE cid = ?';
         client.query(qStr, [perms['edit_class']], function(err, rows) {
-          if(typeof(rows[0]) !== 'object' || rows[0].uid !== current_user.userid) {
+          if(rows === undefined || rows[0] === undefined || rows[0].uid !== current_user.userid) {
             err = true;
           }
           callback(err);
