@@ -29,7 +29,7 @@ form(method="post")
       else
         select(id="teacher",name="tuser",tuid="#{theClass.uid}")
     else
-      =current_user
+      =userName
       input(type="hidden", name="tuser",value="#{tuid}")
   tr
    td Limit:

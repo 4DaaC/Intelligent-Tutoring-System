@@ -17,14 +17,26 @@ client.query('USE ' + config.db.database);
 
 
 var current_user = function(req){
-  if(req.cookies['its-login-username'] && !req.session.user){
-    req.session.user = new Object();
-    req.session.user.username = req.cookies['its-login-username'];
-	//Here we can setup more info about the user from the db, like if they are a professor
-  }if(req.session.user && req.session.user.username){
-	  return req.session.user.username;
+  if(req.session.user){
+    return req.session.user;
   }else return undefined;
 }
+
+var loadSessionInfo = function(req, callback) {
+  client.query('SELECT uid, auth_level FROM Users WHERE username = ?', [req.body.username], function(err, rows) {
+    if(rows.length == 1) {
+      req.session.user = new Object();
+      req.session.user.username = req.body.username;
+      req.session.user.userid = rows[0].uid;
+      req.session.user.auth = rows[0].auth_level;
+    }
+    else {
+      err = new Error("No matching username");
+    }
+    callback(err);
+  });
+}
+
 // Configuration
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -47,9 +59,12 @@ app.configure('production', function(){
 
 app.dynamicHelpers({
   session: function(req,res){ return req.session},
+  userName: function(req, res) {return req.session.user == undefined ? undefined : req.session.user.username},
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
   isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; },
+  isProf: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 1; },
+  isStudent: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 0; },
   requireLogin: function(){return config.requireLogin},
   errors: function(req,res){return req.flash("error")}
 });
@@ -139,7 +154,7 @@ app.get('/class', function(req, res) {
             }else{
               res.render('add_class',{
                 title:'Edit Class',
-                auth_level: auth_level,
+                auth_level: user.auth,
                 tuid: results[0].uid,
                 theClass: classes[0]
               });
@@ -147,8 +162,8 @@ app.get('/class', function(req, res) {
           });
         }else{
           res.render('add_class', {
-			      title: 'Class Add Panel',
-            auth_level: auth_level,
+            title: 'Class Add Panel',
+            auth_level: user.auth,
             tuid: results[0].uid
 		      });
         }
@@ -201,7 +216,7 @@ app.post('/class', function(req, res) {
         if(req.body.cid){
           var cid = req.body.cid;
           getOwnerOfClass(cid, function(err, currentOwner) {
-            if(auth_level == 1 && (current_user(req) != currentOwner)) {
+            if(auth_level == 1 && (current_user(req).username != currentOwner)) {
               req.flash("error", "You do not have permission to edit classes that do not belong to you");
               foundErr = true;
             }
@@ -274,7 +289,7 @@ app.get('/remQuiz',function(req,res){
           " AND qid = '" + qid + "'";
         if(auth_level < 2){
           qString += " AND Classes.cid IN (SELECT Classes.cid FROM Classes, Users WHERE Classes.uid = Users.uid AND Users.username = ?)";
-          qString = client.format(qString,[current_user(req)]);
+          qString = client.format(qString,[current_user(req).username]);
         }
         console.log(qString);
         client.query(qString,function(err,results,fields){
@@ -305,14 +320,14 @@ app.get('/remClass',function(req,res){
           "AND Classes.cid = ?";
         if(auth_level < 2){
           qString += " AND Users.username = ?";
-          qString = client.format(qString,[cid,current_user(req)]);
+          qString = client.format(qString,[cid,current_user(req).username]);
         }else{
           qString = client.format(qString,[cid]);
         }
         console.log(qString);
         client.query(qString,function(err,results,fields){
           if(results.length >0){
-            if(results[0].username = current_user(req) || auth_level > 1){
+            if(results[0].username = current_user(req).username || auth_level > 1){
               var qString ="DELETE FROM Classes WHERE cid = ?";
               console.log(qString);
               client.query(qString,[cid],function(err){
@@ -367,7 +382,7 @@ app.get('/student', function(req, res) {
       var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2) {
         qString += " AND Users.username = ?";
-        qString = client.format(qString,[current_user(req)]);
+        qString = client.format(qString,[current_user(req).username]);
       }
       client.query(qString, function(err, results, fields) {
         console.log(results);
@@ -388,7 +403,7 @@ app.get('/quiz', function(req, res) {
 	    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2){
         qString += " AND Users.username = ?";
-        qString = client.format(qString,[current_user(req)]);
+        qString = client.format(qString,[current_user(req).username]);
       }
       client.query(qString, function(err,results,fields){
         if(err){
@@ -473,7 +488,7 @@ app.get('/viewQuiz', function(req, res) {
       client.query(qString, function(err, quiz, fields) {
         if(quiz.length != 0) {
           getOwnerOfClass(quiz[0].cid, function(err, owner) {
-            if(auth_level == 2 || owner == current_user(req)) {
+            if(auth_level == 2 || owner == current_user(req).username) {
               client.query(client.format("SELECT * FROM Questions WHERE qid = ?",[qid]), function(err, results, fields) {
                 console.log(results);
                 res.render('edit_quiz', {
@@ -637,7 +652,7 @@ app.post('/quiz', function(req, res) {
       var qString = "SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? ";
       if(auth_level < 2){
         qString += " AND username= ?";
-        qString = client.format(qString,[cl,current_user(req)]);
+        qString = client.format(qString,[cl,current_user(req).username]);
       }else{
         qString = client.format(qString,[cl]);
       }
@@ -720,7 +735,7 @@ app.get('/classes',function(req,res){
       qString = "select cid,username,name FROM Classes,Users WHERE Classes.uid = Users.uid";
       if(auth_level < 2){
         qString += " AND Users.username = ?";
-        qString = client.format(qString,[current_user(req)]);
+        qString = client.format(qString,[current_user(req).username]);
       }
       console.log(qString);
       client.query(qString,function(err,results,fields){
@@ -742,7 +757,7 @@ app.get('/quizzes',function(req,res){
       if(cid != undefined){
         var qString = "select cid from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
         if(auth_level == 1) {
-          qString += "AND Users.username = '" + current_user(req) + "'";
+          qString += "AND Users.username = '" + current_user(req).username + "'";
         }
         client.query(qString,[cid],function(err,results,fields){
           if(results.length == 0){
@@ -752,7 +767,7 @@ app.get('/quizzes',function(req,res){
               "AND Quizzes.cid = ?";
             if(auth_level < 2){
               qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
-              "AND Users.username = '" + current_user(req) + "')";
+              "AND Users.username = '" + current_user(req).username + "')";
             }
             console.log(qString);
             client.query(qString,[cid],function(err,results,fields){
@@ -803,9 +818,15 @@ app.post('/test-login',function(req,res){
   if(config.requireLogin){
     res.redirect('/login');
   }else{
-    console.log(req.body.username);
-    res.cookie('its-login-username',req.body.username);
-    res.redirect('/');
+    loadSessionInfo(req, function(err) {
+      if(err) {
+        res.redirect('/login');
+      }
+      else {
+        res.cookie('its-login-username',req.body.username);
+        res.redirect('/');
+      }
+    });
   }
 });
 
