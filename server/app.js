@@ -253,20 +253,23 @@ app.get('/remUser',function(req,res){
     res.redirect('/users');
   } else res.send(403);
 });
+
 app.get('/remStud',function(req, res){
-  authCheck(req,function(auth_level){
-    if(auth_level > 0){
-      var cid = req.query.cid;
-      var uid = req.query.uid;
-      console.log(qString);
-      if(cid != undefined && uid != undefined){
+  var cid = parseInt(req.query.cid);
+  var uid = parseInt(req.query.uid);
+  checkPermissions(req.session.user, {edit_class: cid}, function(err, permitted) {
+    if(permitted) {
+      if(cid !== undefined && uid !== undefined) {
         var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
         client.query(qString, [cid, uid], function(err) {
-          if(err) console.log(err);
+          if(err) {
+            console.log(err);
+            req.flash("error", err);
+          }
+          res.redirect('/quizzes?cid=' + cid);
         });
-      }
-      res.redirect('/quizzes?cid=' + cid);
-    }else res.send(403);
+      } else res.send(403);
+    } else res.send(403);
   });
 });
 
