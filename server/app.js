@@ -578,60 +578,54 @@ app.post('/question', function(req, res) {
 });
 
 app.post('/quiz', function(req, res) {
-  authCheck(req, function(auth_level) {
+  var perms = req.body.qid ? {edit_quiz: req.body.qid} : {add_quiz: true};
+  checkPermissions(req.session.user, perms, res, function(err) {
     var qname = req.body.qname;
-    var cl = req.body.cl;
+    var cl = parseInt(req.body.cl);
     var question_amount = req.body.question_amount;
     var foundErr = false;
-    if(qname.length <=0 || qname.length > 50){
+    if(qname.length <=0 || qname.length > 50) {
       req.flash('error','Quiz Name must be between 1 and 50 characters long');
       foundErr = true;
     }
     question_amount = parseInt(question_amount,10);
-    if(isNaN(question_amount)){
+    if(isNaN(question_amount)) {
       req.flash('error', 'Question Amount must be a number');
       foundErr = true;
-    }else if(question_amount <= 0){
+    }
+    else if(question_amount <= 0) {
       req.flash('error', 'Question Amount must be a positive number');
     }
-    if(foundErr){
+    if(foundErr) {
       res.redirect('/quiz');
-    }else{
-      var qString = "SELECT cid FROM Users, Classes WHERE Users.uid = Classes.uid AND cid=? ";
-      if(auth_level < 2){
-        qString += " AND username= ?";
-        qString = client.format(qString,[cl,current_user(req).username]);
-      }else{
-        qString = client.format(qString,[cl]);
-      }
-      client.query(qString,function(err,results){
+    }
+    else {
+      var qString = "SELECT cid FROM Classes WHERE cid = ?";
+      client.query(qString, [cl], function(err,results) {
         if(err){
           console.log(err);
           req.flash("error",err);
           res.redirect('/quiz');
-        }else{
+        }
+        else {
           console.log(results);
-          if(results.length <= 0){
-            req.flash("error","You can only create quizzes for your own classes");
-            res.redirect('/quiz');
-          }else{
-            if(req.body.qid){
-              client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname,cl,question_amount,req.body.qid],function(err){
-                if(err){
-                  console.log(err);
-                  req.flash("error",err);
-                }
-                res.redirect('/quizzes?cid=' + cl);
-              });
-            }else{
-              client.query("INSERT INTO Quizzes (name, cid,question_amount) VALUES (?,?,?)", [qname,cl,question_amount],function(err) {
-                if(err) {
-                  console.log(err);
-                  req.flash("error",err);
-                }
-                res.redirect('/quizzes?cid='+ cl);
-              });
-            }
+          if(req.body.qid) {
+            client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cl, question_amount, req.body.qid], function(err) {
+              if(err) {
+                console.log(err);
+                req.flash("error", err);
+              }
+              res.redirect('/quizzes?cid=' + cl);
+            });
+          }
+          else {
+            client.query("INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)", [qname, cl,question_amount], function(err) {
+              if(err) {
+                console.log(err);
+                req.flash("error",err);
+              }
+              res.redirect('/quizzes?cid='+ cl);
+            });
           }
         }
       });
