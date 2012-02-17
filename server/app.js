@@ -74,7 +74,7 @@ app.dynamicHelpers({
 });
 
 var isAdmin = function(req) {
-	return req.session.user.auth == 2;
+	return req.session.user.auth === 2;
 }
 
 var isRequestMobile = function(req){
@@ -124,7 +124,7 @@ require('./routes/index')(app,client);
 
 
 app.get('/admin', function(req, res) {
-  if(req.session.user.auth === ADMIN) {
+  if(isAdmin(req)) {
     res.render('control_panel', {
       title: 'Admin Panel'
     });
@@ -166,7 +166,7 @@ app.get('/class', function(req, res) {
 });
 
 app.post('/user', function(req, res) {
-  if(req.session.user.auth === ADMIN) {
+  if(isAdmin(req)) {
     var auth = req.body.priv;
     var user = req.body.user;
     var foundErr = false;
@@ -241,19 +241,17 @@ app.post('/class', function(req, res) {
 });
 
 app.get('/remUser',function(req,res){
-  authCheck(req,function(auth_level){
-    if(auth_level > 1){
-      var uid = req.query.uid;
-      if(uid != undefined){
-        var qString = "DELETE FROM Users WHERE uid = ?";
-        console.log(qString);
-        client.query(qString,[uid],function(err){
-          if(err) console.log(err);
-        });
-      }
-      res.redirect('/users');
-    }else res.send(403);
-  });
+  if(isAdmin(req)) {
+    var uid = req.query.uid;
+    if(uid != undefined){
+      var qString = "DELETE FROM Users WHERE uid = ?";
+      console.log(qString);
+      client.query(qString,[uid],function(err){
+        if(err) console.log(err);
+      });
+    }
+    res.redirect('/users');
+  } else res.send(403);
 });
 app.get('/remStud',function(req, res){
   authCheck(req,function(auth_level){
