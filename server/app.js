@@ -469,7 +469,7 @@ app.get('/question', function(req, res) {
     res.send(404);
   }
   else {
-    checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
+    checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
       if(questid == undefined) {
         res.render(req.query.type, {
           title: '',
