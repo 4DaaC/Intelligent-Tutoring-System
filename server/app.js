@@ -290,42 +290,29 @@ app.get('/remQuiz',function(req,res){
 });
 
 app.get('/remClass',function(req,res){
-  authCheck(req,function(auth_level){
-    if(auth_level>0){
-      var cid = req.query.cid;
-      if(cid != undefined){
-        var qString = "SELECT Classes.cid, Users.username From Classes,Users WHERE Classes.uid = Users.uid " +
-          "AND Classes.cid = ?";
-        if(auth_level < 2){
-          qString += " AND Users.username = ?";
-          qString = client.format(qString,[cid,current_user(req).username]);
-        }else{
-          qString = client.format(qString,[cid]);
-        }
-        console.log(qString);
-        client.query(qString,function(err,results,fields){
-          if(results.length >0){
-            if(results[0].username = current_user(req).username || auth_level > 1){
-              var qString ="DELETE FROM Classes WHERE cid = ?";
-              console.log(qString);
-              client.query(qString,[cid],function(err){
-                if(err){
-                  console.log(err);
-                }
-                res.redirect('/classes');
-              });
-            }else{
-              res.send(403);
-            } 
-          }else{
+  var cid = parseInt(req.query.cid);
+  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
+    if(cid !== undefined) {
+      var qString = "SELECT cid FROM Classes WHERE cid = ?";
+      console.log(qString);
+      client.query(qString, [cid], function(err,results,fields) {
+        if(results.length === 1){
+          var qString ="DELETE FROM Classes WHERE cid = ?";
+          console.log(qString);
+          client.query(qString,[cid],function(err){
+            if(err){
+              console.log(err);
+            }
             res.redirect('/classes');
-          }
-        });
-      }else{
-        res.redirect('/classes');
-      }
-    }else{
-      res.send(403);
+          });
+        }
+        else {
+          res.redirect('/classes');
+        }
+      });
+    }
+    else {
+      res.redirect('/classes');
     }
   });
 });
