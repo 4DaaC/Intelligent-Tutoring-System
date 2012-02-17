@@ -515,23 +515,20 @@ app.get('/question', function(req, res) {
 });
 
 app.del('/question', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level >= 1) {
-      var questid = req.body.questid;
-      console.log(questid);
-      var qString = 'DELETE FROM Questions WHERE questid = ?';
-      qString = client.format(qString, [questid]);
-      client.query(qString, function(err) {
-        if(err) {
-          console.log(err);
-          res.send(503);
-        } else {
-          res.send(200);
-        }
-      });
-    } else {
-      res.send(403);
-    }
+  var questid = req.body.questid;
+  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
+    console.log(questid);
+    var qString = 'DELETE FROM Questions WHERE questid = ?';
+    qString = client.format(qString, [questid]);
+    client.query(qString, function(err) {
+      if(err) {
+        console.log(err);
+        res.send(503);
+      }
+      else {
+        res.send(200);
+      }
+    });
   });
 });
 
