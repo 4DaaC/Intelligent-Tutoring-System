@@ -355,46 +355,46 @@ app.get('/student', function(req, res) {
 });
 
 app.get('/quiz', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level > 0) {
-	    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
-      if(auth_level < 2){
-        qString += " AND Users.username = ?";
-        qString = client.format(qString,[current_user(req).username]);
+  checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
+    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
+    if(!isAdmin(req)) {
+      qString += " AND Users.username = ?";
+      qString = client.format(qString, [current_user(req).username]);
+    }
+    client.query(qString, function(err, results, fields) {
+      if(err) {
+        req.flash("error",err);
+        res.redirect('/classes');
       }
-      client.query(qString, function(err,results,fields){
-        if(err){
-          req.flash("error",err);
-          res.redirect('/classes');
-        }else if (results.length == 0){
-          req.flash('error', "class doesn't exist or does not belong to you");
-          res.redirect('back');
-        }else if(req.query.qid){
-          var sql = "SELECT * FROM Quizzes WHERE qid= ?" ;
-          client.query(sql, [req.query.qid],function(err2,quizzes){
-            if(err2){
-              req.flash("error",err2);
-              res.redirect('back');
-            }else{
-              res.render('add_quiz',{
-                title:'Edit Quiz',
-                classes: results,
-                select: req.query.cid,
-                quiz: quizzes[0]
-              });
-            }
-          });
-        }else{
-          res.render('add_quiz',{
-            title:'Add Quiz',
-            classes: results,
-            select: req.query.cid
-          });
-         }
-      });
-	  } else {
-		  res.send(403);
-	  }
+      else if (results.length == 0) {
+        req.flash('error', "class doesn't exist or does not belong to you");
+        res.redirect('back');
+      }
+      else if(req.query.qid) {
+        var sql = "SELECT * FROM Quizzes WHERE qid= ?" ;
+        client.query(sql, [req.query.qid],function(err2,quizzes) {
+          if(err2) {
+            req.flash("error",err2);
+            res.redirect('back');
+          }
+          else {
+            res.render('add_quiz', {
+              title:'Edit Quiz',
+              classes: results,
+              select: req.query.cid,
+              quiz: quizzes[0]
+            });
+          }
+        });
+      }
+      else {
+        res.render('add_quiz', {
+          title:'Add Quiz',
+          classes: results,
+          select: req.query.cid
+        });
+      }
+    });
   });
 });
 
