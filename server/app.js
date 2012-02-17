@@ -124,15 +124,13 @@ require('./routes/index')(app,client);
 
 
 app.get('/admin', function(req, res) {
-  authCheck(req,function(auth_level){  
-    if(auth_level == 2) {
-			res.render('control_panel', {
-				title: 'Admin Panel'
-			});
-		} else {
-			res.send(403);
-		}
-	});
+  if(req.session.user.auth === ADMIN) {
+    res.render('control_panel', {
+      title: 'Admin Panel'
+    });
+  } else {
+    res.send(403);
+  }
 });
 
 app.get('/class', function(req, res) {
@@ -168,22 +166,25 @@ app.get('/class', function(req, res) {
 });
 
 app.post('/user', function(req, res) {
-  var auth = req.body.priv;
-	var user = req.body.user;
-  var foundErr = false;
-  if(typeof(user) != 'string' || user.length <=0 || user.length > 20){
-    req.flash("error","Username must be between 1 and 20 characters long");
-    res.redirect('/admin');
-  }else{
-	  client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
-		  if(err) {
-			  console.log(err);
-        req.flash("error",err);
-        res.redirect('/admin');
-		  }else{
-		    res.redirect('/users');
-      }
-	  });
+  if(req.session.user.auth === ADMIN) {
+    var auth = req.body.priv;
+    var user = req.body.user;
+    var foundErr = false;
+    if(typeof(user) !== 'string' || user.length <= 1 || user.length >= 20){
+      req.flash("error","Username must be between 1 and 20 characters long");
+      res.redirect('/admin');
+    }else{
+      client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
+        if(err) {
+          req.flash("error",err);
+          res.redirect('/admin');
+        }else{
+          res.redirect('/users');
+        }
+      });
+    }
+  } else {
+    res.send(403);
   }
 });
 
