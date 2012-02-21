@@ -682,50 +682,41 @@ app.get('/classes',function(req,res) {
   });
 });
 
-app.get('/quizzes',function(req,res){
-  authCheck(req,function(auth_level){
-    if(auth_level > 0){
-      var cid = req.query.cid;
-      if(cid != undefined){
-        var qString = "select cid from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
-        if(auth_level == 1) {
-          qString += "AND Users.username = '" + current_user(req).username + "'";
+app.get('/quizzes',function(req,res) {
+  var cid = req.query.cid;
+  if(cid !== undefined) {
+    checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
+      var qString = "select cid from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
+      client.query(qString,[cid],function(err,results,fields){
+        if(results.length == 0) {
+          res.send(403);
         }
-        client.query(qString,[cid],function(err,results,fields){
-          if(results.length == 0){
-            res.send(403);
-          }else{
-            var qString = "select qid,Quizzes.question_amount,Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " + 
-              "AND Quizzes.cid = ?";
-            if(auth_level < 2){
-              qString += " AND Classes.cid IN (Select cid FROM Classes,Users where Classes.uid = Users.uid " + 
-              "AND Users.username = '" + current_user(req).username + "')";
-            }
+        else {
+          var qString = "select qid, Quizzes.question_amount, Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
+            "AND Quizzes.cid = ?";
+          console.log(qString);
+          client.query(qString,[cid],function(err,results,fields) {
+            console.log(results);
+            qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
+            " Class_List.cid = ?";
             console.log(qString);
-            client.query(qString,[cid],function(err,results,fields){
-              console.log(results);
-              qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " + 
-              " Class_List.cid = ?";
-              console.log(qString);
-              client.query(qString,[cid],function(err2,results2,fields2){
-                console.log(results2);
-                res.render('quizzes',{
-                  title:"Quizzes",
-                  quizzes: results,
-                  students: results2,
-                  cid: cid
-                });
+            client.query(qString,[cid],function(err2,results2,fields2) {
+              console.log(results2);
+              res.render('quizzes', {
+                title:"Quizzes",
+                quizzes: results,
+                students: results2,
+                cid: cid
               });
             });
-          }
-        });
-      }else{
-        res.redirect('/');
-      }
-    }else{
-      res.send(403);
-    }
-  });
+          });
+        }
+      });
+    });
+  }
+  else {
+    res.redirect('/');
+  }
 });
 
 app.get('/studentList', function(req, res) {
