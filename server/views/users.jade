@@ -19,7 +19,7 @@
           td
             =user.username
           td
-            -if (isAdmin)
+            -if (!isAdmin)
               -if (user.auth_level == 0)
                 |Student
               -if (user.auth_level == 1)
