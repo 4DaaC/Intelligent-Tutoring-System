@@ -654,16 +654,14 @@ app.get('/users',function(req,res){
 });
 
 app.post('/updateUser', function(req, res) {
-  authCheck(req, function(auth_level) {
-    if(auth_level == 2) {
-      for(var uname in req.body) {
-        var level = req.body[uname] == 'Admin' ? 2 : (req.body[uname] == 'Professor' ? 1 : 0);
-        var qString = 'UPDATE Users SET auth_level= ? WHERE username= ?';
-        client.query(qString,[level,uname]);
-        console.log(qString);
-      }
-      res.redirect('/users');
+  checkPermissions(req.session.user, {update_user_level: true}, res, function(err) {
+    for(var uname in req.body) {
+      var level = req.body[uname] === 'Admin' ? ADMIN : (req.body[uname] === 'Professor' ? PROF : STUDENT);
+      var qString = 'UPDATE Users SET auth_level = ? WHERE username = ?';
+      client.query(qString,[level,uname]);
+      console.log(qString);
     }
+    res.redirect('/users');
   });
 });
 
