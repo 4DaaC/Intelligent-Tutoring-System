@@ -107,14 +107,6 @@ var authCheck = function(req,callback){
   });
 }
 
-var getOwnerOfClass = function(class_id, callback) {
-  var qString = "select Users.username from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
-  client.query(qString,[class_id],function(err,results){
-    if(err)                       callback(err);
-    else if(results.length == 0)  callback(new Error("No results for get owner of class query"));
-    else                          callback(err, results[0].username);
-  });
-}
 // Routes
 
 app.get('*',requireLogin);
