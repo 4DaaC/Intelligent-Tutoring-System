@@ -1,4 +1,4 @@
-if (auth_level > 1)
+if (isAdmin)
   script
     $(document).ready(function() {
     $.get("/mobile/profs", function(data) {
@@ -9,48 +9,27 @@ if (auth_level > 1)
       $('#teacher').val(tuid);
     })
     });
-if(title == 'Edit Class')
-  h1 Edit Class
-else
-  h1 Create a Class
+h1 Create a Class
 form(method="post")
  table
   tr
     td Class name:
-      -if(typeof(theClass) == 'undefined')
-        input(type="text", name="cname")
-      -else
-        input(type="text", name="cname",value="#{theClass.name}")
+      input(type="text", name="cname")
   tr
    td Teacher:
-    if (auth_level > 1)
-      if (typeof(theClass) == 'undefined')
-        select(id="teacher", name="tuser")
-      else
-        select(id="teacher",name="tuser",tuid="#{theClass.uid}")
+    if (isAdmin)
+      select(id="teacher", name="tuser")
     else
       =userName
-      input(type="hidden", name="tuser",value="#{tuid}")
+      input(type="hidden", name="tuser",value="#{userid}")
   tr
    td Limit:
-    if(typeof(theClass) == 'undefined')
-      input(type="text", name="limit")
-    else
-      input(type="text", name="limit", value="#{theClass.classlimit}")
+    input(type="text", name="limit")
   tr
    td Visibility
      select(name="priv")
-       if(typeof(theClass) == 'undefined' || theClass.privacy == 0)
-         option(value="0") public
-         option(value="1") private
-       else
-         option(value="1") private
-         option(value="0") public
+       option(value="0") public
+       option(value="1") private
   tr
    td
-    if(typeof(theClass) != 'undefined')
-     input(type="hidden", name="cid", value="#{theClass.cid}")
-    if(title == 'Edit Class')
-     input(type="submit", value="Save Changes")
-    else
-     input(type="submit", value="Add")
+    input(type="submit", value="Add")

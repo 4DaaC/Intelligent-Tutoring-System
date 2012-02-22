@@ -8,6 +8,7 @@ var mysql = require('mysql');
 var app = module.exports = express.createServer();
 var config = require('./config');
 var checkPermissions = require('./checkPermissions.js');
+var validate = require('./validateForm.js');
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
@@ -64,6 +65,7 @@ app.configure('production', function(){
 app.dynamicHelpers({
   session: function(req,res){ return req.session},
   userName: function(req, res) {return req.session.user == undefined ? undefined : req.session.user.username},
+  userid: function(req, res) {return req.session.user == undefined ? undefined : req.session.user.userid},
   current_user: current_user,
   base_url: function(){return "http://itutor.radford.edu:" + config.port},
   isAdmin: function(req, res) { return req.session.user == undefined ? false : req.session.user.auth == 2; },
@@ -125,18 +127,8 @@ app.get('/admin', function(req, res) {
   }
 });
 
-app.get('/class', function(req, res) {
-  var user = current_user(req);
-  if(req.query.cid){
-    var perms = {edit_class: req.query.cid};
-    var title = 'Edit Class';
-  }
-  else {
-    var perms = {"add_class": true};
-    var title = 'Class Add Panel';
-  }
-
-  checkPermissions(user, perms, res, function(err) {
+app.get('/addClass', function(req, res) {
+  checkPermissions(current_user(req), {add_class: true}, res, function(err) {
     var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
     client.query(sqlStr, [req.query.cid], function(err2, classes){
       if(err2){
@@ -144,10 +136,56 @@ app.get('/class', function(req, res) {
         res.redirect('/classes');
       }
       res.render('add_class', {
-        title: title,
-        auth_level: user.auth,
-        tuid: user.userid,
+        title: 'Add Class',
         theClass: classes[0]
+      });
+    });
+  });
+});
+
+app.post('/addClass', function(req, res) {
+  checkPermissions(current_user(req), {add_class: true}, res, function(err) {
+    validate.addClassForm(req, res, function(err) {
+      qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)"
+      var values = [req.body.tuser, req.body.cname, req.body.limit, req.body.priv];
+      client.query(qString, values, function(err) {
+        if(err) {
+          console.log(err);
+          req.flash("error",err);
+        }
+        res.redirect('/classes');
+      });
+    });
+  });
+});
+
+app.get('/editClass', function(req, res) {
+  checkPermissions(current_user(req), {edit_class: req.query.cid}, res, function(err) {
+    var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
+    client.query(sqlStr, [req.query.cid], function(err2, classes){
+      if(err2){
+        req.flash("error",err2);
+        res.redirect('/classes');
+      }
+      res.render('edit_class', {
+        title: 'Edit Class',
+        theClass: classes[0]
+      });
+    });
+  });
+});
+
+app.post('/editClass', function(req, res) {
+  checkPermissions(current_user(req), {edit_class: req.body.cid}, res, function(err) {
+    validate.addClassForm(req, res, function(err) {
+      qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
+      var values = [req.body.cname, req.body.limit, req.body.priv, req.body.tuser, req.body.cid];
+      client.query(qString, values, function(err) {
+        if(err){
+          console.log(err);
+          req.flash("error",err);
+        }
+        res.redirect('/classes');
       });
     });
   });
@@ -174,56 +212,6 @@ app.post('/user', function(req, res) {
   } else {
     res.send(403);
   }
-});
-
-app.post('/class', function(req, res) {
-  var user = current_user(req);
-  if(req.body.cid){
-    var perms = {edit_class: req.body.cid};
-  }
-  else {
-    var perms = {add_class: true};
-  }
-
-  checkPermissions(user, perms, res, function(err) {
-    var name = req.body.cname;
-    var tuser = req.body.tuser;
-    var limit = req.body.limit;
-    var priv = req.body.priv;
-    var foundErr = false;
-    if(name.length <= 1 || name.length >= 30){
-      req.flash("error","Class Name must be between 1 and 30 characters long");
-      foundErr = true;
-    }
-    if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0){
-      req.flash("error","Class Limit must be a positive number");
-      foundErr=true;
-    }
-    if(foundErr){
-      res.redirect('/classes');
-    }else{
-      if(req.body.cid) {
-        var cid = req.body.cid;
-        qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
-        client.query(qString, [name,limit,priv,tuser,cid],function(err) {
-          if(err){
-            console.log(err);
-            req.flash("error",err);
-          }
-          res.redirect('/classes');
-        });
-      } else {
-        qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)"
-        client.query(qString, [tuser,name,limit,priv], function(err) {
-          if(err) {
-            console.log(err);
-            req.flash("error",err);
-          }
-          res.redirect('/classes');
-        });
-      }
-    }
-  });
 });
 
 app.get('/remUser',function(req,res){
