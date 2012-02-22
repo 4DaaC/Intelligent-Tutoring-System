@@ -12,13 +12,13 @@ function addClassForm(req, res, callback) {
     req.flash("error","Class Name must be between 1 and 30 characters long");
     foundErr = true;
   }
-  if(isNaN(parseInt(limit,10)) || parseInt(limit,10) <=0) {
+  if(isNaN(parseInt(limit, 10)) || parseInt(limit, 10) <= 0) {
     req.flash("error","Class Limit must be a positive number");
-    foundErr=true;
+    foundErr = true;
   }
   if(priv < 0 || priv > 1) {
     req.flash("error","Privacy setting is invalid");
-    foundErr=true;
+    foundErr = true;
   }
   if(foundErr) {
     res.redirect('back');
