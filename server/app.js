@@ -210,17 +210,16 @@ app.post('/addUser', function(req, res) {
 });
 
 app.get('/remUser',function(req,res){
-  if(isAdmin(req)) {
-    var uid = req.query.uid;
-    if(uid != undefined){
+  checkPermissions(current_user(req), {remove_user: true}, res, function(err) {
+    validate.deleteUserForm(req, res, function() {
       var qString = "DELETE FROM Users WHERE uid = ?";
       console.log(qString);
-      client.query(qString,[uid],function(err){
+      client.query(qString, [req.query.uid], function(err) {
         if(err) console.log(err);
       });
-    }
-    res.redirect('/users');
-  } else res.send(403);
+      res.redirect('/users');
+    });
+  });
 });
 
 app.get('/remStud',function(req, res){
