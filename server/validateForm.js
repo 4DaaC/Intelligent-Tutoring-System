@@ -2,6 +2,7 @@ var config = require('./config');
 var client = require('mysql').createClient(config.db);
 
 exports.addClassForm = addClassForm;
+exports.addUserForm = addUserForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -26,4 +27,24 @@ function addClassForm(req, res, callback) {
   else {
     callback();
   }
+}
+
+function addUserForm(req, res, callback) {
+    var auth = parseInt(req.body.auth);
+    var user = req.body.user;
+    var foundErr = false;
+    if(typeof(user) !== 'string' || user.length <= 1 || user.length >= 20){
+      req.flash("error", "Username must be between 1 and 20 characters long");
+      foundErr = true;
+    }
+    if(!(auth === 0 || auth === 1 || auth === 2)) {
+      req.flash("error", "Authorization level setting is invalid");
+      foundErr = true;
+    }
+    if(foundErr) {
+      res.redirect('back');
+    }
+    else {
+      callback();
+    }
 }

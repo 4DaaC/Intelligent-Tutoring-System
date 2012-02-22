@@ -193,27 +193,20 @@ app.post('/editClass', function(req, res) {
 });
 
 app.post('/addUser', function(req, res) {
-  if(isAdmin(req)) {
-    var auth = req.body.priv;
-    var user = req.body.user;
-    var foundErr = false;
-    if(typeof(user) !== 'string' || user.length <= 1 || user.length >= 20){
-      req.flash("error","Username must be between 1 and 20 characters long");
-      res.redirect('/admin');
-    }else{
-      client.query("INSERT INTO Users (username, auth_level) VALUES (?,?)", [user,auth],function(err) {
+  checkPermissions(current_user(req), {add_user: true}, res, function(err) {
+    validate.addUserForm(req, res, function() {
+      var qString = "INSERT INTO Users (username, auth_level) VALUES (?, ?)";
+      client.query(qString, [req.body.user, req.body.auth], function(err) {
         if(err) {
-          req.flash("error",err);
-          res.redirect('/admin');
-        }else{
+          req.flash("error", err);
+          res.redirect('back');
+        }
+        else {
           res.redirect('/users');
         }
       });
-    }
-  }
-  else {
-    res.send(403);
-  }
+    });
+  });
 });
 
 app.get('/remUser',function(req,res){
