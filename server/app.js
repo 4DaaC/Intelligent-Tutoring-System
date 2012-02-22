@@ -192,7 +192,7 @@ app.post('/editClass', function(req, res) {
   });
 });
 
-app.post('/user', function(req, res) {
+app.post('/addUser', function(req, res) {
   if(isAdmin(req)) {
     var auth = req.body.priv;
     var user = req.body.user;
@@ -210,7 +210,8 @@ app.post('/user', function(req, res) {
         }
       });
     }
-  } else {
+  }
+  else {
     res.send(403);
   }
 });
