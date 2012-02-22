@@ -144,10 +144,11 @@ app.get('/addClass', function(req, res) {
 });
 
 app.post('/addClass', function(req, res) {
-  checkPermissions(current_user(req), {add_class: true}, res, function(err) {
+  var tuser = parseInt(req.body.tuser);
+  checkPermissions(current_user(req), {add_class_for_user: tuser}, res, function(err) {
     validate.addClassForm(req, res, function(err) {
-      qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)"
-      var values = [req.body.tuser, req.body.cname, req.body.limit, req.body.priv];
+      qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)";
+      var values = [tuser, req.body.cname, req.body.limit, req.body.priv];
       client.query(qString, values, function(err) {
         if(err) {
           console.log(err);

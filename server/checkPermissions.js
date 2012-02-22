@@ -19,6 +19,12 @@ var checkPermissions = function(current_user, perms, res, callback) {
     var funcs = [];
     if(current_user.auth === PROF) {
       var allowed = allowedProf.split(', ');
+      funcs['add_class_for_user'] = function(callback) {
+        if(perms['add_class_for_user'] !== current_user.userid) {
+          err = true;
+        }
+        callback(err);
+      };
       funcs['edit_class'] = function(callback) {
         qStr = 'SELECT uid FROM Classes WHERE cid = ?';
         client.query(qStr, [perms['edit_class']], function(err, rows) {
