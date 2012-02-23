@@ -7,6 +7,7 @@ exports.deleteUserForm = deleteUserForm;
 exports.removeStudentForm = removeStudentForm;
 exports.removeQuizForm = removeQuizForm;
 exports.removeClassForm = removeClassForm;
+exports.addStudentToClassForm = addStudentToClassForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -105,5 +106,29 @@ function removeClassForm(req, res, callback) {
     else {
       callback();
     }
+  });
+}
+
+function addStudentToClassForm(req, res, callback) {
+  var qString = "SELECT uid FROM Users WHERE uid = ?";
+  client.query(qString, [req.body.user], function(err, rows) {
+    var qString = "SELECT cid FROM Classes WHERE cid = ?";
+    client.query(qString, [req.body.cid], function(err, rows2) {
+      var foundErr = false;
+      if(rows.length === 0) {
+        req.flash("error", "User does not exist");
+        foundErr = true;
+      }
+      if(rows2.length === 0) {
+        req.flash("error", "Class does not exist");
+        foundErr = true;
+      }
+      if(foundErr) {
+        res.redirect('back');
+      }
+      else {
+        callback();
+      }
+    });
   });
 }

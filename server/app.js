@@ -264,18 +264,16 @@ app.post('/student', function(req, res) {
   var cid = parseInt(req.body.cid);
   var uid = parseInt(req.body.user);
   checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    client.query("SELECT uid FROM Users WHERE uid = ?", [uid], function(err, results) {
-      if(err) {
-        console.log(err);
-      }
-      else {
-        client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid, cid] ,function(err) {
-          if(err) {
-            console.log(err);
-          }
-        });
-      }
-      res.redirect('/student');
+    validate.addStudentToClassForm(req, res, function() {
+      client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid, cid] ,function(err) {
+        if(err) {
+          req.flash("error", err);
+          res.redirect('back');
+        }
+        else {
+          res.redirect('/');
+        }
+      });
     });
   });
 });
