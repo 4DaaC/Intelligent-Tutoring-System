@@ -2,7 +2,7 @@ script
  $(document).ready(function() {
  $.get("/studentList", function(data) {
    for(var i = 0;i < data.length;i++) {
-    $('#list').append("<option value='"+data[i].username+"'>"+data[i].username+"</option>");
+    $('#list').append("<option value='"+data[i].uid+"'>"+data[i].username+"</option>");
    }
   })
  });

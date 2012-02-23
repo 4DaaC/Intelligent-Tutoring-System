@@ -293,13 +293,13 @@ app.get('/remClass',function(req,res){
 
 app.post('/student', function(req, res) {
   var cid = parseInt(req.body.cid);
-  var user = parseInt(req.body.user);
+  var uid = parseInt(req.body.user);
   checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    client.query("SELECT uid FROM Users WHERE username = ?", [user], function(err, results) {
+    client.query("SELECT uid FROM Users WHERE uid = ?", [uid], function(err, results) {
       if(err) {
         console.log(err);
-      } else {
-        var uid = results[0].uid;
+      }
+      else {
         client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid, cid] ,function(err) {
           if(err) {
             console.log(err);
