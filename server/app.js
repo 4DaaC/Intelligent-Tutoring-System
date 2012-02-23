@@ -226,16 +226,13 @@ app.get('/remStud',function(req, res){
   var cid = parseInt(req.query.cid);
   var uid = parseInt(req.query.uid);
   checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    if(cid !== undefined && uid !== undefined) {
+    validate.removeStudentForm(req, res, function() {
       var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
       client.query(qString, [cid, uid], function(err) {
-        if(err) {
-          console.log(err);
-          req.flash("error", err);
-        }
-        res.redirect('/quizzes?cid=' + cid);
+        err && req.flash("error", err);
+        res.redirect('back');
       });
-    } else res.send(403);
+    });
   });
 });
 

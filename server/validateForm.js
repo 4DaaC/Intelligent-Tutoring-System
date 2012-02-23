@@ -4,6 +4,7 @@ var client = require('mysql').createClient(config.db);
 exports.addClassForm = addClassForm;
 exports.addUserForm = addUserForm;
 exports.deleteUserForm = deleteUserForm;
+exports.removeStudentForm = removeStudentForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -56,6 +57,19 @@ function deleteUserForm(req, res, callback) {
   client.query(qStr, [uid], function(err, rows) {
     if(rows.length === 0) {
       req.flash("error", "User does not exist");
+      res.redirect('back');
+    }
+    else {
+      callback();
+    }
+  });
+}
+
+function removeStudentForm(req, res, callback) {
+  var qString = "SELECT cid FROM Class_List WHERE cid = ? AND uid = ?";
+  client.query(qString, [req.query.cid, req.query.uid], function(err, rows) {
+    if(rows.length === 0) {
+      req.flash("error", "User is not in specified class");
       res.redirect('back');
     }
     else {
