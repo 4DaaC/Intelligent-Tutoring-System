@@ -5,6 +5,7 @@ exports.addClassForm = addClassForm;
 exports.addUserForm = addUserForm;
 exports.deleteUserForm = deleteUserForm;
 exports.removeStudentForm = removeStudentForm;
+exports.removeQuizForm = removeQuizForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -70,6 +71,20 @@ function removeStudentForm(req, res, callback) {
   client.query(qString, [req.query.cid, req.query.uid], function(err, rows) {
     if(rows.length === 0) {
       req.flash("error", "User is not in specified class");
+      res.redirect('back');
+    }
+    else {
+      callback();
+    }
+  });
+}
+
+function removeQuizForm(req, res, callback) {
+  var qString = "SELECT qid FROM Quizzes WHERE qid = ?";
+  console.log(qString);
+  client.query(qString, [req.query.qid], function(err, rows){
+    if(rows.length === 0) {
+      req.flash("error", "Quiz does not exist");
       res.redirect('back');
     }
     else {
