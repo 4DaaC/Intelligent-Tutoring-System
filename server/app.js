@@ -250,28 +250,13 @@ app.get('/remQuiz',function(req,res){
 app.get('/remClass',function(req,res){
   var cid = parseInt(req.query.cid);
   checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    if(cid !== undefined) {
-      var qString = "SELECT cid FROM Classes WHERE cid = ?";
-      console.log(qString);
-      client.query(qString, [cid], function(err,results,fields) {
-        if(results.length === 1){
-          var qString ="DELETE FROM Classes WHERE cid = ?";
-          console.log(qString);
-          client.query(qString,[cid],function(err){
-            if(err){
-              console.log(err);
-            }
-            res.redirect('/classes');
-          });
-        }
-        else {
-          res.redirect('/classes');
-        }
+    validate.removeClassForm(req, res, function() {
+      var qString ="DELETE FROM Classes WHERE cid = ?";
+      client.query(qString, [cid], function(err){
+        err && req.flash("error", err);
+        res.redirect('back');
       });
-    }
-    else {
-      res.redirect('/classes');
-    }
+    });
   });
 });
 
