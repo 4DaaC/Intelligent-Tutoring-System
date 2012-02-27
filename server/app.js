@@ -318,6 +318,21 @@ app.get('/addQuiz', function(req, res) {
   });
 });
 
+app.post('/addQuiz', function(req, res) {
+  var cid = parseInt(req.body.cid);
+  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
+    validate.addQuizForm(req, res, function() {
+      var qname = req.body.qname;
+      var question_amount = req.body.question_amount;
+      var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
+      client.query(sqlStr, [qname, cid, question_amount], function(err) {
+        err && req.flash("error", err);
+        res.redirect('/quizzes?cid=' + cid);
+      });
+    });
+  });
+});
+
 app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -351,6 +366,22 @@ app.get('/editQuiz', function(req, res) {
           }
         });
       }
+    });
+  });
+});
+
+app.post('/editQuiz', function(req, res) {
+  var qid = parseInt(req.body.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    validate.addQuizForm(req, res, function() {
+      var qname = req.body.qname;
+      var cid = parseInt(req.body.cid);
+      var question_amount = req.body.question_amount;
+      var sqlStr = "UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?";
+      client.query(sqlStr, [qname, cid, question_amount, req.body.qid], function(err) {
+        err && req.flash("error", err);
+        res.redirect('/quizzes?cid=' + cid);
+      });
     });
   });
 });
@@ -530,37 +561,6 @@ app.post('/question', function(req, res) {
       } else {
         res.redirect('/viewQuiz?qid='+qid);
       }
-    });
-  });
-});
-
-app.post('/addQuiz', function(req, res) {
-  var cid = parseInt(req.body.cid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    validate.addQuizForm(req, res, function() {
-      var qname = req.body.qname;
-      var question_amount = req.body.question_amount;
-      var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
-      client.query(sqlStr, [qname, cid, question_amount], function(err) {
-        err && req.flash("error", err);
-        res.redirect('/quizzes?cid=' + cid);
-      });
-    });
-  });
-});
-
-app.post('/editQuiz', function(req, res) {
-  var qid = parseInt(req.body.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    validate.addQuizForm(req, res, function() {
-      var qname = req.body.qname;
-      var cid = parseInt(req.body.cid);
-      var question_amount = req.body.question_amount;
-      var sqlStr = "UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?";
-      client.query(sqlStr, [qname, cid, question_amount, req.body.qid], function(err) {
-        err && req.flash("error", err);
-        res.redirect('/quizzes?cid=' + cid);
-      });
     });
   });
 });
