@@ -425,77 +425,24 @@ app.get('/viewQuiz', function(req, res) {
   });
 });
 
-app.get('/question', function(req, res) {
+app.get('/addQuestion', function(req, res) {
   var questid = req.query.questid;
   var qid = req.query.qid;
-  if(qid == undefined) {
-    res.send(404);
-  }
-  else {
-    checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-      if(questid == undefined) {
-        res.render(req.query.type, {
-          title: '',
-          qid: qid,
-          answers: '{}', 
-          questid: '-1',
-          quest: '{}',
-          add: true,
-          name: ''          
-        });
-      }
-      else {
-        var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
-        qString = client.format(qString, [qid, questid]);
-        console.log(qString);
-        client.query(qString, function(err, results, fields) {
-          var pass = {
-            title : '',
-            qid: qid,
-            answers: results[0].answers,
-            questid: questid,
-            quest: results[0],
-            name : results[0].question,
-            add: false
-          };
-          if(results[0].type == 'short') {
-            res.render('short', pass);
-          }
-          else if(results[0].type == 'multi') {
-            res.render('multi', pass)
-          }
-          else if(results[0].type == 'tf') {
-            res.render('tf', pass);
-          }
-          else {
-            console.log('Could not find questid = '+questid+' and qid = '+qid);
-            res.send(503);
-          } 
-        });
-      }
-    });
-  }
-});
-
-app.del('/question', function(req, res) {
-  var questid = req.body.questid;
-  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
-    console.log(questid);
-    var qString = 'DELETE FROM Questions WHERE questid = ?';
-    qString = client.format(qString, [questid]);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      }
-      else {
-        res.send(200);
-      }
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    res.render(req.query.type, {
+      title: '',
+      qid: qid,
+      action: 'addQuestion',
+      answers: '{}',
+      questid: '-1',
+      quest: '{}',
+      add: true,
+      name: ''
     });
   });
 });
 
-app.post('/question', function(req, res) {
+app.post('/addQuestion', function(req, res) {
   var qid = parseInt(req.body.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
     var action = req.body.action;
@@ -521,13 +468,8 @@ app.post('/question', function(req, res) {
     }
     console.log(cor);
     console.log(ans);
-    if(questid == '-1') {
-      qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
-      qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
-    } else {
-      qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
-      qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
-    }
+    qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
     console.log(qString);
     client.query(qString, function(err) {
       if(err) {
@@ -535,6 +477,99 @@ app.post('/question', function(req, res) {
         res.send(503);
       } else {
         res.redirect('/viewQuiz?qid='+qid);
+      }
+    });
+  });
+});
+
+app.get('/editQuestion', function(req, res) {
+  var questid = req.query.questid;
+  var qid = req.query.qid;
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
+    qString = client.format(qString, [qid, questid]);
+    console.log(qString);
+    client.query(qString, function(err, results, fields) {
+      var pass = {
+        title : '',
+        qid: qid,
+        action: 'editQuestion',
+        answers: results[0].answers,
+        questid: questid,
+        quest: results[0],
+        name : results[0].question,
+        add: false
+      };
+      if(results[0].type == 'short') {
+        res.render('short', pass);
+      }
+      else if(results[0].type == 'multi') {
+        res.render('multi', pass)
+      }
+      else if(results[0].type == 'tf') {
+        res.render('tf', pass);
+      }
+      else {
+        console.log('Could not find questid = '+questid+' and qid = '+qid);
+        res.send(503);
+      } 
+    });
+  });
+});
+
+app.post('/editQuestion', function(req, res) {
+  var qid = parseInt(req.body.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    var action = req.body.action;
+    var quest = req.body.question;
+    var ans = req.body.ans;
+    var cor = req.body.correct;
+    var type = req.body.type;
+    var cat = req.body.cat;
+    var diff = req.body.diff;
+    var questid = req.body.questid;
+    var qString;
+    ans = JSON.stringify(ans);
+    cor = JSON.stringify(cor);
+    if(cor != undefined && cor[0] == '"') {
+      cor = '['+cor+']';
+    } else if(cor == undefined) {
+      cor = '[]';
+    }
+    if(ans != undefined && ans[0] == '"') {
+      ans = '['+ans+']';
+    } else if(ans == undefined) {
+      ans = '[]';
+    }
+    console.log(cor);
+    console.log(ans);
+    qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
+    qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
+    console.log(qString);
+    client.query(qString, function(err) {
+      if(err) {
+        console.log(err);
+        res.send(503);
+      } else {
+        res.redirect('/viewQuiz?qid='+qid);
+      }
+    });
+  });
+});
+
+app.del('/question', function(req, res) {
+  var questid = req.body.questid;
+  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
+    console.log(questid);
+    var qString = 'DELETE FROM Questions WHERE questid = ?';
+    qString = client.format(qString, [questid]);
+    client.query(qString, function(err) {
+      if(err) {
+        console.log(err);
+        res.send(503);
+      }
+      else {
+        res.send(200);
       }
     });
   });

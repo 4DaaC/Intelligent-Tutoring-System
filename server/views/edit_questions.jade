@@ -3,7 +3,7 @@ select(id="type")
   option(value="multi") Multiple Choice
   option(value="tf") True/False
   option(value="short") Short Answer
-button(onclick="window.location='/question?qid=#{qid}&type='+$('#type').val()") Add
+button(onclick="window.location='/addQuestion?qid=#{qid}&type='+$('#type').val()") Add
 form(method="post", action="/question")
   table(id="qtable")
     tr
@@ -15,19 +15,24 @@ form(method="post", action="/question")
       th Correct Answer
       th
     each question in questions
-      if question.type == 'multi'
-        tr
+      tr
+        if question.type == 'multi'
           td Multiple Choice
-          td
-            if question.difficulty == 1
-              |Easy
-            if question.difficulty == 2
-              |Medium
-            if question.difficulty == 3
-              |Hard
-          td #{question.category}
-          td
-            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
+        if question.type == 'tf'
+          td True/False
+        if question.type == 'short'
+          td Short Answer
+        td
+          if question.difficulty == 1
+            |Easy
+          if question.difficulty == 2
+            |Medium
+          if question.difficulty == 3
+            |Hard
+        td #{question.category}
+        td
+          a(href="/editQuestion?qid=#{qid}&questid=#{question.questid}") #{question.question}
+        if question.type == 'multi'
           td
             table
               each choice in JSON.parse(question.answers)
@@ -38,49 +43,18 @@ form(method="post", action="/question")
               each answer in JSON.parse(question.correct_answer)
                 tr
                   td #{answer}
-          td
-            button.rem(type="button", value="#{question.questid}")
-              |Del
-      if question.type == 'tf'
-        tr
-          td True/False
-          td
-            if question.difficulty == 1
-              |Easy
-            if question.difficulty == 2
-              |Medium
-            if question.difficulty == 3
-              |Hard
-          td #{question.category}
-          td
-            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
+        if question.type == 'tf'
           td
           td #{JSON.parse(question.correct_answer)}
-          td
-            button.rem(type="button", value="#{question.questid}")
-              |Del
-      if question.type == 'short'
-        tr
-          td Short Answer
-          td
-            if question.difficulty == 1
-              |Easy
-            if question.difficulty == 2
-              |Medium
-            if question.difficulty == 3
-              |Hard
-          td #{question.category}
-          td
-            a(href="/question?qid=#{qid}&questid=#{question.questid}") #{question.question}
+        if question.type == 'short'
           td
           td
             table
               each answer in JSON.parse(question.correct_answer)
                 tr
                   td #{answer}
-          td
-            button.rem(type="button", value="#{question.questid}")
-              |Del
-      
+        td
+          button.rem(type="button", value="#{question.questid}")
+            |Del
   input(type="hidden", value="add", name="action")
   input(type="hidden", value="#{qid}", name="qid")
