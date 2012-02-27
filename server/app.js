@@ -556,7 +556,8 @@ app.post('/editQuiz', function(req, res) {
       var qname = req.body.qname;
       var cid = parseInt(req.body.cid);
       var question_amount = req.body.question_amount;
-      client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cid, question_amount, req.body.qid], function(err) {
+      var sqlStr = "UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?";
+      client.query(sqlStr, [qname, cid, question_amount, req.body.qid], function(err) {
         err && req.flash("error", err);
         res.redirect('/quizzes?cid=' + cid);
       });
