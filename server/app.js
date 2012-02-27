@@ -413,19 +413,14 @@ app.get('/viewQuiz', function(req, res) {
     var qString = "SELECT name, cid FROM Quizzes WHERE qid = ?";
     console.log(qString);
     client.query(qString, [qid], function(err, quiz, fields) {
-      if(quiz.length != 0) {
-        client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
-          console.log(results);
-          res.render('edit_quiz', {
-            title: quiz[0].name,
-            questions: results,
-            qid: qid
-          });
+      client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
+        console.log(results);
+        res.render('edit_quiz', {
+          title: quiz[0].name,
+          questions: results,
+          qid: qid
         });
-      }
-      else {
-        res.send(404);
-      }
+      });
     });
   });
 });
