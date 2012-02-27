@@ -9,7 +9,7 @@ form(method="post")
       input(type="text",name="qname",value="#{quiz.name}")
   tr
    td Class:
-    select(id="cl", name="cl")
+    select(id="cid", name="cid")
       for class in classes
         -if (class.cid == select ||(typeof(quiz) != "undefined" && class.cid == quiz.cid))
           option(value="#{class.cid}", selected="selected")= class.name

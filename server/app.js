@@ -535,15 +535,15 @@ app.post('/question', function(req, res) {
 });
 
 app.post('/addQuiz', function(req, res) {
-  var cl = parseInt(req.body.cl);
-  checkPermissions(req.session.user, {edit_class: cl}, res, function(err) {
+  var cid = parseInt(req.body.cid);
+  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
     validate.addQuizForm(req, res, function() {
       var qname = req.body.qname;
       var question_amount = req.body.question_amount;
       var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
-      client.query(sqlStr, [qname, cl, question_amount], function(err) {
+      client.query(sqlStr, [qname, cid, question_amount], function(err) {
         err && req.flash("error", err);
-        res.redirect('/quizzes?cid=' + cl);
+        res.redirect('/quizzes?cid=' + cid);
       });
     });
   });
@@ -554,11 +554,11 @@ app.post('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
     validate.addQuizForm(req, res, function() {
       var qname = req.body.qname;
-      var cl = parseInt(req.body.cl);
+      var cid = parseInt(req.body.cid);
       var question_amount = req.body.question_amount;
-      client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cl, question_amount, req.body.qid], function(err) {
+      client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cid, question_amount, req.body.qid], function(err) {
         err && req.flash("error", err);
-        res.redirect('/quizzes?cid=' + cl);
+        res.redirect('/quizzes?cid=' + cid);
       });
     });
   });
