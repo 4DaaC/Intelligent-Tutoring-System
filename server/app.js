@@ -535,47 +535,17 @@ app.post('/question', function(req, res) {
 });
 
 app.post('/addQuiz', function(req, res) {
-  var perms = req.body.qid ? {edit_quiz: req.body.qid} : {add_quiz: true};
-  checkPermissions(req.session.user, perms, res, function(err) {
-    var qname = req.body.qname;
-    var cl = parseInt(req.body.cl);
-    var question_amount = req.body.question_amount;
-    var foundErr = false;
-    if(qname.length <=0 || qname.length > 50) {
-      req.flash('error','Quiz Name must be between 1 and 50 characters long');
-      foundErr = true;
-    }
-    question_amount = parseInt(question_amount,10);
-    if(isNaN(question_amount)) {
-      req.flash('error', 'Question Amount must be a number');
-      foundErr = true;
-    }
-    else if(question_amount <= 0) {
-      req.flash('error', 'Question Amount must be a positive number');
-    }
-    if(foundErr) {
-      res.redirect('/quiz');
-    }
-    else {
-      var qString = "SELECT cid FROM Classes WHERE cid = ?";
-      client.query(qString, [cl], function(err,results) {
-        if(err){
-          console.log(err);
-          req.flash("error",err);
-          res.redirect('/quiz');
-        }
-        else {
-          console.log(results);
-          client.query("INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)", [qname, cl,question_amount], function(err) {
-            if(err) {
-              console.log(err);
-              req.flash("error",err);
-            }
-            res.redirect('/quizzes?cid='+ cl);
-          });
-        }
+  var cl = parseInt(req.body.cl);
+  checkPermissions(req.session.user, {edit_class: cl}, res, function(err) {
+    validate.addQuizForm(req, res, function() {
+      var qname = req.body.qname;
+      var question_amount = req.body.question_amount;
+      var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
+      client.query(sqlStr, [qname, cl, question_amount], function(err) {
+        err && req.flash("error", err);
+        res.redirect('/quizzes?cid=' + cl);
       });
-    }
+    });
   });
 });
 

@@ -8,6 +8,7 @@ exports.removeStudentForm = removeStudentForm;
 exports.removeQuizForm = removeQuizForm;
 exports.removeClassForm = removeClassForm;
 exports.addStudentToClassForm = addStudentToClassForm;
+exports.addQuizForm = addQuizForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -131,4 +132,28 @@ function addStudentToClassForm(req, res, callback) {
       }
     });
   });
+}
+
+function addQuizForm(req, res, callback) {
+  var qname = req.body.qname;
+  var question_amount = parseInt(req.body.question_amount);
+  var foundErr = false;
+  if(qname.length <=0 || qname.length > 50) {
+    req.flash('error','Quiz Name must be between 1 and 50 characters long');
+    foundErr = true;
+  }
+  if(isNaN(question_amount)) {
+    req.flash('error', 'Question Amount must be a number');
+    foundErr = true;
+  }
+  if(question_amount <= 0) {
+    req.flash('error', 'Question Amount must be a positive number');
+    foundErr = true;
+  }
+  if(foundErr) {
+    res.redirect('back');
+  }
+  else {
+    callback();
+  }
 }
