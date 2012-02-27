@@ -415,7 +415,7 @@ app.get('/viewQuiz', function(req, res) {
     client.query(qString, [qid], function(err, quiz, fields) {
       client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
         console.log(results);
-        res.render('edit_quiz', {
+        res.render('edit_questions', {
           title: quiz[0].name,
           questions: results,
           qid: qid
