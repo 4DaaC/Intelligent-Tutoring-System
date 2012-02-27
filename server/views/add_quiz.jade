@@ -2,19 +2,16 @@ if typeof(quiz) == 'undefined'
   h1 Create a Quiz
 else
   h1 Edit Quiz
-form(method="post", action="/quiz")
+form(method="post")
  table
   tr
     td Quiz Name:
-      if typeof(quiz) == 'undefined'
-        input(type="text", name="qname")
-      else
-        input(type="text",name="qname",value="#{quiz.name}")
+      input(type="text", name="qname")
   tr
    td Class:
     select(id="cl", name="cl")
       for class in classes
-        -if (class.cid == select ||(typeof(quiz) != "undefined" && class.cid == quiz.cid))
+        -if (class.cid == select)
           option(value="#{class.cid}", selected="selected")= class.name
         -else
           option(value="#{class.cid}")= class.name
@@ -23,12 +20,7 @@ form(method="post", action="/quiz")
       |Question Amount:
       br
       |(Number of questions students answer)
-      if typeof(quiz) == 'undefined'
-        input(type="text", name="question_amount")
-      else
-        input(type="text",name="question_amount",value="#{quiz['question_amount']}")
+      input(type="text", name="question_amount")
   tr
     td
-      if typeof(quiz) != 'undefined'
-        input(type="hidden",name="qid", value="#{quiz.qid}")
       input(type="submit", value="Add")

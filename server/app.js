@@ -295,7 +295,30 @@ app.get('/student', function(req, res) {
   });
 });
 
-app.get('/quiz', function(req, res) {
+app.get('/addQuiz', function(req, res) {
+  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
+    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
+    if(!isAdmin(req)) {
+      qString += " AND Users.username = ?";
+      qString = client.format(qString, [current_user(req).username]);
+    }
+    client.query(qString, function(err, results, fields) {
+      if (results.length == 0) {
+        req.flash('error', "You must create a class first");
+        res.redirect('back');
+      }
+      else {
+        res.render('add_quiz', {
+          title:'Add Quiz',
+          classes: results,
+          select: req.query.cid
+        });
+      }
+    });
+  });
+});
+
+app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
     if(!isAdmin(req)) {
@@ -311,7 +334,7 @@ app.get('/quiz', function(req, res) {
         req.flash('error', "class doesn't exist or does not belong to you");
         res.redirect('back');
       }
-      else if(req.query.qid) {
+      else {
         var sql = "SELECT * FROM Quizzes WHERE qid= ?" ;
         client.query(sql, [req.query.qid],function(err2,quizzes) {
           if(err2) {
@@ -319,20 +342,13 @@ app.get('/quiz', function(req, res) {
             res.redirect('back');
           }
           else {
-            res.render('add_quiz', {
+            res.render('edit_quiz', {
               title:'Edit Quiz',
               classes: results,
               select: req.query.cid,
               quiz: quizzes[0]
             });
           }
-        });
-      }
-      else {
-        res.render('add_quiz', {
-          title:'Add Quiz',
-          classes: results,
-          select: req.query.cid
         });
       }
     });
@@ -518,7 +534,7 @@ app.post('/question', function(req, res) {
   });
 });
 
-app.post('/quiz', function(req, res) {
+app.post('/addQuiz', function(req, res) {
   var perms = req.body.qid ? {edit_quiz: req.body.qid} : {add_quiz: true};
   checkPermissions(req.session.user, perms, res, function(err) {
     var qname = req.body.qname;
@@ -550,24 +566,58 @@ app.post('/quiz', function(req, res) {
         }
         else {
           console.log(results);
-          if(req.body.qid) {
-            client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cl, question_amount, req.body.qid], function(err) {
-              if(err) {
-                console.log(err);
-                req.flash("error", err);
-              }
-              res.redirect('/quizzes?cid=' + cl);
-            });
-          }
-          else {
-            client.query("INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)", [qname, cl,question_amount], function(err) {
-              if(err) {
-                console.log(err);
-                req.flash("error",err);
-              }
-              res.redirect('/quizzes?cid='+ cl);
-            });
-          }
+          client.query("INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)", [qname, cl,question_amount], function(err) {
+            if(err) {
+              console.log(err);
+              req.flash("error",err);
+            }
+            res.redirect('/quizzes?cid='+ cl);
+          });
+        }
+      });
+    }
+  });
+});
+
+app.post('/editQuiz', function(req, res) {
+  var perms = req.body.qid ? {edit_quiz: req.body.qid} : {add_quiz: true};
+  checkPermissions(req.session.user, perms, res, function(err) {
+    var qname = req.body.qname;
+    var cl = parseInt(req.body.cl);
+    var question_amount = req.body.question_amount;
+    var foundErr = false;
+    if(qname.length <=0 || qname.length > 50) {
+      req.flash('error','Quiz Name must be between 1 and 50 characters long');
+      foundErr = true;
+    }
+    question_amount = parseInt(question_amount,10);
+    if(isNaN(question_amount)) {
+      req.flash('error', 'Question Amount must be a number');
+      foundErr = true;
+    }
+    else if(question_amount <= 0) {
+      req.flash('error', 'Question Amount must be a positive number');
+    }
+    if(foundErr) {
+      res.redirect('/quiz');
+    }
+    else {
+      var qString = "SELECT cid FROM Classes WHERE cid = ?";
+      client.query(qString, [cl], function(err,results) {
+        if(err){
+          console.log(err);
+          req.flash("error",err);
+          res.redirect('/quiz');
+        }
+        else {
+          console.log(results);
+          client.query("UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?", [qname, cl, question_amount, req.body.qid], function(err) {
+            if(err) {
+              console.log(err);
+              req.flash("error", err);
+            }
+            res.redirect('/quizzes?cid=' + cl);
+          });
         }
       });
     }
