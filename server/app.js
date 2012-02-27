@@ -390,33 +390,19 @@ app.get('/quizGrades',function(req,res) {
   var qid = parseInt(req.query.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
     client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err,results) {
-      if(err) {
-        console.log(err);
-        req.flash('error',err);
-        res.redirect('back');
+      var questions = new Object();
+      for(var idx in results) {
+        questions[results[idx].questid] = results[idx];
       }
-      else {
-        var questions = new Object();
-        for(var idx in results) {
-          questions[results[idx].questid] = results[idx];
-        }
-        var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer FROM Users,Answers" +
-          " WHERE Users.uid = Answers.uid AND Answers.questid IN (SELECT questid FROM Questions WHERE qid = ?)";
-        client.query(sql, [qid], function(err2,answers) {
-          if(err2) {
-            console.log(err2);
-            req.flash('error',err);
-            res.redirect('back');
-          }
-          else {
-            res.render('grades', {
-              title:"Grade View",
-              questions: questions,
-              answers: answers
-            });
-          }
+      var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer FROM Users, Answers" +
+        " WHERE Users.uid = Answers.uid AND Answers.questid IN (SELECT questid FROM Questions WHERE qid = ?)";
+      client.query(sql, [qid], function(err2, answers) {
+        res.render('grades', {
+          title:"Grade View",
+          questions: questions,
+          answers: answers
         });
-      }
+      });
     });
   });
 });
