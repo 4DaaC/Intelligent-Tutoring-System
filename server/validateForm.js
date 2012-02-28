@@ -1,17 +1,6 @@
 var config = require('./config');
 var client = require('mysql').createClient(config.db);
 
-exports.addClassForm = addClassForm;
-exports.addUserForm = addUserForm;
-exports.deleteUserForm = deleteUserForm;
-exports.removeStudentForm = removeStudentForm;
-exports.removeQuizForm = removeQuizForm;
-exports.removeClassForm = removeClassForm;
-exports.addStudentToClassForm = addStudentToClassForm;
-exports.addQuizForm = addQuizForm;
-exports.addQuestionForm = addQuestionForm;
-exports.updateUserForm = updateUserForm;
-
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
   var limit = req.body.limit;
@@ -205,3 +194,14 @@ function updateUserForm(req, res, callback) {
     callback();
   }
 }
+
+exports.addClassForm = addClassForm;
+exports.addUserForm = addUserForm;
+exports.deleteUserForm = deleteUserForm;
+exports.removeStudentForm = removeStudentForm;
+exports.removeQuizForm = removeQuizForm;
+exports.removeClassForm = removeClassForm;
+exports.addStudentToClassForm = addStudentToClassForm;
+exports.addQuizForm = addQuizForm;
+exports.addQuestionForm = addQuestionForm;
+exports.updateUserForm = updateUserForm;
