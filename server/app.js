@@ -445,39 +445,20 @@ app.get('/addQuestion', function(req, res) {
 app.post('/addQuestion', function(req, res) {
   var qid = parseInt(req.body.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var action = req.body.action;
-    var quest = req.body.question;
-    var ans = req.body.ans;
-    var cor = req.body.correct;
-    var type = req.body.type;
-    var cat = req.body.cat;
-    var diff = req.body.diff;
-    var questid = req.body.questid;
-    var qString;
-    ans = JSON.stringify(ans);
-    cor = JSON.stringify(cor);
-    if(cor != undefined && cor[0] == '"') {
-      cor = '['+cor+']';
-    } else if(cor == undefined) {
-      cor = '[]';
-    }
-    if(ans != undefined && ans[0] == '"') {
-      ans = '['+ans+']';
-    } else if(ans == undefined) {
-      ans = '[]';
-    }
-    console.log(cor);
-    console.log(ans);
-    qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    qString = client.format(qString, [qid, type, quest, ans, cor, cat, diff]);
-    console.log(qString);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      } else {
-        res.redirect('/viewQuiz?qid='+qid);
-      }
+    validate.addQuestionForm(req, res, function() {
+      ans = stringify(req.body.ans);
+      cor = stringify(req.body.correct);
+      var qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      qString = client.format(qString, [qid, req.body.type, req.body.question, ans, cor, req.body.cat, req.body.diff]);
+      client.query(qString, function(err) {
+        if(err) {
+          console.log(err);
+          res.send(503);
+        }
+        else {
+          res.redirect('/viewQuiz?qid=' + qid);
+        }
+      });
     });
   });
 });
@@ -519,43 +500,36 @@ app.get('/editQuestion', function(req, res) {
 
 app.post('/editQuestion', function(req, res) {
   var qid = parseInt(req.body.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var action = req.body.action;
-    var quest = req.body.question;
-    var ans = req.body.ans;
-    var cor = req.body.correct;
-    var type = req.body.type;
-    var cat = req.body.cat;
-    var diff = req.body.diff;
-    var questid = req.body.questid;
-    var qString;
-    ans = JSON.stringify(ans);
-    cor = JSON.stringify(cor);
-    if(cor != undefined && cor[0] == '"') {
-      cor = '['+cor+']';
-    } else if(cor == undefined) {
-      cor = '[]';
-    }
-    if(ans != undefined && ans[0] == '"') {
-      ans = '['+ans+']';
-    } else if(ans == undefined) {
-      ans = '[]';
-    }
-    console.log(cor);
-    console.log(ans);
-    qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
-    qString = client.format(qString, [quest, type, ans, cor, cat, diff, questid]);
-    console.log(qString);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      } else {
-        res.redirect('/viewQuiz?qid='+qid);
-      }
+  var questid = req.body.questid;
+  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
+    validate.addQuestionForm(req, res, function() {
+      ans = stringify(req.body.ans);
+      cor = stringify(req.body.correct);
+      var qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
+      qString = client.format(qString, [req.body.question, req.body.type, ans, cor, req.body.cat, req.body.diff, questid]);
+      client.query(qString, function(err) {
+        if(err) {
+          console.log(err);
+          res.send(503);
+        }
+        else {
+          res.redirect('/viewQuiz?qid=' + qid);
+        }
+      });
     });
   });
 });
+
+function stringify(str) {
+  str = JSON.stringify(str);
+  if(str != undefined && str[0] == '"') {
+    str = '['+str+']';
+  }
+  else if(str == undefined) {
+    str = '[]';
+  }
+  return str;
+}
 
 app.del('/question', function(req, res) {
   var questid = req.body.questid;
