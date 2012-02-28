@@ -604,8 +604,8 @@ app.get('/quizzes',function(req,res) {
   var cid = req.query.cid;
   if(cid !== undefined) {
     checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-      var qString = "select cid from Classes,Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
-      client.query(qString,[cid],function(err,results,fields){
+      var qString = "select cid from Classes, Users WHERE Classes.uid = Users.uid AND Classes.cid = ?";
+      client.query(qString, [cid], function(err, results, fields) {
         if(results.length == 0) {
           res.send(403);
         }
@@ -613,12 +613,12 @@ app.get('/quizzes',function(req,res) {
           var qString = "select qid, Quizzes.question_amount, Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
             "AND Quizzes.cid = ?";
           console.log(qString);
-          client.query(qString,[cid],function(err,results,fields) {
+          client.query(qString, [cid], function(err, results, fields) {
             console.log(results);
             qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
             " Class_List.cid = ?";
             console.log(qString);
-            client.query(qString,[cid],function(err2,results2,fields2) {
+            client.query(qString, [cid], function(err2, results2, fields2) {
               console.log(results2);
               res.render('quizzes', {
                 title:"Quizzes",
