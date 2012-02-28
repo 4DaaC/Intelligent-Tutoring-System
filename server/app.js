@@ -394,8 +394,10 @@ app.get('/quizGrades',function(req,res) {
       for(var idx in results) {
         questions[results[idx].questid] = results[idx];
       }
-      var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer FROM Users, Answers" +
-        " WHERE Users.uid = Answers.uid AND Answers.questid IN (SELECT questid FROM Questions WHERE qid = ?)";
+      var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer, Answers.time_spent"
+                + " FROM Users, Answers"
+                + " WHERE Users.uid = Answers.uid AND Answers.questid"
+                + " IN (SELECT questid FROM Questions WHERE qid = ?)";
       client.query(sql, [qid], function(err2, answers) {
         res.render('grades', {
           title:"Grade View",

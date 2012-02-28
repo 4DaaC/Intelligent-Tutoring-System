@@ -7,6 +7,7 @@ table
     th Difficulty
     th Answer
     th Attempts
+    th Avg Time Taken (Mins)
     th % Correct
   -for(var idx in questions){
     question = questions[idx]
@@ -29,6 +30,7 @@ table
           -})
       -var numAttempted = 0;
       -var numCorrect = 0;
+      -var timeSpent = 0;
       td
         table
           tr
@@ -37,6 +39,7 @@ table
           
           -answers.forEach(function(answer){
             -if (answer.questid == question.questid)
+              -timeSpent += answer['time_spent']
               -numAttempted ++
               -var answersLowered = new Array()
               -for(var index in correctAnswers){
@@ -53,6 +56,11 @@ table
                   td #{answer.username}
                   td #{answer['saved_answer']}
           -})
+      td
+        -if (numAttempted > 0)
+          |#{(timeSpent / numAttempted / 60).toFixed(2)}
+        -else
+          |n/a
       td
         -if (numAttempted > 0)
           |#{(numCorrect/numAttempted) * 100}%
