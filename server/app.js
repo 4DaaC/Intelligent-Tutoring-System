@@ -571,13 +571,15 @@ app.get('/users',function(req,res){
 
 app.post('/updateUser', function(req, res) {
   checkPermissions(req.session.user, {update_user_level: true}, res, function(err) {
-    for(var uname in req.body) {
-      var level = req.body[uname] === 'Admin' ? ADMIN : (req.body[uname] === 'Professor' ? PROF : STUDENT);
-      var qString = 'UPDATE Users SET auth_level = ? WHERE username = ?';
-      client.query(qString,[level,uname]);
-      console.log(qString);
-    }
-    res.redirect('/users');
+    validate.updateUserForm(req, res, function() {
+      for(var uname in req.body) {
+        var level = req.body[uname] === 'Admin' ? ADMIN : (req.body[uname] === 'Professor' ? PROF : STUDENT);
+        var qString = 'UPDATE Users SET auth_level = ? WHERE username = ?';
+        client.query(qString, [level, uname]);
+        console.log(qString);
+      }
+      res.redirect('/users');
+    });
   });
 });
 

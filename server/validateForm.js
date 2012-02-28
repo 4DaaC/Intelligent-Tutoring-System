@@ -10,6 +10,7 @@ exports.removeClassForm = removeClassForm;
 exports.addStudentToClassForm = addStudentToClassForm;
 exports.addQuizForm = addQuizForm;
 exports.addQuestionForm = addQuestionForm;
+exports.updateUserForm = updateUserForm;
 
 function addClassForm(req, res, callback) {
   var name = req.body.cname;
@@ -177,6 +178,25 @@ function addQuestionForm(req, res, callback) {
   if(quest.length <=0 || quest.length > 500) {
     req.flash('error','Quiz Name must be between 1 and 500 characters long');
     foundErr = true;
+  }
+  if(foundErr) {
+    res.redirect('back');
+  }
+  else {
+    callback();
+  }
+}
+
+function updateUserForm(req, res, callback) {
+  var foundErr = false;
+
+  for(var uname in req.body) {
+    var level = req.body[uname];
+    var validLevels = ['Admin', 'Professor', 'Student'];
+    if(validLevels.indexOf(level) === -1) {
+      req.flash('error','Invalid user level chosen for ' + uname);
+      foundErr = true;
+    }
   }
   if(foundErr) {
     res.redirect('back');
