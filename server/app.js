@@ -630,11 +630,12 @@ app.get('/studentList', function(req, res) {
   });
 });
 
-app.get('/login',function(req,res){
+app.get('/login',function(req,res) {
   console.log('req');
-  if(typeof(current_user(req)) != 'undefined'){
+  if(typeof(current_user(req)) != 'undefined') {
     res.redirect("/");
-  }else{
+  }
+  else {
     res.render('login',{
       title:'Login',
       layout:false
@@ -642,10 +643,11 @@ app.get('/login',function(req,res){
   }
 });
 
-app.post('/test-login',function(req,res){
-  if(config.requireLogin){
+app.post('/test-login',function(req,res) {
+  if(config.requireLogin) {
     res.redirect('/login');
-  }else{
+  }
+  else {
     loadSessionInfo(req, function(err) {
       if(err) {
         res.redirect('/login');
@@ -658,11 +660,11 @@ app.post('/test-login',function(req,res){
   }
 });
 
-app.get('/logout',function(req,res){
-  res.cookie('its-login-username','',{
+app.get('/logout',function(req,res) {
+  res.cookie('its-login-username', '', {
     expires: new Date(Date.now() - 1000),
   });
-  res.cookie('its-login-username','',{
+  res.cookie('its-login-username', '', {
     expires: new Date(Date.now() - 1000),
     path:'/',
     domain:'.radford.edu',
