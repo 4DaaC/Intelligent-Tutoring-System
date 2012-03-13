@@ -97,6 +97,8 @@
                 questid = keys[Math.random()*(keys.length-1)];
               }
               currentQuestion = bank[questid];
+              quiz['start-time'] = Math.round(new Date().getTime() / 1000);
+              setQuiz(qid,quiz);
               $('#question').html(currentQuestion.question.replace(/\n/g, '<br />'));
               $('#diff-display').find('span').html(difficulties[currentQuestion.difficulty]);
               $('#quest-left').find('span').html(questionsLeft);

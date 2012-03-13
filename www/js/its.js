@@ -193,10 +193,13 @@ getQuizQuestions = function(quiz){
 }
 
 setAnswer = function(qid,questid,answer,correct){
+  var now = new Date().getTime() / 1000;
   var quiz = getQuiz(qid);
   quiz.answers[questid] = new Object();
   quiz.answers[questid]["saved_answer"] = answer;
   quiz.answers[questid]["questid"] = questid;
+  timeSpent =  Math.round((new Date().getTime() / 1000) - quiz["start-time"]);
+  quiz.answers[questid]["time_spent"] =timeSpent;
   var prevCorrect = quiz.prevCorrect;
   if(typeof(prevCorrect) != 'undefined' && prevCorrect != undefined && prevCorrect != correct){
     quiz.diffStep = Math.max(quiz.diffStep -2,2);
@@ -209,7 +212,8 @@ setAnswer = function(qid,questid,answer,correct){
     quiz.currentDiff = Math.max(quiz.currentDiff - quiz.diffStep,1);
   }
   var url = baseUrl + "/mobile/answer?username=" + encodeURIComponent(encrypt(getUsername())) +
-    "&questid=" + encodeURIComponent(questid) + "&answer=" + encodeURIComponent(answer);
+    "&questid=" + encodeURIComponent(questid) + "&answer=" + encodeURIComponent(answer) + "&timespent=" + encodeURIComponent(timeSpent);
+    console.log(url);
   pushUpdateQueue(url);
   setQuiz(qid,quiz);
   return quiz;

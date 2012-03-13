@@ -83,6 +83,7 @@ app.get('/mobile/answer', function(req, res) {
   var user = req.query.username;
   var answer = req.query.answer;
   var questid = req.query.questid;
+  var timeSpent = req.query.timespent;
   //no response needed, 200 will remove the request from the Q, 500 will return it
   if(user == undefined || answer == undefined || questid == undefined){
     console.log("Something is undefined");
@@ -97,7 +98,7 @@ app.get('/mobile/answer', function(req, res) {
         console.log("No user found");
         res.send(200);
       }else{
-        client.query("INSERT INTO Answers(uid,questid,saved_answer) VALUES(?,?,?)",[results[0].uid,questid,answer],function(err2,results){
+        client.query("INSERT INTO Answers(uid,questid,saved_answer,time_spent) VALUES(?,?,?,?)",[results[0].uid,questid,answer,timeSpent],function(err2,results){
           if(err2){
             console.log(err2);
             if(err2.number = 1062){
