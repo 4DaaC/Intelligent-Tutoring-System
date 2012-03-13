@@ -59,25 +59,29 @@
         var currentQuestion = new Object();
         if(typeof(quiz.currentDiff) == 'undefined'){
           console.log('default level set');
-          quiz.currentDiff = 7;
+          quiz.currentDiff = 45;
+          quiz.diffStep = 10;
           quiz.inProgress = true;
           setQuiz(qid,quiz);
         }
+        
         prepQuestion = function(){
           console.log(questAmount);
           var quiz = getQuiz(qid);
+          console.log(quiz.currentDiff);
+          console.log(quiz.diffStep);
           var questionsLeft = questAmount - Object.keys(quiz.answers).length;
           console.log("Questions Left: " + questionsLeft);
           if(questionsLeft > 0){
             var questions = getQuizQuestions(quiz);
             var diff;
             console.log("Current Diff is " + quiz.currentDiff);
-            if(quiz.currentDiff < 5){
+            if(quiz.currentDiff <= 30){
               diff = 1;
-            }else if(quiz.currentDiff > 9){
-              diff = 3;
-            }else{
+            }else if(quiz.currentDiff <= 60){
               diff = 2;
+            }else{
+              diff = 3;
             }
             var difficulties = [" ","easy","medium","hard"];
             var bank = questions[difficulties[diff]];

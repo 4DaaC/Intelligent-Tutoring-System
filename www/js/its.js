@@ -197,16 +197,16 @@ setAnswer = function(qid,questid,answer,correct){
   quiz.answers[questid] = new Object();
   quiz.answers[questid]["saved_answer"] = answer;
   quiz.answers[questid]["questid"] = questid;
+  var prevCorrect = quiz.prevCorrect;
+  if(typeof(prevCorrect) != 'undefined' && prevCorrect != undefined && prevCorrect != correct){
+    quiz.diffStep = Math.max(quiz.diffStep -2,2);
+  }
+  quiz.prevCorrect = correct;
   if(correct){
-    quiz.currentDiff = quiz.currentDiff + 1;
-    if(quiz.currentDiff > 13){
-      quiz.currentDiff = 13;
-    }
+    quiz.currentDiff = Math.min(quiz.currentDiff + quiz.diffStep,90);
+
   }else{
-    quiz.currentDiff = quiz.currentDiff - 1;
-    if(quiz.currentDiff < 1){
-      quiz.currentDiff = 1;
-    }
+    quiz.currentDiff = Math.max(quiz.currentDiff - quiz.diffStep,1);
   }
   var url = baseUrl + "/mobile/answer?username=" + encodeURIComponent(encrypt(getUsername())) +
     "&questid=" + encodeURIComponent(questid) + "&answer=" + encodeURIComponent(answer);
