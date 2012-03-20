@@ -1,7 +1,9 @@
 var config = require('./config');
 var client = require('mysql').createClient(config.db);
 
-function addClassForm(req, res, callback) {
+module.exports = function(app) {
+
+app.post('(/addClass)|(/editClass)', function(req, res, next) {
   var name = req.body.cname;
   var limit = req.body.limit;
   var priv = req.body.priv;
@@ -22,11 +24,11 @@ function addClassForm(req, res, callback) {
     res.redirect('back');
   }
   else {
-    callback();
+    next();
   }
-}
+});
 
-function addUserForm(req, res, callback) {
+app.post('/addUser', function(req, res, next) {
   var auth = parseInt(req.body.auth);
   var user = req.body.user;
   var foundErr = false;
@@ -42,11 +44,11 @@ function addUserForm(req, res, callback) {
     res.redirect('back');
   }
   else {
-    callback();
+    next();
   }
-}
+});
 
-function deleteUserForm(req, res, callback) {
+app.get('/remUser',function(req, res, next){
   var uid = req.query.uid;
   qStr = 'SELECT uid FROM Users WHERE uid = ?';
   client.query(qStr, [uid], function(err, rows) {
@@ -55,12 +57,12 @@ function deleteUserForm(req, res, callback) {
       res.redirect('back');
     }
     else {
-      callback();
+      next();
     }
   });
-}
+});
 
-function removeStudentForm(req, res, callback) {
+app.get('/remStud',function(req, res, next){
   var qString = "SELECT cid FROM Class_List WHERE cid = ? AND uid = ?";
   client.query(qString, [req.query.cid, req.query.uid], function(err, rows) {
     if(rows.length === 0) {
@@ -68,40 +70,38 @@ function removeStudentForm(req, res, callback) {
       res.redirect('back');
     }
     else {
-      callback();
+      next();
     }
   });
-}
+});
 
-function removeQuizForm(req, res, callback) {
+app.get('/remQuiz',function(req, res, next){
   var qString = "SELECT qid FROM Quizzes WHERE qid = ?";
-  console.log(qString);
   client.query(qString, [req.query.qid], function(err, rows){
     if(rows.length === 0) {
       req.flash("error", "Quiz does not exist");
       res.redirect('back');
     }
     else {
-      callback();
+      next();
     }
   });
-}
+});
 
-function removeClassForm(req, res, callback) {
+app.get('/remClass',function(req, res, next){
   var qString = "SELECT cid FROM Classes WHERE cid = ?";
-  console.log(qString);
   client.query(qString, [req.query.cid], function(err, rows) {
     if(rows.length === 0) {
       req.flash("error", "Class does not exist");
       res.redirect('back');
     }
     else {
-      callback();
+      next();
     }
   });
-}
+});
 
-function addStudentToClassForm(req, res, callback) {
+app.post('/student', function(req, res, next) {
   var qString = "SELECT uid FROM Users WHERE uid = ?";
   client.query(qString, [req.body.user], function(err, rows) {
     var qString = "SELECT cid FROM Classes WHERE cid = ?";
@@ -119,13 +119,13 @@ function addStudentToClassForm(req, res, callback) {
         res.redirect('back');
       }
       else {
-        callback();
+        next();
       }
     });
   });
-}
+});
 
-function addQuizForm(req, res, callback) {
+app.post('(/addQuiz)|(/editQuiz)', function(req, res, next) {
   var qname = req.body.qname;
   var question_amount = parseInt(req.body.question_amount);
   var foundErr = false;
@@ -145,11 +145,11 @@ function addQuizForm(req, res, callback) {
     res.redirect('back');
   }
   else {
-    callback();
+    next();
   }
-}
+});
 
-function addQuestionForm(req, res, callback) {
+app.post('(/addQuestion)|(/editQuestion)', function(req, res, next) {
   var action = req.body.action;
   var quest = req.body.question;
   var ans = req.body.ans;
@@ -172,11 +172,11 @@ function addQuestionForm(req, res, callback) {
     res.redirect('back');
   }
   else {
-    callback();
+    next();
   }
-}
+});
 
-function updateUserForm(req, res, callback) {
+app.post('/updateUser', function(req, res, next) {
   var foundErr = false;
 
   for(var uname in req.body) {
@@ -191,17 +191,8 @@ function updateUserForm(req, res, callback) {
     res.redirect('back');
   }
   else {
-    callback();
+    next();
   }
-}
+});
 
-exports.addClassForm = addClassForm;
-exports.addUserForm = addUserForm;
-exports.deleteUserForm = deleteUserForm;
-exports.removeStudentForm = removeStudentForm;
-exports.removeQuizForm = removeQuizForm;
-exports.removeClassForm = removeClassForm;
-exports.addStudentToClassForm = addStudentToClassForm;
-exports.addQuizForm = addQuizForm;
-exports.addQuestionForm = addQuestionForm;
-exports.updateUserForm = updateUserForm;
+}
