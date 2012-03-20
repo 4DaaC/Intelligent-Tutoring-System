@@ -24,6 +24,26 @@
           span |
           a(href="/remQuiz?qid=#{quiz.qid}", onClick="return confirm('Are you sure you want to delete this Quiz?');") Delete
 a(href="/addQuiz?cid=#{cid}") Add a Quiz
+br
+-if(modules.length == 0)
+  h1 No Modules Found
+-else
+  h1 = modules[0].className + "'s Modules"
+  table.center
+    tr
+      th
+        |Name
+      th
+        |Class
+      th
+    for module in modules
+      tr
+        td
+          a(href="/viewModule?mid=#{module.mid}")=module.title
+        td=module.title
+        td
+          a(href="/remModule?qid=#{module.mid}", onClick="return confirm('Are you sure you want to delete this Module?');") Delete
+a(href="/addModule?cid=#{cid}") Add a Module
 -if(students.length == 0)
   h1 No Students in Class
 -else

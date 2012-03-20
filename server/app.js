@@ -332,7 +332,31 @@ app.post('/addQuiz', function(req, res) {
     });
   });
 });
-
+app.get('/addModule', function(req, res) {
+  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
+    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
+    if(!isAdmin(req)) {
+      qString += " AND Users.username = ?";
+      qString = client.format(qString, [current_user(req).username]);
+    }
+    client.query(qString, function(err, results, fields) {
+      if (results.length == 0) {
+        req.flash('error', "You must create a class first");
+        res.redirect('back');
+      }
+      else {
+        res.render('add_module', {
+          title:'Add Module',
+          classes: results,
+          select: req.query.cid
+        });
+      }
+    });
+  });
+});
+app.post('/addModule', function(req,res){
+  //TODO
+});
 app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -385,6 +409,7 @@ app.post('/editQuiz', function(req, res) {
     });
   });
 });
+
 
 app.get('/quizGrades',function(req,res) {
   var qid = parseInt(req.query.qid);
@@ -658,16 +683,23 @@ app.get('/quizzes',function(req,res) {
     console.log(qString);
     client.query(qString, [cid], function(err, results, fields) {
       console.log(results);
-      qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
-      " Class_List.cid = ?";
-      console.log(qString);
-      client.query(qString, [cid], function(err2, results2, fields2) {
-        console.log(results2);
-        res.render('quizzes', {
-          title:"Quizzes",
-          quizzes: results,
-          students: results2,
-          cid: cid
+      qString = "select mid, Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
+      "AND Modules.cid = ?";
+      client.query(qString,[cid],function(err3,modules){
+        console.log(modules);
+        console.log(err);
+        qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
+        " Class_List.cid = ?";
+        console.log(qString);
+        client.query(qString, [cid], function(err2, results2, fields2) {
+          console.log(results2);
+          res.render('quizzes', {
+            title:"Quizzes",
+            quizzes: results,
+            modules: modules,
+            students: results2,
+            cid: cid
+          });
         });
       });
     });

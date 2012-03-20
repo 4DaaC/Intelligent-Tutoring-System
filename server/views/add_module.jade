@@ -1,0 +1,27 @@
+if typeof(module) == 'undefined'
+  h1 Create a Learning Module
+else
+  h1 Edit Learning Module
+form(method="post")
+ table
+  tr
+    td Module Name:
+      input(type="text", name="mname")
+  tr
+   td Class:
+    select(id="cid", name="cid")
+      for class in classes
+        -if (class.cid == select)
+          option(value="#{class.cid}", selected="selected")= class.name
+        -else
+          option(value="#{class.cid}")= class.name
+  tr
+    td 
+      |Module PDF:
+      br
+      |(.pdf must be less than 10Mb)
+      br
+      input(type="file", name="pdf-file")
+  tr
+    td
+      input(type="submit", value="Add")
