@@ -39,7 +39,7 @@ br
     for module in modules
       tr
         td
-          a(href="/viewModule?mid=#{module.mid}")=module.title
+          a(href="#{module.filepath}")=module.title
         td=module.title
         td
           a(href="/remModule?qid=#{module.mid}", onClick="return confirm('Are you sure you want to delete this Module?');") Delete

@@ -8,5 +8,7 @@
     , "jade": ">= 0.0.1"
     , "mysql":""
     , "async":""
+    , "mkdirp":""
+    , "formidable":""
   }
 }

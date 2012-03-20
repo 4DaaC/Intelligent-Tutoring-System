@@ -8,6 +8,9 @@ var mysql = require('mysql');
 var app = module.exports = express.createServer();
 var config = require('./config');
 var checkPermissions = require('./checkPermissions.js');
+var mkdirp = require('mkdirp');
+var util = require('util');
+var formidable = require('formidable');
 var validate = require('./validateForm.js');
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
@@ -115,7 +118,6 @@ app.get('*',requireLogin);
 app.put('*',requireLogin);
 app.post('*',requireLogin);
 require('./routes/index')(app,client);
-
 
 app.get('/admin', function(req, res) {
   if(isAdmin(req)) {
@@ -354,8 +356,55 @@ app.get('/addModule', function(req, res) {
     });
   });
 });
+
+function dirpString() {
+  var time = new Date().getTime().toString();
+  var dir = "uploads/";
+  for(num = 0; num < time.length; num = num + 2){
+    dir += time.substring(num, num + 2) + '/';
+  }
+  if (dir.substring(dir.length-1) == '/')
+    return dir;
+  else return dir + '/';
+}
+
 app.post('/addModule', function(req,res){
-  //TODO
+  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
+    console.log('START');
+    var name = req.body.mname;
+    var cid = req.body.cid;
+    if(isAdmin(req)) {
+      console.log("IS_ADMIN");
+      var form = new formidable.IncomingForm();
+      console.log("PREDERP");
+      console.log("DERP");
+      var dirp = dirpString();
+      mkdirp('public/'+dirp, 0777, function(derrp) {
+        console.log(derrp)
+        var files = req.files;
+        console.log("DERPED");
+        var is = fs.createReadStream(files['pdf-file'].path);
+        var os = fs.createWriteStream("public/"+dirp+files['pdf-file'].name);
+        util.pump(is, os, function() {
+          console.log("PUMPED");
+          fs.unlinkSync(files['pdf-file'].path);
+          var qString = "INSERT INTO Modules (cid, title, filepath) VALUES (?, ? , ?)";
+          client.query(qString, [cid, name, dirp+files['pdf-file'].name], function(err) {
+            console.log("INSERTED");
+            if(err) {
+              console.log(err);
+              req.flash('error', err);
+              res.redirect('back');
+            } else {
+              res.redirect('/quizzes?cid='+cid);
+            }
+          });
+        });
+      });
+    } else {
+      //TODO check permissions for non-admin
+    }
+  });
 });
 app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
