@@ -412,17 +412,65 @@ app.get('/quizGrades',function(req,res) {
 app.get('/viewQuiz', function(req, res) {
   var qid = parseInt(req.query.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var qString = "SELECT name, cid FROM Quizzes WHERE qid = ?";
+    var qString = "SELECT * FROM Quizzes WHERE qid = ?";
     console.log(qString);
     client.query(qString, [qid], function(err, quiz, fields) {
       client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
         console.log(results);
+        difficulty = [0,0,0,0];
+        for(idx in results){
+          difficulty[results[idx].difficulty] ++;
+        }
         res.render('edit_questions', {
           title: quiz[0].name,
           questions: results,
+          quiz: quiz[0],
+          diffArray: difficulty,
           qid: qid
         });
       });
+    });
+  });
+});
+
+app.get('/enableQuiz', function(req,res) {
+  var qid = parseInt(req.query.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    var qString = "SELECT * FROM Quizzes WHERE qid = ?";
+    console.log(qString);
+    client.query(qString, [qid], function(err, quiz, fields) {
+      client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
+        console.log(results);
+        difficulty = [0,0,0,0];
+        question_amount = quiz[0]['question_amount'];
+        for(idx in results){
+          difficulty[results[idx].difficulty] ++;
+        }
+        if(difficulty[1] >= question_amount && difficulty[2] >= question_amount && difficulty[3] >= question_amount){
+          client.query("UPDATE Quizzes SET active= '1' WHERE qid = ?", [qid],function(err){
+            if(err){
+              console.log(err)
+              req.flash("error",err);
+            }
+            res.redirect('/viewQuiz?qid=' + qid);
+          });
+        }else{
+          req.flash("error","This quiz does not have enough questions to be enabled");
+          res.redirect('/viewQuiz?qid=' + qid);
+        }
+      });
+    });
+  });
+});
+app.get('/disableQuiz', function(req,res){
+  var qid = parseInt(req.query.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
+    client.query("UPDATE Quizzes SET active = '0' WHERE qid = ?", [qid], function(err){
+      if(err){
+        console.log(err);
+        req.flash("error",err);
+      }
+      res.redirect('/viewQuiz?qid=' + qid);
     });
   });
 });
