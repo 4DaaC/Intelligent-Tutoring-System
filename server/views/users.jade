@@ -11,7 +11,8 @@
           |Username
         th
           |Auth Level
-        th
+        if(isAdmin)
+          th
       for user in users
         tr
           td
@@ -40,7 +41,10 @@
                   option(selected='selected') Student
                 -else
                   option Student
-          td
-            a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
-    input(type='submit', value='Update')
-a(href="/admin") Add a User
+          if(isAdmin)
+            td
+              a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+    if(isAdmin)
+      input(type='submit', value='Update')
+if(isAdmin)
+  a(href="/admin") Add a User

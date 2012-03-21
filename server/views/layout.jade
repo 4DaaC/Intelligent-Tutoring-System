@@ -19,24 +19,26 @@ html
         ul
           li
             a(href="/") Home
-          li
-            |Classes
-            ul
-              li
-                a(href="/classes") View Classes
-              li
-                a(href="/addClass") Add Class
-              li
-                a(href="/addQuiz") Add Quiz
-          li
-            |Users
-            ul
-              li
-                a(href="/users") View Users
-              li
-                a(href="/student") Add Student to Class
-              li
-                a(href="/admin") Add Users
+          if(!isStudent)
+            li
+              |Classes
+              ul
+                li
+                  a(href="/classes") View Classes
+                li
+                  a(href="/addClass") Add Class
+                li
+                  a(href="/addQuiz") Add Quiz
+            li
+              |Users
+              ul
+                li
+                  a(href="/users") View Users
+                li
+                  a(href="/student") Add Student to Class
+                if(isAdmin)
+                  li
+                    a(href="/admin") Add Users
       #bd
         if errors.length > 0
           ul#error-box
