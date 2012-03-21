@@ -67,3 +67,53 @@ table#grades-table
         -else
           |Not Taken
   -}
+
+#individualGrades
+  h2 Individual Grades
+  -var users = new Array();
+  -for(var i in answers)
+    -if (!users[answers[i].username])
+      -users[answers[i].username] = new Array();
+    -users[answers[i].username].push(answers[i])
+  -for(var i in users)
+    h3 #{i}
+    -var student_answers = users[i]
+    table
+      tr
+        th Question
+        th Type
+        th Category
+        th Difficulty
+        th Correct Answer
+        th Student Answer
+        th Time Taken
+      -for(var j in student_answers)
+        -var ans = student_answers[j]
+        -var question = questions[ans.questid]
+        tr
+          td #{question.question}
+          td #{question.type}
+          td #{question.category}
+          -if (question.difficulty == 1)
+            td Easy
+          -else if(question.difficulty == 2)
+            td Medium
+          -else
+            td Hard
+          correctAnswers = JSON.parse(question['correct_answer'])
+          td
+            table
+              -correctAnswers.forEach(function(answer){
+                tr
+                  td #{answer}
+              -})
+          -var answersLowered = new Array()
+          -for(var index in correctAnswers){
+            -corr=correctAnswers[index]
+            -answersLowered.push(corr.toLowerCase())
+          -}
+          -if (answersLowered.indexOf(ans.saved_answer.toLowerCase()) != -1)
+            td.correct #{ans.saved_answer}
+          -else
+            td.incorrect #{ans.saved_answer}
+          td #{ans.time_spent}
