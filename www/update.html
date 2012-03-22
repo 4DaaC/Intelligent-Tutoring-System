@@ -47,7 +47,9 @@
       var profs = new Object();
       var classes = new Object();
       var quizzesObj = new Object();
+      var modulesObj = new Object();
       var quizzes = new Object();
+
       downloadProfs(function(downloadedProfs,error){
         if(error){
           console.log(error);
@@ -66,13 +68,15 @@
                 classes[profname] = downloadedClasses;
                 for(cidx in downloadedClasses){
                   var cid = downloadedClasses[cidx].cid;
-                  downloadQuizzes(cid,function(downloadedQuizzes,error3){
+                  downloadQuizzesAndModules(cid,function(downloadedQuizzes,downloadedModules,error3){
                     if(error3){
                       errored = true;
                       console.log(error3);
                     }else{
                       console.log(downloadedQuizzes);
+                      console.log(downloadedModules);
                       quizzesObj[cid] = downloadedQuizzes;
+                      modulesObj[cid] = downloadedModules;
                       for(qidx in downloadedQuizzes){
                         var qid = downloadedQuizzes[qidx].qid;
                         downloadQuiz(qid,function(downloadedQuiz,error4){
@@ -103,6 +107,9 @@
         }
         for(var cid in quizzesObj){
           setQuizzes(cid,quizzesObj[cid]);
+        }
+        for(var cid in modulesObj){
+          setModules(cid,modulesObj[cid]);
         }
         for(var qid in quizzes){
           setQuiz(qid,quizzes[qid]);

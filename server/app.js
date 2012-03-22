@@ -259,7 +259,7 @@ app.post('/student', function(req, res) {
         res.redirect('back');
       }
       else {
-        res.redirect('/');
+        res.redirect('/quizzes?cid=' + cid);
       }
     });
   });

@@ -7,7 +7,7 @@
 	<key>EnableLocation</key>
 	<false/>
 	<key>EnableViewportScale</key>
-	<false/>
+	<true/>
 	<key>AutoHideSplashScreen</key>
 	<true/>
 	<key>MediaPlaybackRequiresUserAction</key>
@@ -21,6 +21,8 @@
 	</array>
 	<key>Plugins</key>
 	<dict>
+		<key>ChildBrowser</key>
+		<string>ChildBrowser.js</string>
 		<key>com.phonegap.accelerometer</key>
 		<string>PGAccelerometer</string>
 		<key>com.phonegap.camera</key>
@@ -47,6 +49,8 @@
 		<string>PGSplashScreen</string>
 		<key>com.phonegap.battery</key>
 		<string>PGBattery</string>
+		<key>ChildBrowserCommand</key>
+		<string>ChildBrowserCommand</string>
 	</dict>
 </dict>
 </plist>
