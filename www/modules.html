@@ -24,25 +24,22 @@
       $.mobile.page.prototype.options.addBackBtn = true;
     });
   </script>
+  <script src="js/childbrowser.js"></script>
   <script src="js/jquery.mobile-1.0.min.js"></script>
   <script src="js/its.js"></script>
 
 </head>
 <body>
-  <div data-role="page" id="classes">
+  <div data-role="page" id="modules">
     <div data-role="header">
-      <h1>Available Quizzes</h1>  
+      <h1>Available Modules</h1>  
     </div>
     <div data-role="content">
       <ul data-role="listview" id="class-list"></ul>
     </div>
   <script>
-    $('.quiz-link').live('click',function(){
-      console.log("name: " + $(this).children().children().html());
-      window.history.replaceState('','index.html');
-      window.location = "quiz.html?qid=" + $(this).attr('qid') + "&amount=" + $(this).attr('question-amount') + "&name=" + encodeURIComponent($(this).attr('name'));
-    });
-    $('#classes').bind('pageshow',function(){
+
+    $('#modules').bind('pageshow',function(){
       console.log('init');
       if (!loggedIn()){
         $('#class-list').html('<li>Login to View</li>');
@@ -62,28 +59,20 @@
               for(idx2 in classes){
                 var className = classes[idx2].name;
                 markup +="<li>" + className + "<ul>";
-                var quizzes = getQuizzes(classes[idx2].cid);
-                if(quizzes == null || quizzes.length < 1){
-                  markup += "<li>No Quizzes Found</li>";
+                var modules = getModules(classes[idx2].cid);
+                if(modules == null || modules.length < 1){
+                  markup += "<li>No Modules Found</li>";
                 }else{
-                  for(idx3 in quizzes){
-                    var quiz = quizzes[idx3];
-                    var questions = getQuiz(quiz.qid);
-                    console.log(questions);
-                    markup += "<a href='#' data-role='button' name='" + quiz.name+ "' question-amount='" + quiz['question_amount'] + "' qid='" + quiz.qid + "' class='quiz-link ";
-                    if(questions.taken || !quiz.active){
-                      markup += "ui-disabled ";
+                  for(idx3 in modules){
+                    var module = modules[idx3];
+                    markup += "<a data-role='button' href='" + baseUrl + "/" + module.filepath + "' type='application/pdf' rel='external' class='mod-link ";
+                    if(!module.active){
+                      markup += " ui-disabled";
                     }
-                    markup += "'>"  + quiz.name;
-                    if(questions.taken){
-                      markup += "(Taken)";
-                    }
-                    if(!quiz.active){
+                    markup += "'>"  + module.title;
+                    if(!module.active){
                       markup += "(Disabled)";
                     } 
-                    if(questions.inProgress){
-                      markup += "(In Progress)";
-                    }
                     markup += '</a>';
                   }
                 }

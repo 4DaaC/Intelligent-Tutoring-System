@@ -73,7 +73,6 @@
 		8440C92114E88590001CD9C8 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainViewController.h; path = Classes/MainViewController.h; sourceTree = "<group>"; };
 		8440C92214E88590001CD9C8 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MainViewController.m; path = Classes/MainViewController.m; sourceTree = "<group>"; };
 		8440C92414E88590001CD9C8 /* MainViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainViewController.xib; path = Classes/MainViewController.xib; sourceTree = "<group>"; };
-		8440C92714E88590001CD9C8 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; name = README; path = Plugins/README; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,7 +151,6 @@
 				8440C90214E88590001CD9C8 /* PhoneGap.framework */,
 				8440C90414E88590001CD9C8 /* Resources */,
 				8440C91D14E88590001CD9C8 /* Classes */,
-				8440C92614E88590001CD9C8 /* Plugins */,
 				8440C8FA14E88590001CD9C8 /* Supporting Files */,
 			);
 			path = "ITS-iOS";
@@ -229,14 +227,6 @@
 			name = Classes;
 			sourceTree = "<group>";
 		};
-		8440C92614E88590001CD9C8 /* Plugins */ = {
-			isa = PBXGroup;
-			children = (
-				8440C92714E88590001CD9C8 /* README */,
-			);
-			name = Plugins;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -266,7 +256,7 @@
 		8440C8CF14E8858F001CD9C8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 420;
 			};
 			buildConfigurationList = 8440C8D214E8858F001CD9C8 /* Build configuration list for PBXProject "ITS-iOS" */;
 			compatibilityVersion = "Xcode 3.2";

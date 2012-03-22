@@ -1,5 +1,5 @@
 var cname = 'its-login-username'; 
-var baseUrl = "http://itutor.radford.edu:3002";
+baseUrl = "http://itutor.radford.edu:3002";
 itsLogin = function(user){
     setUsername(user);
     $('#login-frame').attr('src','').hide();
@@ -116,14 +116,29 @@ getQuizzes = function(cid){
   return JSON.parse(storage.getItem(getUsername() + ":" + cid + ":Quizzes"));
 }
 
-downloadQuizzes = function(cid,callback){
+setModules = function(cid,modulesObject){
+  var storage = window.localStorage;
+  var modules = new Object();
+  for(var idx in modulesObject){
+    var module = modulesObject[idx];
+    modules[module.mid] = module; 
+  }
+  storage.setItem(getUsername() + ":" + cid + ":Modules",JSON.stringify(modules));
+}
+
+getModules = function(cid){
+  var storage = window.localStorage;
+  return JSON.parse(storage.getItem(getUsername() + ":" + cid + ":Modules"));
+}
+
+downloadQuizzesAndModules = function(cid,callback){
   var url = baseUrl + "/mobile/quizzes?cid=" + encodeURIComponent(cid) + "&user=" + encodeURIComponent(encrypt(getUsername()));
   console.log("GET:" + url);
   $.ajax({
     url:url,
     async:false,
     success:function(data){
-      callback(data);
+      callback(data['quizzes'],data['modules']);
     },
     error:function(){
       callback(null,"Problem Downloading Quizzes");
