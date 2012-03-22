@@ -67,7 +67,7 @@ app.get('/mobile/quizzes', function(req, res) {
   if(user == undefined || cid == undefined){
     res.send(500);
   }else{
-    //user = crypt.decrypt(user).toLowerCase();
+    user = crypt.decrypt(user).toLowerCase();
     var qString = "SELECT Quizzes.* FROM Quizzes,Classes WHERE Quizzes.cid = Classes.cid AND Quizzes.cid = '" + cid + "' AND " + 
       "Quizzes.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = ?)";
     console.log(qString);
