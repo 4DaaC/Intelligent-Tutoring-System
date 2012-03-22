@@ -36,6 +36,9 @@
     #import "PGURLProtocol.h"
 #endif
 
+#import "ChildBrowserCommand.h"
+#import "ChildBrowserViewController.h"
+
 
 @implementation AppDelegate
 
@@ -180,7 +183,15 @@
 
 - (BOOL) webView:(UIWebView*)theWebView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
 {
-	return [self.viewController webView:theWebView shouldStartLoadWithRequest:request navigationType:navigationType];
+    NSURL *url = [request URL];
+    // Intercept the external http requests and forward to Safari.app
+    // Otherwise forward to the PhoneGap WebView
+    if ([[url scheme] isEqualToString:@"http"] || [[url scheme] isEqualToString:@"https"]) {
+        [[UIApplication sharedApplication] openURL:url];
+        return NO;
+    } else {
+    return [self.viewController webView:theWebView shouldStartLoadWithRequest:request navigationType:navigationType];
+    }
 }
 
 - (void) dealloc

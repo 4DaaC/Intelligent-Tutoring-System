@@ -61,7 +61,6 @@ app.get('/mobile/quiz', function(req,res){
     });
   }
 });
-app.get('/mobile/test', function(req,res){res.send('hello world')});
 app.get('/mobile/quizzes', function(req, res) {
   var cid = req.query.cid;
   var user = req.query.user;
@@ -72,10 +71,26 @@ app.get('/mobile/quizzes', function(req, res) {
     var qString = "SELECT Quizzes.* FROM Quizzes,Classes WHERE Quizzes.cid = Classes.cid AND Quizzes.cid = '" + cid + "' AND " + 
       "Quizzes.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = ?)";
     console.log(qString);
-    client.query(qString,[user], function(err,results,fields){
-        console.log(results);
-        res.send(results);
-      });
+    client.query(qString,[user], function(err,quizzes,fields){
+      if(err){
+        console.log(err);
+        res.send(500);
+      }else{
+        var qString = "SELECT Modules.* FROM Modules,Classes WHERE Modules.cid = Classes.cid AND Modules.cid = '" + cid + "' AND " + 
+          "Modules.cid IN (SELECT cid FROM (Class_List a NATURAL JOIN Users b) WHERE username = ?)";
+        console.log(qString);
+        client.query(qString,[user], function(err2,modules,fields){
+          if(err2){
+            console.log(err2);
+          }else{
+            var response = new Object();
+            response['quizzes'] = quizzes;
+            response['modules'] = modules;
+            res.send(response);
+          }
+        });
+      }
+    });
   }
 });
 

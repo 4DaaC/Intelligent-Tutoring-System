@@ -84,7 +84,7 @@ var isAdmin = function(req) {
 
 var isRequestMobile = function(req){
   var paramArray = req.route.params[0].split('/');
-  if(paramArray.length >=2 && paramArray[1] == 'mobile'){
+  if(paramArray.length >=2 && (paramArray[1] == 'mobile'|| paramArray[1] == 'uploads')){
     return true;
   }else return false;
 }
@@ -356,7 +356,7 @@ app.post('/addModule', function(req,res){
     console.log('START');
     var name = req.body.mname;
     var cid = req.body.cid;
-    if(isAdmin(req)) {
+    //if(isAdmin(req)) {
       console.log("IS_ADMIN");
       var form = new formidable.IncomingForm();
       console.log("PREDERP");
@@ -384,11 +384,61 @@ app.post('/addModule', function(req,res){
           });
         });
       });
-    } else {
+    //} else {
       //TODO check permissions for non-admin
-    }
+    //}
   });
 });
+app.get('/remModule',function(req,res){
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("SELECT filepath FROM Modules WHERE mid = ?",[mid],function(err,results){
+      if(err){
+        console.log(err);
+        req.flash('error',err);
+        res.redirect('back');
+      }
+      else if(results.length < 1){
+        console.log("Module Not Found");
+        req.flash('error', "Module not found");
+        res.redirect('back');
+      }else{
+        filepath = results[0].filepath;
+        fs.unlink('public/' + filepath);
+        client.query("DELETE FROM Modules WHERE mid = ?", [mid], function(err){
+          res.redirect('back');
+        });
+      }
+    });
+  });
+});
+
+app.get('/enableModule', function(req,res) {
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("UPDATE Modules SET active= '1' WHERE mid = ?", [mid],function(err){
+      if(err){
+        console.log(err)
+        req.flash("error",err);
+      }
+      res.redirect('back');
+    });
+  });
+});
+
+app.get('/disableModule', function(req,res) {
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("UPDATE Modules SET active= '0' WHERE mid = ?", [mid],function(err){
+      if(err){
+        console.log(err)
+        req.flash("error",err);
+      }
+      res.redirect('back');
+    });
+  });
+});
+
 app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -707,7 +757,7 @@ app.get('/quizzes',function(req,res) {
     console.log(qString);
     client.query(qString, [cid], function(err, results, fields) {
       console.log(results);
-      qString = "select mid, Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
+      qString = "select mid, Modules.active,Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
       "AND Modules.cid = ?";
       client.query(qString,[cid],function(err3,modules){
         console.log(modules);

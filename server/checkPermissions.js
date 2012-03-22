@@ -43,6 +43,15 @@ var checkPermissions = function(current_user, perms, res, callback) {
           callback(err);
         });
       };
+      funcs['edit_module'] = function(callback) {
+        qStr = 'SELECT uid FROM Classes, Modules WHERE Classes.cid = Modules.cid and Modules.mid = ?';
+        client.query(qStr, [perms['edit_module']], function(err, rows) {
+          if(rows === undefined || rows[0] === undefined || rows[0].uid !== current_user.userid) {
+            err = true;
+          }
+          callback(err);
+        });
+      };
       funcs['edit_question'] = function(callback) {
         qStr = 'SELECT uid FROM Classes, Quizzes, Questions WHERE Classes.cid = Quizzes.cid'
           + ' AND Questions.qid = Quizzes.qid AND Questions.questid = ?';
