@@ -84,7 +84,7 @@ var isAdmin = function(req) {
 
 var isRequestMobile = function(req){
   var paramArray = req.route.params[0].split('/');
-  if(paramArray.length >=2 && paramArray[1] == 'mobile'){
+  if(paramArray.length >=2 && (paramArray[1] == 'mobile'|| paramArray[1] == 'uploads')){
     return true;
   }else return false;
 }
