@@ -356,7 +356,7 @@ app.post('/addModule', function(req,res){
     console.log('START');
     var name = req.body.mname;
     var cid = req.body.cid;
-    if(isAdmin(req)) {
+    //if(isAdmin(req)) {
       console.log("IS_ADMIN");
       var form = new formidable.IncomingForm();
       console.log("PREDERP");
@@ -384,9 +384,32 @@ app.post('/addModule', function(req,res){
           });
         });
       });
-    } else {
+    //} else {
       //TODO check permissions for non-admin
-    }
+    //}
+  });
+});
+app.get('/remModule',function(req,res){
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("SELECT filepath FROM Modules WHERE mid = ?",[mid],function(err,results){
+      if(err){
+        console.log(err);
+        req.flash('error',err);
+        res.redirect('back');
+      }
+      else if(results.length < 1){
+        console.log("Module Not Found");
+        req.flash('error', "Module not found");
+        res.redirect('back');
+      }else{
+        filepath = results[0].filepath;
+        fs.unlink('public/' + filepath);
+        client.query("DELETE FROM Modules WHERE mid = ?", [mid], function(err){
+          res.redirect('back');
+        });
+      }
+    });
   });
 });
 app.get('/editQuiz', function(req, res) {

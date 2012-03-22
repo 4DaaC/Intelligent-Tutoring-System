@@ -14,3 +14,4 @@ server/public/stylesheets/*.css
 server/node_modules
 **.log
 server/config.js
+server/public/uploads
