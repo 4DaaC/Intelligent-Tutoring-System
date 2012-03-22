@@ -28,40 +28,6 @@ app.post('(/addClass)|(/editClass)', function(req, res, next) {
   }
 });
 
-app.post('/addUser', function(req, res, next) {
-  var auth = parseInt(req.body.auth);
-  var user = req.body.user;
-  var foundErr = false;
-  if(typeof(user) !== 'string' || user.length <= 1 || user.length >= 20){
-    req.flash("error", "Username must be between 1 and 20 characters long");
-    foundErr = true;
-  }
-  if(!(auth === 0 || auth === 1 || auth === 2)) {
-    req.flash("error", "Authorization level setting is invalid");
-    foundErr = true;
-  }
-  if(foundErr) {
-    res.redirect('back');
-  }
-  else {
-    next();
-  }
-});
-
-app.get('/remUser',function(req, res, next){
-  var uid = req.query.uid;
-  qStr = 'SELECT uid FROM Users WHERE uid = ?';
-  client.query(qStr, [uid], function(err, rows) {
-    if(rows.length === 0) {
-      req.flash("error", "User does not exist");
-      res.redirect('back');
-    }
-    else {
-      next();
-    }
-  });
-});
-
 app.get('/remStud',function(req, res, next){
   var qString = "SELECT cid FROM Class_List WHERE cid = ? AND uid = ?";
   client.query(qString, [req.query.cid, req.query.uid], function(err, rows) {
@@ -167,25 +133,6 @@ app.post('(/addQuestion)|(/editQuestion)', function(req, res, next) {
   if(quest.length <=0 || quest.length > 500) {
     req.flash('error','Quiz Name must be between 1 and 500 characters long');
     foundErr = true;
-  }
-  if(foundErr) {
-    res.redirect('back');
-  }
-  else {
-    next();
-  }
-});
-
-app.post('/updateUser', function(req, res, next) {
-  var foundErr = false;
-
-  for(var uname in req.body) {
-    var level = req.body[uname];
-    var validLevels = ['Admin', 'Professor', 'Student'];
-    if(validLevels.indexOf(level) === -1) {
-      req.flash('error','Invalid user level chosen for ' + uname);
-      foundErr = true;
-    }
   }
   if(foundErr) {
     res.redirect('back');

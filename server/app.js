@@ -119,16 +119,7 @@ app.put('*',requireLogin);
 app.post('*',requireLogin);
 require('./routes/index')(app,client);
 require('./validateForm')(app);
-
-app.get('/admin', function(req, res) {
-  if(isAdmin(req)) {
-    res.render('control_panel', {
-      title: 'Admin Panel'
-    });
-  } else {
-    res.send(403);
-  }
-});
+require('./users.js')(app);
 
 app.get('/addClass', function(req, res) {
   checkPermissions(current_user(req), {add_class: true}, res, function(err) {
@@ -188,32 +179,6 @@ app.post('/editClass', function(req, res) {
       }
       res.redirect('/classes');
     });
-  });
-});
-
-app.post('/addUser', function(req, res) {
-  checkPermissions(current_user(req), {add_user: true}, res, function(err) {
-    var qString = "INSERT INTO Users (username, auth_level) VALUES (?, ?)";
-    client.query(qString, [req.body.user, req.body.auth], function(err) {
-      if(err) {
-        req.flash("error", err);
-        res.redirect('back');
-      }
-      else {
-        res.redirect('/users');
-      }
-    });
-  });
-});
-
-app.get('/remUser',function(req,res){
-  checkPermissions(current_user(req), {remove_user: true}, res, function(err) {
-    var qString = "DELETE FROM Users WHERE uid = ?";
-    console.log(qString);
-    client.query(qString, [req.query.uid], function(err) {
-      if(err) console.log(err);
-    });
-    res.redirect('/users');
   });
 });
 
@@ -710,32 +675,6 @@ app.del('/question', function(req, res) {
 app.get('/', function(req, res){
   res.render('index', {
     title: 'Home'
-  });
-});
-
-app.get('/users',function(req,res){
-  checkPermissions(req.session.user, {view_all_users: true}, res, function(err) {
-    var qString = "select * from Users";
-    console.log(qString);
-    client.query(qString, function(err,results,fields) {
-      console.log('render');
-      res.render('users', {
-        title: 'Users',
-        users: results
-      });
-    });
-  });
-});
-
-app.post('/updateUser', function(req, res) {
-  checkPermissions(req.session.user, {update_user_level: true}, res, function(err) {
-    for(var uname in req.body) {
-      var level = req.body[uname] === 'Admin' ? ADMIN : (req.body[uname] === 'Professor' ? PROF : STUDENT);
-      var qString = 'UPDATE Users SET auth_level = ? WHERE username = ?';
-      client.query(qString, [level, uname]);
-      console.log(qString);
-    }
-    res.redirect('/users');
   });
 });
 
