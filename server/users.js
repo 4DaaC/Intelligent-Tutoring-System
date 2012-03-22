@@ -7,58 +7,69 @@ var PROF = 1;
 var ADMIN = 2;
 
 module.exports = function(app) {
-  app.get('/admin', function(req, res) {
-    checkPermissions(req.session.user, {add_user: true}, res, function(err) {
-      res.render('control_panel', {
-        title: 'Admin Panel'
-      });
-    });
-  });
+  app.get('/admin', addUserForm);
 
   app.post('/addUser', validateAddUser);
-  app.post('/addUser', function(req, res) {
-    checkPermissions(req.session.user, {add_user: true}, res, function(err) {
-      addUser(req.body.user, req.body.auth, function(err) {
-        if(err) {
-          req.flash("error", err);
-          res.redirect('back');
-        }
-        else {
-          res.redirect('/users');
-        }
-      });
-    });
-  });
+  app.post('/addUser', addUserSubmit);
 
   app.get('/remUser', validateRemoveUser);
-  app.get('/remUser', function(req, res) {
-    checkPermissions(req.session.user, {remove_user: true}, res, function(err) {
-      removeUser(req.query.uid, function(err) {
-        if(err) console.log(err);
-        res.redirect('/users');
-      });
-    });
-  });
+  app.get('/remUser', removeUserSubmit);
 
   app.post('/updateUser', validateUpdateUser);
-  app.post('/updateUser', function(req, res) {
-    checkPermissions(req.session.user, {update_user_level: true}, res, function(err) {
-      for(var uname in req.body) {
-        updateUser(uname, req.body[uname]);
-      }
-      res.redirect('/users');
-    }); 
-  }); 
+  app.post('/updateUser', updateUserSubmit);
 
-  app.get('/users', function(req, res) {
-    checkPermissions(req.session.user, {view_all_users: true}, res, function(err) {
-      var qString = "select * from Users";
-      client.query(qString, function(err,results,fields) {
-        console.log('render');
-        res.render('users', {
-          title: 'Users',
-          users: results
-        });
+  app.get('/users', viewUsers);
+}
+
+// Routes
+function addUserForm(req, res) {
+  checkPermissions(req.session.user, {add_user: true}, res, function(err) {
+    res.render('control_panel', {
+      title: 'Admin Panel'
+    });
+  });
+}
+
+function addUserSubmit(req, res) {
+  checkPermissions(req.session.user, {add_user: true}, res, function(err) {
+    addUser(req.body.user, req.body.auth, function(err) {
+      if(err) {
+        req.flash("error", err);
+        res.redirect('back');
+      }
+      else {
+        res.redirect('/users');
+      }
+    });
+  });
+}
+
+function removeUserSubmit(req, res) {
+  checkPermissions(req.session.user, {remove_user: true}, res, function(err) {
+    removeUser(req.query.uid, function(err) {
+      if(err) console.log(err);
+      res.redirect('/users');
+    });
+  });
+}
+
+function updateUserSubmit(req, res) {
+  checkPermissions(req.session.user, {update_user_level: true}, res, function(err) {
+    for(var uname in req.body) {
+      updateUser(uname, req.body[uname]);
+    }
+    res.redirect('/users');
+  }); 
+}
+
+function viewUsers(req, res) {
+  checkPermissions(req.session.user, {view_all_users: true}, res, function(err) {
+    var qString = "select * from Users";
+    client.query(qString, function(err,results,fields) {
+      console.log('render');
+      res.render('users', {
+        title: 'Users',
+        users: results
       });
     });
   });
