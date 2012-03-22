@@ -412,6 +412,33 @@ app.get('/remModule',function(req,res){
     });
   });
 });
+
+app.get('/enableModule', function(req,res) {
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("UPDATE Modules SET active= '1' WHERE mid = ?", [mid],function(err){
+      if(err){
+        console.log(err)
+        req.flash("error",err);
+      }
+      res.redirect('back');
+    });
+  });
+});
+
+app.get('/disableModule', function(req,res) {
+  var mid = parseInt(req.query.mid);
+  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
+    client.query("UPDATE Modules SET active= '0' WHERE mid = ?", [mid],function(err){
+      if(err){
+        console.log(err)
+        req.flash("error",err);
+      }
+      res.redirect('back');
+    });
+  });
+});
+
 app.get('/editQuiz', function(req, res) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -730,7 +757,7 @@ app.get('/quizzes',function(req,res) {
     console.log(qString);
     client.query(qString, [cid], function(err, results, fields) {
       console.log(results);
-      qString = "select mid, Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
+      qString = "select mid, Modules.active,Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
       "AND Modules.cid = ?";
       client.query(qString,[cid],function(err3,modules){
         console.log(modules);

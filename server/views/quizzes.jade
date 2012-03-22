@@ -36,12 +36,24 @@ br
       th
         |Class
       th
+        |Active
+      th
     for module in modules
       tr
         td
           a(href="#{module.filepath}")=module.title
         td=module.title
         td
+          if module.active
+            span Active
+          else
+            span Disabled
+        td
+          if module.active
+            a(href="/disableModule?mid=#{module.mid}") Disable
+          else
+            a(href="/enableModule?mid=#{module.mid}") Enable
+          |
           a(href="/remModule?mid=#{module.mid}", onClick="return confirm('Are you sure you want to delete this Module?');") Delete
 a(href="/addModule?cid=#{cid}") Add a Module
 -if(students.length == 0)
