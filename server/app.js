@@ -361,11 +361,17 @@ app.post('/addModule', function(req,res){
       var form = new formidable.IncomingForm();
       console.log("PREDERP");
       console.log("DERP");
+      if(req.files['pdf-file'].type != 'application/pdf' || req.files['pdf-file'].size > 10485760){
+        console.log('not valid');
+        req.flash('error','File must be a .pdf file and less than 10 Mb');
+        res.redirect('back');
+      }else{
       var dirp = dirpString();
       mkdirp('public/'+dirp, 0777, function(derrp) {
         console.log(derrp)
         var files = req.files;
         console.log("DERPED");
+        console.log(files['pdf-file']);
         var is = fs.createReadStream(files['pdf-file'].path);
         var os = fs.createWriteStream("public/"+dirp+files['pdf-file'].name);
         util.pump(is, os, function() {
@@ -384,6 +390,7 @@ app.post('/addModule', function(req,res){
           });
         });
       });
+      }
     //} else {
       //TODO check permissions for non-admin
     //}
