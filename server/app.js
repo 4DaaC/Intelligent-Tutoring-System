@@ -119,7 +119,33 @@ app.put('*',requireLogin);
 app.post('*',requireLogin);
 require('./routes/index')(app,client);
 require('./validateForm')(app);
-require('./users.js')(app);
+
+var user = require('./users.js');
+app.all('(/admin)|(/addUser)', function(req, res, next) {
+  checkPermissions(req.session.user, {add_user: true}, res, next);
+});
+
+app.get('/admin', user.addUserForm);
+
+app.post('/addUser', user.validateAddUser);
+app.post('/addUser', user.addUserSubmit);
+
+app.get('/remUser', function(req, res, next) {
+  checkPermissions(req.session.user, {remove_user: true}, res, next);
+});
+app.get('/remUser', user.validateRemoveUser);
+app.get('/remUser', user.removeUserSubmit);
+
+app.post('/updateUser', function(req, res, next) {
+  checkPermissions(req.session.user, {update_user_level: true}, res, next);
+});
+app.post('/updateUser', user.validateUpdateUser);
+app.post('/updateUser', user.updateUserSubmit);
+
+app.get('/users', function(req, res, next) {
+  checkPermissions(req.session.user, {view_all_users: true}, res, next);
+});
+app.get('/users', user.viewUsers);
 
 app.get('/addClass', function(req, res) {
   checkPermissions(current_user(req), {add_class: true}, res, function(err) {

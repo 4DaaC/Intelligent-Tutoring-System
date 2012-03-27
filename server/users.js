@@ -1,38 +1,18 @@
 var config = require('./config');
 var client = require('mysql').createClient(config.db);
-var checkPermissions = require('./checkPermissions.js');
 
 var STUDENT = 0;
 var PROF = 1;
 var ADMIN = 2;
 
-module.exports = function(app) {
-  app.all('(/admin)|(/addUser)', function(req, res, next) {
-    checkPermissions(req.session.user, {add_user: true}, res, next);
-  });
-
-  app.get('/admin', addUserForm);
-
-  app.post('/addUser', validateAddUser);
-  app.post('/addUser', addUserSubmit);
-
-  app.get('/remUser', function(req, res, next) {
-    checkPermissions(req.session.user, {remove_user: true}, res, next);
-  });
-  app.get('/remUser', validateRemoveUser);
-  app.get('/remUser', removeUserSubmit);
-
-  app.post('/updateUser', function(req, res, next) {
-    checkPermissions(req.session.user, {update_user_level: true}, res, next);
-  });
-  app.post('/updateUser', validateUpdateUser);
-  app.post('/updateUser', updateUserSubmit);
-
-  app.get('/users', function(req, res, next) {
-    checkPermissions(req.session.user, {view_all_users: true}, res, next);
-  });
-  app.get('/users', viewUsers);
-}
+exports.addUserForm = addUserForm;
+exports.addUserSubmit = addUserSubmit;
+exports.removeUserSubmit = removeUserSubmit;
+exports.updateUserSubmit = updateUserSubmit;
+exports.viewUsers = viewUsers;
+exports.validateAddUser = validateAddUser;
+exports.validateRemoveUser = validateRemoveUser;
+exports.validateUpdateUser = validateUpdateUser;
 
 // Routes
 function addUserForm(req, res) {
