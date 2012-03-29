@@ -147,131 +147,61 @@ app.get('/users', function(req, res, next) {
 });
 app.get('/users', user.viewUsers);
 
-app.get('/addClass', function(req, res) {
-  checkPermissions(current_user(req), {add_class: true}, res, function(err) {
-    var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
-    client.query(sqlStr, [req.query.cid], function(err2, classes){
-      if(err2){
-        req.flash("error",err2);
-        res.redirect('/classes');
-      }
-      res.render('add_class', {
-        title: 'Add Class',
-        theClass: classes[0]
-      });
-    });
-  });
+/**
+ * Class manipulation routes
+ */
+var classes = require('./classes.js');
+app.get('/addClass', function(req, res, next) {
+  checkPermissions(current_user(req), {add_class: true}, res, next);
 });
+app.get('/addClass', classes.addClassForm);
 
-app.post('/addClass', function(req, res) {
+app.post('/addClass', function(req, res, next) {
   var tuser = parseInt(req.body.tuser);
-  checkPermissions(current_user(req), {add_class_for_user: tuser}, res, function(err) {
-    qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)";
-    var values = [tuser, req.body.cname, req.body.limit, req.body.priv];
-    client.query(qString, values, function(err) {
-      if(err) {
-        console.log(err);
-        req.flash("error",err);
-      }
-      res.redirect('/classes');
-    });
-  });
+  checkPermissions(current_user(req), {add_class_for_user: tuser}, res, next);
 });
+app.post('/addClass', classes.addClassSubmit);
 
-app.get('/editClass', function(req, res) {
-  checkPermissions(current_user(req), {edit_class: req.query.cid}, res, function(err) {
-    var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
-    client.query(sqlStr, [req.query.cid], function(err2, classes){
-      if(err2){
-        req.flash("error",err2);
-        res.redirect('/classes');
-      }
-      res.render('edit_class', {
-        title: 'Edit Class',
-        theClass: classes[0]
-      });
-    });
-  });
+app.get('/editClass', function(req, res, next) {
+  checkPermissions(current_user(req), {edit_class: req.query.cid}, res, next);
 });
+app.get('/editClass', classes.editClassForm);
 
-app.post('/editClass', function(req, res) {
-  checkPermissions(current_user(req), {edit_class: req.body.cid}, res, function(err) {
-    qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
-    var values = [req.body.cname, req.body.limit, req.body.priv, req.body.tuser, req.body.cid];
-    client.query(qString, values, function(err) {
-      if(err){
-        console.log(err);
-        req.flash("error",err);
-      }
-      res.redirect('/classes');
-    });
-  });
+app.post('/editClass', function(req, res, next) {
+  checkPermissions(current_user(req), {edit_class: req.body.cid}, res, next);
 });
+app.post('/editClass', classes.editClassSubmit);
 
-app.get('/remStud',function(req, res){
+app.get('/remStud', function(req, res, next) {
   var cid = parseInt(req.query.cid);
   var uid = parseInt(req.query.uid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
-    client.query(qString, [cid, uid], function(err) {
-      err && req.flash("error", err);
-      res.redirect('back');
-    });
-  });
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
+app.get('/remStud', classes.removeStudentSubmit);
 
-app.get('/remQuiz',function(req,res){
+app.get('/remQuiz', function(req, res, next) {
   var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    client.query("DELETE FROM Quizzes WHERE qid = ?", [qid], function(err){
-      res.redirect('back');
-    });
-  });
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
 });
+app.get('/remQuiz', classes.removeQuizSubmit);
 
-app.get('/remClass',function(req,res){
+app.get('/remClass', function(req, res, next) {
   var cid = parseInt(req.query.cid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    var qString ="DELETE FROM Classes WHERE cid = ?";
-    client.query(qString, [cid], function(err){
-      err && req.flash("error", err);
-      res.redirect('back');
-    });
-  });
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
+app.get('/remClass', classes.removeClassSubmit);
 
-app.post('/student', function(req, res) {
+app.post('/student', function(req, res, next) {
   var cid = parseInt(req.body.cid);
   var uid = parseInt(req.body.user);
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    client.query("INSERT INTO Class_List (uid, cid) VALUES (?,?)", [uid, cid] ,function(err) {
-      if(err) {
-        req.flash("error", err);
-        res.redirect('back');
-      }
-      else {
-        res.redirect('/quizzes?cid=' + cid);
-      }
-    });
-  });
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
+app.post('/student', classes.addStudentToClassSubmit);
 
-app.get('/student', function(req, res) {
-  checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
-    var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
-    if(!isAdmin(req)) {
-      qString += " AND Users.username = ?";
-      qString = client.format(qString, [current_user(req).username]);
-    }
-    client.query(qString, function(err, results, fields) {
-      console.log(results);
-      res.render('student_class', {
-        title: 'Add student to class',
-        classes: results
-      });
-    });
-  });
+app.get('/student', function(req, res, next) {
+  checkPermissions(req.session.user, {view_edit_class: true}, res, next);
 });
+app.get('/student', classes.addStudentToClassForm);
 
 app.get('/addQuiz', function(req, res) {
   checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
