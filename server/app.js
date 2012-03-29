@@ -172,6 +172,11 @@ app.post('/editClass', function(req, res, next) {
 });
 app.post('/editClass', classes.editClassSubmit);
 
+app.get('/classes', function(req, res, next) {
+  checkPermissions(req.session.user, {view_classes: true}, res, next);
+});
+app.get('/classes', classes.viewClasses);
+
 app.get('/remStud', function(req, res, next) {
   var cid = parseInt(req.query.cid);
   var uid = parseInt(req.query.uid);
@@ -631,23 +636,6 @@ app.del('/question', function(req, res) {
 app.get('/', function(req, res){
   res.render('index', {
     title: 'Home'
-  });
-});
-
-app.get('/classes',function(req,res) {
-  checkPermissions(req.session.user, {view_classes: true}, res, function(err) {
-    qString = "select cid, username, name FROM Classes, Users WHERE Classes.uid = Users.uid";
-    if(!isAdmin(req)) {
-      qString += " AND Users.username = ?";
-      qString = client.format(qString,[current_user(req).username]);
-    }
-    console.log(qString);
-    client.query(qString,function(err,results,fields) {
-      res.render('classes', {
-        title: 'Classes',
-        classes: results
-      });
-    });
   });
 });
 

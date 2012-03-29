@@ -14,6 +14,7 @@ exports.removeQuizSubmit = removeQuizSubmit;
 exports.removeClassSubmit = removeClassSubmit;
 exports.addStudentToClassSubmit = addStudentToClassSubmit;
 exports.addStudentToClassForm = addStudentToClassForm;
+exports.viewClasses = viewClasses;
 
 //Routes
 function addClassForm(req, res) {
@@ -113,6 +114,21 @@ function addStudentToClassForm(req, res) {
     console.log(results);
     res.render('student_class', {
       title: 'Add student to class',
+      classes: results
+    });
+  });
+}
+
+function viewClasses(req, res) {
+  qString = "select cid, username, name FROM Classes, Users WHERE Classes.uid = Users.uid";
+  if(req.session.user.auth != ADMIN) {
+    qString += " AND Users.username = ?";
+    qString = client.format(qString, [current_user(req).username]);
+  }
+  console.log(qString);
+  client.query(qString, function(err, results, fields) {
+    res.render('classes', {
+      title: 'Classes',
       classes: results
     });
   });
