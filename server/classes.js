@@ -30,14 +30,11 @@ function addClassForm(req, res) {
   });
 }
 
-  var tuser = parseInt(req.body.tuser);
-  qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)";
-  var values = [tuser, req.body.cname, req.body.limit, req.body.priv];
-  client.query(qString, values, function(err) {
 function addClassSubmit(req, res) {
+  addClass(req.body.tuser, req.body.cname, req.body.limit, req.body.priv, function(err) {
     if(err) {
       console.log(err);
-      req.flash("error",err);
+      req.flash("error", err);
     }
     res.redirect('/classes');
   });
@@ -58,12 +55,11 @@ function editClassForm(req, res) {
 }
 
 function editClassSubmit(req, res) {
-  qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
-  var values = [req.body.cname, req.body.limit, req.body.priv, req.body.tuser, req.body.cid];
-  client.query(qString, values, function(err) {
+  var frm = req.body;
+  editClass(frm.cname, frm.limit, frm.priv, frm.tuser, frm.cid, function(err) {
     if(err) {
       console.log(err);
-      req.flash("error",err);
+      req.flash("error", err);
     }
     res.redirect('/classes');
   });
@@ -72,24 +68,22 @@ function editClassSubmit(req, res) {
 function removeStudentSubmit(req, res) {
   var cid = parseInt(req.query.cid);
   var uid = parseInt(req.query.uid);
-  var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
-  client.query(qString, [cid, uid], function(err) {
+  removeStudent(cid, uid, function(err) {
     err && req.flash("error", err);
     res.redirect('back');
   });
 }
 
 function removeQuizSubmit(req, res) {
-  var cid = parseInt(req.query.cid);
-  client.query("DELETE FROM Quizzes WHERE qid = ?", [qid], function(err) {
+  var qid = parseInt(req.query.qid);
+  removeQuiz(qid, function(err) {
     res.redirect('back');
   });
 }
 
 function removeClassSubmit(req, res) {
   var cid = parseInt(req.query.cid);
-  var qString ="DELETE FROM Classes WHERE cid = ?";
-  client.query(qString, [cid], function(err) {
+  removeClass(cid, function(err) {
     err && req.flash("error", err);
     res.redirect('back');
   });
@@ -98,7 +92,7 @@ function removeClassSubmit(req, res) {
 function addStudentToClassSubmit(req, res) {
   var cid = parseInt(req.body.cid);
   var uid = parseInt(req.body.user);
-  client.query("INSERT INTO Class_List (uid, cid) VALUES (?, ?)", [uid, cid], function(err) {
+  addStudentToClass(uid, cid, function(err) {
     if(err) {
       req.flash("error", err);
       res.redirect('back');
@@ -122,4 +116,36 @@ function addStudentToClassForm(req, res) {
       classes: results
     });
   });
+}
+
+//Actions
+function addClass(owner, name, classlimit, privacy, next) {
+  qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)";
+  var values = [owner, name, classlimit, privacy];
+  client.query(qString, values, next);
+}
+
+function editClass(classname, limit, privacy, owner, classid, next) {
+  qString = "UPDATE Classes SET name = ?, classlimit = ?, privacy = ?, uid= ? WHERE cid = ?";
+  var values = [classname, limit, privacy, owner, classid];
+  client.query(qString, values, next);
+}
+
+function removeStudent(classid, studentid, next) {
+  var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
+  client.query(qString, [classid, studentid], next);
+}
+
+function removeQuiz(quizid, next) {
+  client.query("DELETE FROM Quizzes WHERE qid = ?", [quizid], next);
+}
+
+function removeClass(classid, next) {
+  var qString ="DELETE FROM Classes WHERE cid = ?";
+  client.query(qString, [classid], next);
+}
+
+function addStudentToClass(studentid, classid, next) {
+  var qString = "INSERT INTO Class_List (uid, cid) VALUES (?, ?)";
+  client.query(qString, [studentid, classid], next);
 }
