@@ -108,7 +108,7 @@ function addStudentToClassForm(req, res) {
   var qString = "SELECT cid, Classes.name FROM Classes, Users WHERE Classes.uid = Users.uid";
   if(req.session.user.auth != ADMIN) {
     qString += " AND Users.username = ?";
-    qString = client.format(qString, [current_user(req).username]);
+    qString = client.format(qString, [req.session.user.username]);
   }
   client.query(qString, function(err, results, fields) {
     console.log(results);
@@ -123,7 +123,7 @@ function viewClasses(req, res) {
   qString = "select cid, username, name FROM Classes, Users WHERE Classes.uid = Users.uid";
   if(req.session.user.auth != ADMIN) {
     qString += " AND Users.username = ?";
-    qString = client.format(qString, [current_user(req).username]);
+    qString = client.format(qString, [req.session.user.username]);
   }
   console.log(qString);
   client.query(qString, function(err, results, fields) {
