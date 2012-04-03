@@ -10,11 +10,11 @@ exports.addClassSubmit = addClassSubmit;
 exports.editClassForm = editClassForm;
 exports.editClassSubmit = editClassSubmit;
 exports.removeStudentSubmit = removeStudentSubmit;
-exports.removeQuizSubmit = removeQuizSubmit;
 exports.removeClassSubmit = removeClassSubmit;
 exports.addStudentToClassSubmit = addStudentToClassSubmit;
 exports.addStudentToClassForm = addStudentToClassForm;
 exports.viewClasses = viewClasses;
+exports.viewClass = viewClass;
 
 //Routes
 function addClassForm(req, res) {
@@ -75,13 +75,6 @@ function removeStudentSubmit(req, res) {
   });
 }
 
-function removeQuizSubmit(req, res) {
-  var qid = parseInt(req.query.qid);
-  removeQuiz(qid, function(err) {
-    res.redirect('back');
-  });
-}
-
 function removeClassSubmit(req, res) {
   var cid = parseInt(req.query.cid);
   removeClass(cid, function(err) {
@@ -134,6 +127,35 @@ function viewClasses(req, res) {
   });
 }
 
+function viewClass(req, res) {
+  var cid = req.query.cid;
+  var qString = "select qid, Quizzes.question_amount, Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
+    "AND Quizzes.cid = ?";
+  console.log(qString);
+  client.query(qString, [cid], function(err, results, fields) {
+    console.log(results);
+    qString = "select mid, Modules.active,Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
+    "AND Modules.cid = ?";
+    client.query(qString,[cid],function(err3,modules){
+      console.log(modules);
+      console.log(err);
+      qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
+      " Class_List.cid = ?";
+      console.log(qString);
+      client.query(qString, [cid], function(err2, results2, fields2) {
+        console.log(results2);
+        res.render('quizzes', {
+          title:"Quizzes",
+          quizzes: results,
+          modules: modules,
+          students: results2,
+          cid: cid
+        });
+      });
+    });
+  });
+}
+
 //Actions
 function addClass(owner, name, classlimit, privacy, next) {
   qString = "INSERT INTO Classes (uid, name, classlimit, privacy) VALUES (?,?,?,?)";
@@ -150,10 +172,6 @@ function editClass(classname, limit, privacy, owner, classid, next) {
 function removeStudent(classid, studentid, next) {
   var qString = "DELETE FROM Class_List WHERE cid = ? AND uid = ?";
   client.query(qString, [classid, studentid], next);
-}
-
-function removeQuiz(quizid, next) {
-  client.query("DELETE FROM Quizzes WHERE qid = ?", [quizid], next);
 }
 
 function removeClass(classid, next) {

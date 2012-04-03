@@ -184,12 +184,6 @@ app.get('/remStud', function(req, res, next) {
 });
 app.get('/remStud', classes.removeStudentSubmit);
 
-app.get('/remQuiz', function(req, res, next) {
-  var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
-});
-app.get('/remQuiz', classes.removeQuizSubmit);
-
 app.get('/remClass', function(req, res, next) {
   var cid = parseInt(req.query.cid);
   checkPermissions(req.session.user, {edit_class: cid}, res, next);
@@ -208,41 +202,46 @@ app.get('/student', function(req, res, next) {
 });
 app.get('/student', classes.addStudentToClassForm);
 
-app.get('/addQuiz', function(req, res) {
-  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
-    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
-    if(!isAdmin(req)) {
-      qString += " AND Users.username = ?";
-      qString = client.format(qString, [current_user(req).username]);
-    }
-    client.query(qString, function(err, results, fields) {
-      if (results.length == 0) {
-        req.flash('error', "You must create a class first");
-        res.redirect('back');
-      }
-      else {
-        res.render('add_quiz', {
-          title:'Add Quiz',
-          classes: results,
-          select: req.query.cid
-        });
-      }
-    });
-  });
+app.get('/quizzes', function(req, res, next) {
+  var cid = req.query.cid;
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
+});
+app.get('/quizzes', classes.viewClass);
+
+/**
+ * Quiz manipulation routes
+ */
+var quizzes = require('./quizzes.js');
+
+app.get('/addQuiz', function(req, res, next) {
+  checkPermissions(req.session.user, {add_quiz: true}, res, next);
+});
+app.get('/((rem)|(view)|(enable)|(disable)Quiz)|(quizGrades)', function(req, res, next) {
+  var qid = parseInt(req.query.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
+});
+app.post('/addQuiz', function(req, res, next) {
+  var cid = parseInt(req.body.cid);
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
+});
+app.get('/editQuiz', function(req, res, next) {
+  checkPermissions(req.session.user, {view_edit_class: true}, res, next);
+});
+app.post('/editQuiz', function(req, res, next) {
+  var qid = parseInt(req.body.qid);
+  checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
 });
 
-app.post('/addQuiz', function(req, res) {
-  var cid = parseInt(req.body.cid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    var qname = req.body.qname;
-    var question_amount = req.body.question_amount;
-    var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
-    client.query(sqlStr, [qname, cid, question_amount], function(err) {
-      err && req.flash("error", err);
-      res.redirect('/quizzes?cid=' + cid);
-    });
-  });
-});
+app.get('/addQuiz', quizzes.addQuizForm);
+app.post('/addQuiz', quizzes.addQuizSubmit);
+app.get('/remQuiz', quizzes.removeQuizSubmit);
+app.get('/editQuiz', quizzes.editQuizForm);
+app.post('/editQuiz', quizzes.editQuizSubmit);
+app.get('/viewQuiz', quizzes.viewQuiz);
+app.get('/enableQuiz', quizzes.enableQuizSubmit);
+app.get('/disableQuiz', quizzes.disableQuizSubmit);
+app.get('/quizGrades', quizzes.viewQuizGrades);
+
 app.get('/addModule', function(req, res) {
   checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
     var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -372,147 +371,6 @@ app.get('/disableModule', function(req,res) {
   });
 });
 
-app.get('/editQuiz', function(req, res) {
-  checkPermissions(req.session.user, {view_edit_class: true}, res, function(err) {
-    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
-    if(!isAdmin(req)) {
-      qString += " AND Users.username = ?";
-      qString = client.format(qString, [current_user(req).username]);
-    }
-    client.query(qString, function(err, results, fields) {
-      if(err) {
-        req.flash("error",err);
-        res.redirect('/classes');
-      }
-      else if (results.length == 0) {
-        req.flash('error', "class doesn't exist or does not belong to you");
-        res.redirect('back');
-      }
-      else {
-        var sql = "SELECT * FROM Quizzes WHERE qid= ?" ;
-        client.query(sql, [req.query.qid],function(err2,quizzes) {
-          if(err2) {
-            req.flash("error",err2);
-            res.redirect('back');
-          }
-          else {
-            res.render('edit_quiz', {
-              title:'Edit Quiz',
-              classes: results,
-              select: req.query.cid,
-              quiz: quizzes[0]
-            });
-          }
-        });
-      }
-    });
-  });
-});
-
-app.post('/editQuiz', function(req, res) {
-  var qid = parseInt(req.body.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var qname = req.body.qname;
-    var cid = parseInt(req.body.cid);
-    var question_amount = req.body.question_amount;
-    var sqlStr = "UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?";
-    client.query(sqlStr, [qname, cid, question_amount, req.body.qid], function(err) {
-      err && req.flash("error", err);
-      res.redirect('/quizzes?cid=' + cid);
-    });
-  });
-});
-
-
-app.get('/quizGrades',function(req,res) {
-  var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err,results) {
-      var questions = new Object();
-      for(var idx in results) {
-        questions[results[idx].questid] = results[idx];
-      }
-      var sql = "SELECT Users.username, Answers.questid, Answers.saved_answer, Answers.time_spent"
-                + " FROM Users, Answers"
-                + " WHERE Users.uid = Answers.uid AND Answers.questid"
-                + " IN (SELECT questid FROM Questions WHERE qid = ?)";
-      client.query(sql, [qid], function(err2, answers) {
-        res.render('grades', {
-          title:"Grade View",
-          questions: questions,
-          answers: answers
-        });
-      });
-    });
-  });
-});
-
-app.get('/viewQuiz', function(req, res) {
-  var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var qString = "SELECT * FROM Quizzes WHERE qid = ?";
-    console.log(qString);
-    client.query(qString, [qid], function(err, quiz, fields) {
-      client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
-        console.log(results);
-        difficulty = [0,0,0,0];
-        for(idx in results){
-          difficulty[results[idx].difficulty] ++;
-        }
-        res.render('edit_questions', {
-          title: quiz[0].name,
-          questions: results,
-          quiz: quiz[0],
-          diffArray: difficulty,
-          qid: qid
-        });
-      });
-    });
-  });
-});
-
-app.get('/enableQuiz', function(req,res) {
-  var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var qString = "SELECT * FROM Quizzes WHERE qid = ?";
-    console.log(qString);
-    client.query(qString, [qid], function(err, quiz, fields) {
-      client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
-        console.log(results);
-        difficulty = [0,0,0,0];
-        question_amount = quiz[0]['question_amount'];
-        for(idx in results){
-          difficulty[results[idx].difficulty] ++;
-        }
-        if(difficulty[1] >= question_amount && difficulty[2] >= question_amount && difficulty[3] >= question_amount){
-          client.query("UPDATE Quizzes SET active= '1' WHERE qid = ?", [qid],function(err){
-            if(err){
-              console.log(err)
-              req.flash("error",err);
-            }
-            res.redirect('/viewQuiz?qid=' + qid);
-          });
-        }else{
-          req.flash("error","This quiz does not have enough questions to be enabled");
-          res.redirect('/viewQuiz?qid=' + qid);
-        }
-      });
-    });
-  });
-});
-app.get('/disableQuiz', function(req,res){
-  var qid = parseInt(req.query.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    client.query("UPDATE Quizzes SET active = '0' WHERE qid = ?", [qid], function(err){
-      if(err){
-        console.log(err);
-        req.flash("error",err);
-      }
-      res.redirect('/viewQuiz?qid=' + qid);
-    });
-  });
-});
-
 app.get('/addQuestion', function(req, res) {
   var questid = req.query.questid;
   var qid = req.query.qid;
@@ -636,37 +494,6 @@ app.del('/question', function(req, res) {
 app.get('/', function(req, res){
   res.render('index', {
     title: 'Home'
-  });
-});
-
-app.get('/quizzes',function(req,res) {
-  var cid = req.query.cid;
-  checkPermissions(req.session.user, {edit_class: cid}, res, function(err) {
-    var qString = "select qid, Quizzes.question_amount, Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
-      "AND Quizzes.cid = ?";
-    console.log(qString);
-    client.query(qString, [cid], function(err, results, fields) {
-      console.log(results);
-      qString = "select mid, Modules.active,Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
-      "AND Modules.cid = ?";
-      client.query(qString,[cid],function(err3,modules){
-        console.log(modules);
-        console.log(err);
-        qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
-        " Class_List.cid = ?";
-        console.log(qString);
-        client.query(qString, [cid], function(err2, results2, fields2) {
-          console.log(results2);
-          res.render('quizzes', {
-            title:"Quizzes",
-            quizzes: results,
-            modules: modules,
-            students: results2,
-            cid: cid
-          });
-        });
-      });
-    });
   });
 });
 
