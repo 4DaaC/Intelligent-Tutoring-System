@@ -139,12 +139,13 @@ app.get('/users', function(req, res, next) {
   checkPermissions(req.session.user, {view_all_users: true}, res, next);
 });
 
-app.get('/admin', user.addUserForm);
 app.post('/addUser', user.validateAddUser);
-app.post('/addUser', user.addUserSubmit);
 app.get('/remUser', user.validateRemoveUser);
-app.get('/remUser', user.removeUserSubmit);
 app.post('/updateUser', user.validateUpdateUser);
+
+app.get('/admin', user.addUserForm);
+app.post('/addUser', user.addUserSubmit);
+app.get('/remUser', user.removeUserSubmit);
 app.post('/updateUser', user.updateUserSubmit);
 app.get('/users', user.viewUsers);
 
