@@ -152,61 +152,41 @@ app.get('/users', user.viewUsers);
  * Class manipulation routes
  */
 var classes = require('./classes.js');
+
 app.get('/addClass', function(req, res, next) {
   checkPermissions(current_user(req), {add_class: true}, res, next);
 });
-app.get('/addClass', classes.addClassForm);
-
 app.post('/addClass', function(req, res, next) {
   var tuser = parseInt(req.body.tuser);
   checkPermissions(current_user(req), {add_class_for_user: tuser}, res, next);
 });
-app.post('/addClass', classes.addClassSubmit);
-
-app.get('/editClass', function(req, res, next) {
-  checkPermissions(current_user(req), {edit_class: req.query.cid}, res, next);
+app.get('/((edit)|(rem)Class)|(remStud)|(quizzes)', function(req, res, next) {
+  var cid = parseInt(req.query.cid);
+  checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
-app.get('/editClass', classes.editClassForm);
-
 app.post('/editClass', function(req, res, next) {
   checkPermissions(current_user(req), {edit_class: req.body.cid}, res, next);
 });
-app.post('/editClass', classes.editClassSubmit);
-
 app.get('/classes', function(req, res, next) {
   checkPermissions(req.session.user, {view_classes: true}, res, next);
 });
-app.get('/classes', classes.viewClasses);
-
-app.get('/remStud', function(req, res, next) {
-  var cid = parseInt(req.query.cid);
-  var uid = parseInt(req.query.uid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, next);
-});
-app.get('/remStud', classes.removeStudentSubmit);
-
-app.get('/remClass', function(req, res, next) {
-  var cid = parseInt(req.query.cid);
-  checkPermissions(req.session.user, {edit_class: cid}, res, next);
-});
-app.get('/remClass', classes.removeClassSubmit);
-
 app.post('/student', function(req, res, next) {
   var cid = parseInt(req.body.cid);
-  var uid = parseInt(req.body.user);
   checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
-app.post('/student', classes.addStudentToClassSubmit);
-
 app.get('/student', function(req, res, next) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, next);
 });
-app.get('/student', classes.addStudentToClassForm);
 
-app.get('/quizzes', function(req, res, next) {
-  var cid = req.query.cid;
-  checkPermissions(req.session.user, {edit_class: cid}, res, next);
-});
+app.get('/addClass', classes.addClassForm);
+app.post('/addClass', classes.addClassSubmit);
+app.get('/editClass', classes.editClassForm);
+app.post('/editClass', classes.editClassSubmit);
+app.get('/classes', classes.viewClasses);
+app.get('/remStud', classes.removeStudentSubmit);
+app.get('/remClass', classes.removeClassSubmit);
+app.post('/student', classes.addStudentToClassSubmit);
+app.get('/student', classes.addStudentToClassForm);
 app.get('/quizzes', classes.viewClass);
 
 /**
