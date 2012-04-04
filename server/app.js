@@ -122,7 +122,7 @@ require('./validateForm')(app);
 
 
 /**
- * Class manipulation routes
+ * User manipulation routes
  */
 var user = require('./users.js');
 
