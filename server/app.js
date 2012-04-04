@@ -160,7 +160,7 @@ app.post('/addClass', function(req, res, next) {
   var tuser = parseInt(req.body.tuser);
   checkPermissions(current_user(req), {add_class_for_user: tuser}, res, next);
 });
-app.get('/((edit)|(rem)Class)|(remStud)|(quizzes)', function(req, res, next) {
+app.get('/(((edit)|(rem))Class)|(remStud)|(quizzes)', function(req, res, next) {
   var cid = parseInt(req.query.cid);
   checkPermissions(req.session.user, {edit_class: cid}, res, next);
 });
