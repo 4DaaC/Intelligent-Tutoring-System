@@ -14,6 +14,8 @@ exports.viewQuiz = viewQuiz;
 exports.enableQuizSubmit = enableQuizSubmit;
 exports.disableQuizSubmit = disableQuizSubmit;
 exports.viewQuizGrades = viewQuizGrades;
+exports.validateRemoveQuiz = validateRemoveQuiz;
+exports.validateAddQuiz = validateAddQuiz;
 
 function addQuizForm(req, res) {
   var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -186,4 +188,42 @@ function viewQuizGrades(req, res) {
 // Functions
 function removeQuiz(quizid, next) {
   client.query("DELETE FROM Quizzes WHERE qid = ?", [quizid], next);
+}
+
+// Validation
+function validateRemoveQuiz(req, res, next) {
+  var qString = "SELECT qid FROM Quizzes WHERE qid = ?";
+  client.query(qString, [req.query.qid], function(err, rows){
+    if(rows.length === 0) {
+      req.flash("error", "Quiz does not exist");
+      res.redirect('back');
+    }
+    else {
+      next();
+    }
+  });
+}
+
+function validateAddQuiz(req, res, next) {
+  var qname = req.body.qname;
+  var question_amount = parseInt(req.body.question_amount);
+  var foundErr = false;
+  if(qname.length <=0 || qname.length > 50) {
+    req.flash('error','Quiz Name must be between 1 and 50 characters long');
+    foundErr = true;
+  }
+  if(isNaN(question_amount)) {
+    req.flash('error', 'Question Amount must be a number');
+    foundErr = true;
+  }
+  if(question_amount <= 0) {
+    req.flash('error', 'Question Amount must be a positive number');
+    foundErr = true;
+  }
+  if(foundErr) {
+    res.redirect('back');
+  }
+  else {
+    next();
+  }
 }

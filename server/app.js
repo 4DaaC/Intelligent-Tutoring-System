@@ -219,6 +219,9 @@ app.post('/editQuiz', function(req, res, next) {
   checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
 });
 
+app.get('/remQuiz', quizzes.validateRemoveQuiz);
+app.post('(/addQuiz)|(/editQuiz)', quizzes.validateAddQuiz);
+
 app.get('/addQuiz', quizzes.addQuizForm);
 app.post('/addQuiz', quizzes.addQuizSubmit);
 app.get('/remQuiz', quizzes.removeQuizSubmit);
