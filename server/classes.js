@@ -15,6 +15,10 @@ exports.addStudentToClassSubmit = addStudentToClassSubmit;
 exports.addStudentToClassForm = addStudentToClassForm;
 exports.viewClasses = viewClasses;
 exports.viewClass = viewClass;
+exports.validateAddClass = validateAddClass;
+exports.validateRemoveStudent = validateRemoveStudent;
+exports.validateRemoveClass = validateRemoveClass;
+exports.validateAddStudent = validateAddStudent;
 
 //Routes
 function addClassForm(req, res) {
@@ -182,4 +186,80 @@ function removeClass(classid, next) {
 function addStudentToClass(studentid, classid, next) {
   var qString = "INSERT INTO Class_List (uid, cid) VALUES (?, ?)";
   client.query(qString, [studentid, classid], next);
+}
+
+// Validation
+function validateAddClass(req, res, next) {
+  var name = req.body.cname;
+  var limit = req.body.limit;
+  var priv = req.body.priv;
+  var foundErr = false;
+  if(name.length <= 1 || name.length >= 30) {
+    req.flash("error","Class Name must be between 1 and 30 characters long");
+    foundErr = true;
+  }
+  if(isNaN(parseInt(limit, 10)) || parseInt(limit, 10) <= 0) {
+    req.flash("error","Class Limit must be a positive number");
+    foundErr = true;
+  }
+  if(priv < 0 || priv > 1) {
+    req.flash("error","Privacy setting is invalid");
+    foundErr = true;
+  }
+  if(foundErr) {
+    res.redirect('back');
+  }
+  else {
+    next();
+  }
+}
+
+function validateRemoveStudent(req, res, next) {
+  var qString = "SELECT cid FROM Class_List WHERE cid = ? AND uid = ?";
+  client.query(qString, [req.query.cid, req.query.uid], function(err, rows) {
+    if(rows.length === 0) {
+      req.flash("error", "User is not in specified class");
+      res.redirect('back');
+    }
+    else {
+      next();
+    }
+  });
+}
+
+function validateRemoveClass(req, res, next){
+  var qString = "SELECT cid FROM Classes WHERE cid = ?";
+  client.query(qString, [req.query.cid], function(err, rows) {
+    if(rows.length === 0) {
+      req.flash("error", "Class does not exist");
+      res.redirect('back');
+    }
+    else {
+      next();
+    }
+  });
+}
+
+function validateAddStudent(req, res, next) {
+  var qString = "SELECT uid FROM Users WHERE uid = ?";
+  client.query(qString, [req.body.user], function(err, rows) {
+    var qString = "SELECT cid FROM Classes WHERE cid = ?";
+    client.query(qString, [req.body.cid], function(err, rows2) {
+      var foundErr = false;
+      if(rows.length === 0) {
+        req.flash("error", "User does not exist");
+        foundErr = true;
+      }
+      if(rows2.length === 0) {
+        req.flash("error", "Class does not exist");
+        foundErr = true;
+      }
+      if(foundErr) {
+        res.redirect('back');
+      }
+      else {
+        next();
+      }
+    });
+  });
 }

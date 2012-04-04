@@ -178,6 +178,11 @@ app.get('/student', function(req, res, next) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, next);
 });
 
+app.post('(/addClass)|(/editClass)', classes.validateAddClass);
+app.get('/remStud', classes.validateRemoveStudent);
+app.get('/remClass', classes.validateRemoveClass);
+app.post('/student', classes.validateAddStudent);
+
 app.get('/addClass', classes.addClassForm);
 app.post('/addClass', classes.addClassSubmit);
 app.get('/editClass', classes.editClassForm);
