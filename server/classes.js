@@ -20,6 +20,10 @@ exports.validateRemoveStudent = validateRemoveStudent;
 exports.validateRemoveClass = validateRemoveClass;
 exports.validateAddStudent = validateAddStudent;
 
+exports.disconnect = function() {
+	client.destroy();
+}
+
 //Routes
 function addClassForm(req, res) {
   var sqlStr = "SELECT * FROM Classes WHERE cid = ?";
