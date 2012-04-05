@@ -1,27 +1,33 @@
-if typeof(quiz) == 'undefined'
+- var isEdit = typeof(quiz) != 'undefined'
+if isEdit
   h1 Create a Quiz
 else
   h1 Edit Quiz
-form(method="post")
- table
-  tr
-    td Quiz Name:
-      input(type="text",name="qname",value="#{quiz.name}")
-  tr
-   td Class:
-    select(id="cid", name="cid")
-      for class in classes
-        -if (class.cid == select ||(typeof(quiz) != "undefined" && class.cid == quiz.cid))
-          option(value="#{class.cid}", selected="selected")= class.name
-        -else
-          option(value="#{class.cid}")= class.name
-  tr
-    td 
-      |Question Amount:
-      br
-      |(Number of questions students answer)
-      input(type="text",name="question_amount",value="#{quiz['question_amount']}")
-  tr
-    td
-      input(type="hidden",name="qid", value="#{quiz.qid}")
-      input(type="submit", value="Save Changes")
+form(method="post").form-horizontal
+  .control-group
+    .control-label Quiz Name
+    .controls
+      if isEdit
+        input(type="text",name="qname",value="#{quiz.name}")
+      else
+        input(type="text",name="qname")
+  .control-group
+    .control-label Class
+    .controls
+      select(id="cid", name="cid")
+        for class in classes
+          -if (class.cid == select ||(isEdit && class.cid == quiz.cid))
+            option(value="#{class.cid}", selected="selected")= class.name
+          -else
+            option(value="#{class.cid}")= class.name
+  .control-group
+    .control-label Question Amount
+    .controls
+      if isEdit
+        input(type="text",name="question_amount",value="#{quiz['question_amount']}")
+      else
+        input(type="text",name="question_amount")
+      p.help-block Number of questions students answer.  You must provide this many questions at each difficulty level before enabling the quiz.
+  if isEdit
+    input(type="hidden",name="qid", value="#{quiz.qid}")
+  input.btn.btn-primary(type="submit", value="Save Changes")

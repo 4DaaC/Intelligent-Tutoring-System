@@ -2,52 +2,39 @@
 html
   head
     title= title
+    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js')
     script(src='js/local.js')
+    script(src='js/bootstrap.min.js')
   body
-    #wrapper
-      #header
-        #title-wrap
-          a.title(href="/") RU Intelligent Tutoring System
-          .subtitle= title
-        #user-info
-          .user Logged in as #{userName}
-          a(href="/logout") Logout
-        .clear
-      #sidebar
-        ul
-          li
-            a(href="/") Home
-          if(!isStudent)
+    #navbar.navbar.navbar.container
+      .navbar-inner
+        .container
+          a.brand(href='/') RU Tutor
+          ul.nav.pull-left
+            li.divider-vertical
             li
-              |Classes
-              ul
-                li
-                  a(href="/classes") View Classes
-                li
-                  a(href="/addClass") Add Class
-                li
-                  a(href="/addQuiz") Add Quiz
+              a(href='/classes') Classes
             li
-              |Users
-              ul
-                li
-                  a(href="/users") View Users
-                li
-                  a(href="/student") Add Student to Class
-                if(isAdmin)
-                  li
-                    a(href="/admin") Add Users
-      #bd
-        if errors.length > 0
-          ul#error-box
-            -errors.forEach(function(error){
-              li= error
-            -})
-        != body
-      .clear
-    script
-      $(document).ready(function(){
-      $('#sidebar').css('height',$('#wrapper').css('height'));
-      });
+              a(href='/addClass') Add Class
+            li
+              a(href='/addQuiz') Add Quiz
+            li
+              a(href='/addModule') Add Module
+            li.divider-vertical
+            li
+              a(href='/users') Users
+          ul.nav.pull-right
+            li 
+              a(href='#') Logged in as #{userName}
+            li.divider-vertical
+            li
+              a(href='/logout') Logout
+    #bd.container
+      if errors.length > 0
+        ul#error-box
+          -errors.forEach(function(error){
+            li= error
+          -})
+      != body
