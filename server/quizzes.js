@@ -16,6 +16,7 @@ exports.disableQuizSubmit = disableQuizSubmit;
 exports.viewQuizGrades = viewQuizGrades;
 exports.validateRemoveQuiz = validateRemoveQuiz;
 exports.validateAddQuiz = validateAddQuiz;
+exports.validateEnableQuiz = validateEnableQuiz;
 
 function addQuizForm(req, res) {
   var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
@@ -42,8 +43,7 @@ function addQuizSubmit(req, res) {
   var cid = parseInt(req.body.cid);
   var qname = req.body.qname;
   var question_amount = req.body.question_amount;
-  var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
-  client.query(sqlStr, [qname, cid, question_amount], function(err) {
+  addQuiz(qname, cid, question_amount, function(err) {
     err && req.flash("error", err);
     res.redirect('/quizzes?cid=' + cid);
   });
@@ -97,7 +97,7 @@ function editQuizSubmit(req, res) {
   var cid = parseInt(req.body.cid);
   var question_amount = req.body.question_amount;
   var sqlStr = "UPDATE Quizzes SET name= ?, cid = ?, question_amount = ? WHERE qid = ?";
-  client.query(sqlStr, [qname, cid, question_amount, req.body.qid], function(err) {
+  editQuiz(qname, cid, question_amount, req.body.qid, function(err) {
     err && req.flash("error", err);
     res.redirect('/quizzes?cid=' + cid);
   });
@@ -127,38 +127,21 @@ function viewQuiz(req, res) {
 
 function enableQuizSubmit(req, res) {
   var qid = parseInt(req.query.qid);
-  var qString = "SELECT * FROM Quizzes WHERE qid = ?";
-  console.log(qString);
-  client.query(qString, [qid], function(err, quiz, fields) {
-    client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
-      console.log(results);
-      difficulty = [0,0,0,0];
-      question_amount = quiz[0]['question_amount'];
-      for(idx in results) {
-        difficulty[results[idx].difficulty] ++;
-      }
-      if(difficulty[1] >= question_amount && difficulty[2] >= question_amount && difficulty[3] >= question_amount) {
-        client.query("UPDATE Quizzes SET active= '1' WHERE qid = ?", [qid], function(err) {
-          if(err) {
-            console.log(err)
-            req.flash("error", err);
-          }
-          res.redirect('/viewQuiz?qid=' + qid);
-        });
-      }else{
-        req.flash("error", "This quiz does not have enough questions to be enabled");
-        res.redirect('/viewQuiz?qid=' + qid);
-      }
-    });
+  enableQuiz(qid, function(err) {
+    if(err) {
+      console.log(err)
+      req.flash("error", err);
+    }
+    res.redirect('/viewQuiz?qid=' + qid);
   });
 }
 
 function disableQuizSubmit(req, res) {
   var qid = parseInt(req.query.qid);
-  client.query("UPDATE Quizzes SET active = '0' WHERE qid = ?", [qid], function(err) {
+  disableQuiz(qid, function(err) {
     if(err) {
       console.log(err);
-      req.flash("error",err);
+      req.flash("error", err);
     }
     res.redirect('/viewQuiz?qid=' + qid);
   });
@@ -188,6 +171,24 @@ function viewQuizGrades(req, res) {
 // Functions
 function removeQuiz(quizid, next) {
   client.query("DELETE FROM Quizzes WHERE qid = ?", [quizid], next);
+}
+
+function addQuiz(quizname, classid, questionAmount, next) {
+  var sqlStr = "INSERT INTO Quizzes (name, cid, question_amount) VALUES (?, ?, ?)";
+  client.query(sqlStr, [quizname, classid, questionAmount], next);
+}
+
+function editQuiz(quizName, classid, questionAmount, quizid, next) {
+  var sqlStr = "UPDATE Quizzes SET name = ?, cid = ?, question_amount = ? WHERE qid = ?";
+  client.query(sqlStr, [quizName, classid, questionAmount, quizid], next);
+}
+
+function enableQuiz(quizid, next) {
+  client.query("UPDATE Quizzes SET active= '1' WHERE qid = ?", [quizid], next);
+}
+
+function disableQuiz(quizid, next) {
+  client.query("UPDATE Quizzes SET active = '0' WHERE qid = ?", [quizid], next);
 }
 
 // Validation
@@ -226,4 +227,24 @@ function validateAddQuiz(req, res, next) {
   else {
     next();
   }
+}
+
+function validateEnableQuiz(req, res, next) {
+  var quizid = parseInt(req.query.qid);
+  var qString = "SELECT * FROM Quizzes WHERE qid = ?";
+  client.query(qString, [quizid], function(err, quiz, fields) {
+    client.query("SELECT * FROM Questions WHERE qid = ?", [quizid], function(err, results, fields) {
+      difficulty = [0,0,0,0];
+      question_amount = quiz[0]['question_amount'];
+      for(idx in results) {
+        difficulty[results[idx].difficulty] ++;
+      }
+      if(difficulty[1] >= question_amount && difficulty[2] >= question_amount && difficulty[3] >= question_amount) {
+        next();
+      }else{
+        req.flash("error", "This quiz does not have enough questions to be enabled");
+        res.redirect('/viewQuiz?qid=' + quizid);
+      }
+    });
+  });
 }

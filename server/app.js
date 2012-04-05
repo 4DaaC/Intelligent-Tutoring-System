@@ -221,6 +221,7 @@ app.post('/editQuiz', function(req, res, next) {
 
 app.get('/remQuiz', quizzes.validateRemoveQuiz);
 app.post('(/addQuiz)|(/editQuiz)', quizzes.validateAddQuiz);
+app.get('/enableQuiz', quizzes.validateEnableQuiz);
 
 app.get('/addQuiz', quizzes.addQuizForm);
 app.post('/addQuiz', quizzes.addQuizSubmit);
