@@ -1,11 +1,3 @@
-script
- $(document).ready(function() {
- $.get("/studentList", function(data) {
-   for(var i = 0;i < data.length;i++) {
-    $('#list').append("<option value='"+data[i].uid+"'>"+data[i].username+"</option>");
-   }
-  })
- });
 form(method="post", action="/student")
  table
   tr
@@ -16,6 +8,8 @@ form(method="post", action="/student")
   tr
    td Student:
     select(id="list", name='user')
+      for student in students
+        option(value=student.uid)=student.username
   tr
    td
     input(type="submit", value="Add")

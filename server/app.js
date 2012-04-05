@@ -203,7 +203,7 @@ var quizzes = require('./quizzes.js');
 app.get('/addQuiz', function(req, res, next) {
   checkPermissions(req.session.user, {add_quiz: true}, res, next);
 });
-app.get('/((rem)|(view)|(enable)|(disable)Quiz)|(quizGrades)', function(req, res, next) {
+app.get('/(((rem)|(view)|(enable)|(disable))Quiz)|(quizGrades)', function(req, res, next) {
   var qid = parseInt(req.query.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
 });
