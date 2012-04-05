@@ -32,9 +32,12 @@ function addClassForm(req, res) {
       req.flash("error", err2);
       res.redirect('/classes');
     }
-    res.render('add_class', {
-      title: 'Add Class',
-      theClass: classes[0]
+    client.query("SELECT * FROM Users WHERE auth_level > 0",function(err3,profs){
+      res.render('edit_class', {
+        title: 'Add Class',
+        theClass: classes[0],
+        professors: profs
+      });
     });
   });
 }
@@ -56,9 +59,12 @@ function editClassForm(req, res) {
       req.flash("error",err2);
       res.redirect('/classes');
     }
-    res.render('edit_class', {
-      title: 'Edit Class',
-      theClass: classes[0]
+    client.query("SELECT * FROM Users WHERE auth_level > 0",function(err3,profs){
+      res.render('edit_class', {
+        title: 'Edit Class',
+        theClass: classes[0],
+        professors:profs
+      });
     });
   });
 }
@@ -113,15 +119,18 @@ function addStudentToClassForm(req, res) {
   }
   client.query(qString, function(err, results, fields) {
     console.log(results);
-    res.render('student_class', {
-      title: 'Add student to class',
-      classes: results
+    client.query("SELECT * FROM Users", function(err2, students){
+      res.render('student_class', {
+        title: 'Add student to class',
+        classes: results,
+        students:students
+      });
     });
   });
 }
 
 function viewClasses(req, res) {
-  qString = "select cid, username, name FROM Classes, Users WHERE Classes.uid = Users.uid";
+  qString = "select Classes.*, username, name FROM Classes, Users WHERE Classes.uid = Users.uid";
   if(req.session.user.auth != ADMIN) {
     qString += " AND Users.username = ?";
     qString = client.format(qString, [req.session.user.username]);
@@ -137,7 +146,7 @@ function viewClasses(req, res) {
 
 function viewClass(req, res) {
   var cid = req.query.cid;
-  var qString = "select qid, Quizzes.question_amount, Quizzes.name, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
+  var qString = "select Quizzes.*, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
     "AND Quizzes.cid = ?";
   console.log(qString);
   client.query(qString, [cid], function(err, results, fields) {

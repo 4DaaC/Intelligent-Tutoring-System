@@ -30,7 +30,7 @@ function addQuizForm(req, res) {
       res.redirect('back');
     }
     else {
-      res.render('add_quiz', {
+      res.render('edit_quiz', {
         title:'Add Quiz',
         classes: results,
         select: req.query.cid
