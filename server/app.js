@@ -3,14 +3,10 @@
  */
 
 var express = require('express');
-var fs = require('fs');
 var mysql = require('mysql');
 var app = module.exports = express.createServer();
 var config = require('./config');
 var checkPermissions = require('./checkPermissions.js');
-var mkdirp = require('mkdirp');
-var util = require('util');
-var formidable = require('formidable');
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
@@ -245,134 +241,24 @@ app.get('/editQuestion', quizzes.editQuestionForm);
 app.post('/editQuestion', quizzes.editQuestionSubmit);
 app.del('/question', quizzes.deleteQuestionSubmit);
 
-app.get('/addModule', function(req, res) {
-  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
-    var qString = "SELECT cid,Classes.name FROM Classes,Users WHERE Classes.uid = Users.uid";
-    if(!isAdmin(req)) {
-      qString += " AND Users.username = ?";
-      qString = client.format(qString, [current_user(req).username]);
-    }
-    client.query(qString, function(err, results, fields) {
-      if (results.length == 0) {
-        req.flash('error', "You must create a class first");
-        res.redirect('back');
-      }
-      else {
-        res.render('add_module', {
-          title:'Add Module',
-          classes: results,
-          select: req.query.cid
-        });
-      }
-    });
-  });
-});
+/**
+ * Module manipulation routes
+ */
+var modules = require('./modules.js');
 
-function dirpString() {
-  var time = new Date().getTime().toString();
-  var dir = "uploads/";
-  for(num = 0; num < time.length; num = num + 2){
-    dir += time.substring(num, num + 2) + '/';
-  }
-  if (dir.substring(dir.length-1) == '/')
-    return dir;
-  else return dir + '/';
-}
-
-app.post('/addModule', function(req,res){
-  checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
-    console.log('START');
-    var name = req.body.mname;
-    var cid = req.body.cid;
-    //if(isAdmin(req)) {
-      console.log("IS_ADMIN");
-      var form = new formidable.IncomingForm();
-      console.log("PREDERP");
-      console.log("DERP");
-      if(req.files['pdf-file'].type != 'application/pdf' || req.files['pdf-file'].size > 10485760){
-        console.log('not valid');
-        req.flash('error','File must be a .pdf file and less than 10 Mb');
-        res.redirect('back');
-      }else{
-      var dirp = dirpString();
-      mkdirp('public/'+dirp, 0777, function(derrp) {
-        console.log(derrp)
-        var files = req.files;
-        console.log("DERPED");
-        console.log(files['pdf-file']);
-        var is = fs.createReadStream(files['pdf-file'].path);
-        var os = fs.createWriteStream("public/"+dirp+files['pdf-file'].name);
-        util.pump(is, os, function() {
-          console.log("PUMPED");
-          fs.unlinkSync(files['pdf-file'].path);
-          var qString = "INSERT INTO Modules (cid, title, filepath) VALUES (?, ? , ?)";
-          client.query(qString, [cid, name, dirp+files['pdf-file'].name], function(err) {
-            console.log("INSERTED");
-            if(err) {
-              console.log(err);
-              req.flash('error', err);
-              res.redirect('back');
-            } else {
-              res.redirect('/quizzes?cid='+cid);
-            }
-          });
-        });
-      });
-      }
-    //} else {
-      //TODO check permissions for non-admin
-    //}
-  });
+app.all('/addModule', function(req, res, next) {
+  checkPermissions(req.session.user, {add_quiz: true}, res, next);
 });
-app.get('/remModule',function(req,res){
+app.get('/(rem)|(enable)|(disable)Module', function(req, res, next) {
   var mid = parseInt(req.query.mid);
-  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
-    client.query("SELECT filepath FROM Modules WHERE mid = ?",[mid],function(err,results){
-      if(err){
-        console.log(err);
-        req.flash('error',err);
-        res.redirect('back');
-      }
-      else if(results.length < 1){
-        console.log("Module Not Found");
-        req.flash('error', "Module not found");
-        res.redirect('back');
-      }else{
-        filepath = results[0].filepath;
-        fs.unlink('public/' + filepath);
-        client.query("DELETE FROM Modules WHERE mid = ?", [mid], function(err){
-          res.redirect('back');
-        });
-      }
-    });
-  });
+  checkPermissions(req.session.user, {edit_module: mid}, res, next)
 });
 
-app.get('/enableModule', function(req,res) {
-  var mid = parseInt(req.query.mid);
-  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
-    client.query("UPDATE Modules SET active= '1' WHERE mid = ?", [mid],function(err){
-      if(err){
-        console.log(err)
-        req.flash("error",err);
-      }
-      res.redirect('back');
-    });
-  });
-});
-
-app.get('/disableModule', function(req,res) {
-  var mid = parseInt(req.query.mid);
-  checkPermissions(req.session.user, {edit_module: mid}, res, function(err) {
-    client.query("UPDATE Modules SET active= '0' WHERE mid = ?", [mid],function(err){
-      if(err){
-        console.log(err)
-        req.flash("error",err);
-      }
-      res.redirect('back');
-    });
-  });
-});
+app.get('/addModule', modules.addModuleForm);
+app.post('/addModule', modules.addModuleSubmit);
+app.get('/remModule', modules.removeModuleSubmit);
+app.get('/enableModule', modules.enableModuleSubmit);
+app.get('/disableModule', modules.disableModuleSubmit);
 
 app.get('/', function(req, res){
   res.render('index', {
