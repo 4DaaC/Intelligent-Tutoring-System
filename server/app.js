@@ -11,7 +11,6 @@ var checkPermissions = require('./checkPermissions.js');
 var mkdirp = require('mkdirp');
 var util = require('util');
 var formidable = require('formidable');
-var validate = require('./validateForm.js');
 /*var app = module.exports = express.createServer({
   key: fs.readFileSync('server.key'),
   cert: fs.readFileSync('server.crt')
@@ -118,8 +117,6 @@ app.get('*',requireLogin);
 app.put('*',requireLogin);
 app.post('*',requireLogin);
 require('./routes/index')(app,client);
-require('./validateForm')(app);
-
 
 /**
  * User manipulation routes
@@ -231,6 +228,7 @@ app.del('/question', function(req, res, next) {
 app.get('/remQuiz', quizzes.validateRemoveQuiz);
 app.post('(/addQuiz)|(/editQuiz)', quizzes.validateAddQuiz);
 app.get('/enableQuiz', quizzes.validateEnableQuiz);
+app.post('/(addQuestion)|(editQuestion)', quizzes.validateAddQuestion);
 
 app.get('/addQuiz', quizzes.addQuizForm);
 app.post('/addQuiz', quizzes.addQuizSubmit);
