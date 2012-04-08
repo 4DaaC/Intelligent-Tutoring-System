@@ -203,7 +203,8 @@ var quizzes = require('./quizzes.js');
 app.get('/addQuiz', function(req, res, next) {
   checkPermissions(req.session.user, {add_quiz: true}, res, next);
 });
-app.get('/(((rem)|(view)|(enable)|(disable))Quiz)|(quizGrades)', function(req, res, next) {
+app.get('/(((rem)|(view)|(enable)|(disable))Quiz)|(quizGrades)' +
+    '|((add)|(edit)Question)' , function(req, res, next) {
   var qid = parseInt(req.query.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
 });
@@ -214,9 +215,17 @@ app.post('/addQuiz', function(req, res, next) {
 app.get('/editQuiz', function(req, res, next) {
   checkPermissions(req.session.user, {view_edit_class: true}, res, next);
 });
-app.post('/editQuiz', function(req, res, next) {
+app.post('/(editQuiz)|(addQuestion)', function(req, res, next) {
   var qid = parseInt(req.body.qid);
   checkPermissions(req.session.user, {edit_quiz: qid}, res, next);
+});
+app.post('/editQuestion', function(req, res, next) {
+  var questid = req.body.questid;
+  checkPermissions(req.session.user, {edit_question: questid}, res, next);
+});
+app.del('/question', function(req, res, next) {
+  var questid = req.body.questid;
+  checkPermissions(req.session.user, {edit_question: questid}, res, next);
 });
 
 app.get('/remQuiz', quizzes.validateRemoveQuiz);
@@ -232,6 +241,11 @@ app.get('/viewQuiz', quizzes.viewQuiz);
 app.get('/enableQuiz', quizzes.enableQuizSubmit);
 app.get('/disableQuiz', quizzes.disableQuizSubmit);
 app.get('/quizGrades', quizzes.viewQuizGrades);
+app.get('/addQuestion', quizzes.addQuestionForm);
+app.post('/addQuestion', quizzes.addQuestionSubmit);
+app.get('/editQuestion', quizzes.editQuestionForm);
+app.post('/editQuestion', quizzes.editQuestionSubmit);
+app.del('/question', quizzes.deleteQuestionSubmit);
 
 app.get('/addModule', function(req, res) {
   checkPermissions(req.session.user, {add_quiz: true}, res, function(err) {
@@ -358,126 +372,6 @@ app.get('/disableModule', function(req,res) {
         req.flash("error",err);
       }
       res.redirect('back');
-    });
-  });
-});
-
-app.get('/addQuestion', function(req, res) {
-  var questid = req.query.questid;
-  var qid = req.query.qid;
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    res.render(req.query.type, {
-      title: '',
-      qid: qid,
-      action: 'addQuestion',
-      answers: '{}',
-      questid: '-1',
-      quest: '{}',
-      add: true,
-      name: ''
-    });
-  });
-});
-
-app.post('/addQuestion', function(req, res) {
-  var qid = parseInt(req.body.qid);
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    ans = stringify(req.body.ans);
-    cor = stringify(req.body.correct);
-    var qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    qString = client.format(qString, [qid, req.body.type, req.body.question, ans, cor, req.body.cat, req.body.diff]);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      }
-      else {
-        res.redirect('/viewQuiz?qid=' + qid);
-      }
-    });
-  });
-});
-
-app.get('/editQuestion', function(req, res) {
-  var questid = req.query.questid;
-  var qid = req.query.qid;
-  checkPermissions(req.session.user, {edit_quiz: qid}, res, function(err) {
-    var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
-    qString = client.format(qString, [qid, questid]);
-    console.log(qString);
-    client.query(qString, function(err, results, fields) {
-      var pass = {
-        title : '',
-        qid: qid,
-        action: 'editQuestion',
-        answers: results[0].answers,
-        questid: questid,
-        quest: results[0],
-        name : results[0].question,
-        add: false
-      };
-      if(results[0].type == 'short') {
-        res.render('short', pass);
-      }
-      else if(results[0].type == 'multi') {
-        res.render('multi', pass)
-      }
-      else if(results[0].type == 'tf') {
-        res.render('tf', pass);
-      }
-      else {
-        console.log('Could not find questid = '+questid+' and qid = '+qid);
-        res.send(503);
-      } 
-    });
-  });
-});
-
-app.post('/editQuestion', function(req, res) {
-  var qid = parseInt(req.body.qid);
-  var questid = req.body.questid;
-  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
-    ans = stringify(req.body.ans);
-    cor = stringify(req.body.correct);
-    var qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
-    qString = client.format(qString, [req.body.question, req.body.type, ans, cor, req.body.cat, req.body.diff, questid]);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      }
-      else {
-        res.redirect('/viewQuiz?qid=' + qid);
-      }
-    });
-  });
-});
-
-function stringify(str) {
-  str = JSON.stringify(str);
-  if(str != undefined && str[0] == '"') {
-    str = '['+str+']';
-  }
-  else if(str == undefined) {
-    str = '[]';
-  }
-  return str;
-}
-
-app.del('/question', function(req, res) {
-  var questid = req.body.questid;
-  checkPermissions(req.session.user, {edit_question: questid}, res, function(err) {
-    console.log(questid);
-    var qString = 'DELETE FROM Questions WHERE questid = ?';
-    qString = client.format(qString, [questid]);
-    client.query(qString, function(err) {
-      if(err) {
-        console.log(err);
-        res.send(503);
-      }
-      else {
-        res.send(200);
-      }
     });
   });
 });
