@@ -192,9 +192,7 @@ function addQuestionSubmit(req, res) {
   var qid = parseInt(req.body.qid);
   var ans = stringify(req.body.ans);
   var cor = stringify(req.body.correct);
-  var qString = "INSERT INTO Questions (qid, type, question, answers, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  qString = client.format(qString, [qid, req.body.type, req.body.question, ans, cor, req.body.cat, req.body.diff]);
-  client.query(qString, function(err) {
+  addQuestion(qid, req.body.type, req.body.question, ans, cor, req.body.cat, req.body.diff, function(err) {
     if(err) {
       console.log(err);
       res.send(503);
@@ -243,9 +241,8 @@ function editQuestionSubmit(req, res) {
   var questid = req.body.questid;
   var ans = stringify(req.body.ans);
   var cor = stringify(req.body.correct);
-  var qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
-  qString = client.format(qString, [req.body.question, req.body.type, ans, cor, req.body.cat, req.body.diff, questid]);
-  client.query(qString, function(err) {
+  editQuestion(questid, req.body.question, req.body.type, ans, cor, req.body.cat,
+      req.body.diff, function(err) {
     if(err) {
       console.log(err);
       res.send(503);
@@ -259,9 +256,7 @@ function editQuestionSubmit(req, res) {
 function deleteQuestionSubmit(req, res) {
   var questid = req.body.questid;
   console.log(questid);
-  var qString = 'DELETE FROM Questions WHERE questid = ?';
-  qString = client.format(qString, [questid]);
-  client.query(qString, function(err) {
+  deleteQuestion(questid, function(err) {
     if(err) {
       console.log(err);
       res.send(503);
@@ -293,6 +288,25 @@ function enableQuiz(quizid, next) {
 
 function disableQuiz(quizid, next) {
   client.query("UPDATE Quizzes SET active = '0' WHERE qid = ?", [quizid], next);
+}
+
+function addQuestion(quizid, type, question, answers, correctAnswer, category, difficulty, next) {
+  var qString = "INSERT INTO Questions (qid, type, question, answers, "
+    + "correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  client.query(qString, [quizid, type, question, answers, correctAnswer,
+      category, difficulty], next);
+}
+
+function editQuestion(questionid, question, type, answers, correctAnswer, category, difficulty, next) {
+  var qString = "UPDATE Questions SET question = ?, type = ?, answers = ?, "
+    + "correct_answer = ?, category = ?, difficulty = ? WHERE questid = ?";
+  client.query(qString, [question, type, answers, correctAnswer, category,
+      difficulty, questionid], next);
+}
+
+function deleteQuestion(questionid, next) {
+  var qString = 'DELETE FROM Questions WHERE questid = ?';
+  client.query(qString, [questionid], next);
 }
 
 function stringify(str) {
