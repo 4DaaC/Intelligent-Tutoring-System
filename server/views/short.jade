@@ -1,47 +1,17 @@
-h3 #{name}
-form(action="#{action}", method="POST")
-  |Category
-  if add
-    input(type="text", name="cat")
-  else
-    input(type="text", name="cat", value="#{quest.category}")
-  br
-  |Difficulty
-  select(name="diff")
-    if quest.difficulty == 1
-      option(value=1, selected="selected") Easy
-    else
-      option(value=1) Easy
-    if quest.difficulty == 2
-      option(value=1, selected="selected") Medium
-    else
-      option(value=2) Medium
-    if quest.difficulty == 3
-      option(value=1, selected="selected") Hard
-    else
-      option(value=3) Hard
-  br
-  br
-  |Question
-  br
-  textarea(name="question", rows="5", cols="40") #{name}
-  br
-  br
-  button#addno(type="button") Add
-  |&nbsp;Answer
-  ol#choices
-    if add
-      li
-        textarea(name="correct")
-        button(type="button", class="del")
-          |Del
-    else
-      each choice in JSON.parse(quest.correct_answer)
-        li
-          textarea(name="correct") #{choice}
-          button(type="button", class="del")
-            |Del
-  input(type="submit", value="Save")
-  input(type="hidden", name="type", value="short")
-  input(type="hidden", name="qid", value="#{qid}")
-  input(type="hidden", name="questid", value="#{questid}")
+include question
+  .control-group
+    .control-label Answers
+      br
+      button.btn#addno(type="button") Add Answer
+    #choices.controls 
+      if add
+        .input-append
+          input.span8(type='text', name="correct")
+          button.btn.btn-danger(type="button", class="del")
+            i.icon-remove-sign
+      else
+        each choice in JSON.parse(quest.correct_answer)
+          .input-append
+            input.span8(type="text",name="correct", value="#{choice}")
+            button.btn.btn-danger(type="button", class="del")
+              i.icon-remove-sign

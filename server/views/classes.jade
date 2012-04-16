@@ -2,33 +2,35 @@
   h1 No Classes Found
 -else
   h1 Classes
-  table.table.table-bordered.table-striped.table-condensed
-    tr
-      th
-        |Class
-      th
-        |Professor
-      th
-        |Student Limit(Not Used)
-      th
-        |Privacy(Not Used)
-      th
-    for class in classes
+  table.table.table-bordered.table-striped.table-condensed.default-sort
+    thead
       tr
-        td
-          strong=class.name
-        td
-          =class.username
-        td
-          =class.classlimit
-        td
-          if class.privacy == 0
-            |Public
-          else
-            |Private
-        td
-          .btn-group
-            a.btn(href="/quizzes?cid=#{class.cid}") View Class
-            a.btn(href="/editClass?cid=#{class.cid}") Edit Class
-            a.btn.btn-danger(href="/remClass?cid=#{class.cid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+        th
+          |Class
+        th
+          |Professor
+        th
+          |Student Limit(Not Used)
+        th
+          |Privacy(Not Used)
+        th
+    tbody
+      for class in classes
+        tr
+          td
+            strong=class.name
+          td
+            =class.username
+          td
+            =class.classlimit
+          td
+            if class.privacy == 0
+              |Public
+            else
+              |Private
+          td
+            .btn-group
+              a.btn(href="/quizzes?cid=#{class.cid}") View Class
+              a.btn(href="/editClass?cid=#{class.cid}") Edit Class
+              a.btn.btn-danger(href="/remClass?cid=#{class.cid}",onClick="return confirm('Are you sure you want to delete?');") Delete
 a.btn.btn-primary.right(href="/addClass") Add a Class

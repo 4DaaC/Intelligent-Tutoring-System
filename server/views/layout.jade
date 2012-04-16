@@ -4,9 +4,12 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
-    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js')
-    script(src='js/local.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
     script(src='js/bootstrap.min.js')
+    script(src='js/jquery.tablesorter.min.js')
+    script(src='js/jquery.tablesorter.pager.js')
+    script(src='js/jquery.metadata.js')
+    script(src='js/local.js')
   body
     #navbar.navbar.navbar.container
       .navbar-inner
@@ -33,8 +36,11 @@ html
               a(href='/logout') Logout
     #bd.container
       if errors.length > 0
-        ul#error-box
-          -errors.forEach(function(error){
-            li= error
-          -})
+        #error-box.alert.alert-block.alert-error
+          a.close(data-dismiss="alert") x
+          h4.alert-heading Error
+          ul
+            -errors.forEach(function(error){
+              li= error
+            -})
       != body

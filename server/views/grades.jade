@@ -1,73 +1,94 @@
 h1 Grades
-table#grades-table
-  tr
-    th Question
-    th Type
-    th Category
-    th Difficulty
-    th Answer
-    th Attempts
-    th Avg Time Taken (Mins)
-    th % Correct
-  -for(var idx in questions){
-    question = questions[idx]
+table#grades-table.table.table-bordered.table-striped
+  thead
     tr
-      td #{question.question}
-      td #{question.type}
-      td #{question.category}
-      -if (question.difficulty == 1)
-        td Easy
-      -else if(question.difficulty == 2)
-        td Medium
-      -else
-        td Hard
-      correctAnswers = JSON.parse(question['correct_answer'])
-      td
-        table
-          -correctAnswers.forEach(function(answer){
-            tr
-              td #{answer}
-          -})
-      -var numAttempted = 0;
-      -var numCorrect = 0;
-      -var timeSpent = 0;
-      td
-        table
-          tr
-            th Username
-            th Answer
-          
-          -answers.forEach(function(answer){
-            -if (answer.questid == question.questid)
-              -timeSpent += answer['time_spent']
-              -numAttempted ++
-              -var answersLowered = new Array()
-              -for(var index in correctAnswers){
-                -corr=correctAnswers[index]
-                -answersLowered.push(corr.toLowerCase())
-              -}
-              -if (answersLowered.indexOf(answer['saved_answer'].toLowerCase()) != -1)
-                -numCorrect ++
-                tr.correct
-                  td #{answer.username}
-                  td #{answer['saved_answer']}
-              -else
-                tr.incorrect
-                  td #{answer.username}
-                  td #{answer['saved_answer']}
-          -})
-      td
-        -if (numAttempted > 0)
-          |#{(timeSpent / numAttempted / 60).toFixed(2)}
+      th Category
+      th Difficulty
+      th Question
+      th Type
+      th Attempts
+      th Avg Time Taken (Mins)
+      th % Correct
+  tbody
+    -for(var idx in questions){
+      question = questions[idx]
+      tr
+        td #{question.category}
+        -if (question.difficulty == 1)
+          td 
+            span.label.label-success Easy
+        -else if(question.difficulty == 2)
+          td 
+            span.label.label-warning Medium
         -else
-          |n/a
-      td
-        -if (numAttempted > 0)
-          |#{(numCorrect/numAttempted) * 100}%
-        -else
-          |Not Taken
-  -}
-
+          td 
+            span.label.label-important Difficult
+        td
+          em #{question.question}
+        td
+          if question.type == 'multi'
+            span.label.label-inverse Multiple Choice
+          if question.type == 'tf'
+            span.label.label-inverse True/False
+          if question.type == 'short'
+            span.label.label-inverse Short Answer
+        correctAnswers = JSON.parse(question['correct_answer'])
+        -var numAttempted = 0;
+        -var numCorrect = 0;
+        -var timeSpent = 0;
+        td
+          .modal.fade(id="attempts" + question.questid)
+            .modal-header
+              h3 Attempts
+            .modal-body
+              table.table.table-bordered.table-condensed
+                tr
+                  th Username
+                  th Answer
+                -answers.forEach(function(answer){
+                -if (answer.questid == question.questid)
+                  -timeSpent += answer['time_spent']
+                  -numAttempted ++
+                  -var answersLowered = new Array()
+                  -for(var index in correctAnswers){
+                    -corr=correctAnswers[index]
+                    -answersLowered.push(corr.toLowerCase())
+                  -}
+                  -if (answersLowered.indexOf(answer['saved_answer'].toLowerCase()) != -1)
+                    -numCorrect ++
+                    tr.correct
+                      td #{answer.username}
+                      td.correct #{answer['saved_answer']}
+                  -else
+                    tr.incorrect
+                      td #{answer.username}
+                      td.incorrect #{answer['saved_answer']}
+                -})
+            .modal-footer
+              a.btn.btn-danger(href='#', data-dismiss='modal') Close
+          .input-append.input-prepend
+            span.add-on=numAttempted
+            a.btn(data-toggle='modal', data-target="#attempts" + question.questid) View Attempts
+        td
+          -if (numAttempted > 0)
+            |#{(timeSpent / numAttempted / 60).toFixed(2)}
+          -else
+            |n/a
+        td
+          -if (numAttempted > 0)
+            |#{(numCorrect/numAttempted) * 100}%
+          -else
+            |Not Taken
+    -}
+script
+  $(function(){
+  $('#grades-table').tablesorter({
+    headers:{
+    1:{sorter:'difficulty'},
+    4:{sorter:'attempts'}
+    }
+  });
+  });
 #individualGrades
   h2 Individual Grades
   -var users = new Array();
@@ -76,44 +97,66 @@ table#grades-table
       -users[answers[i].username] = new Array();
     -users[answers[i].username].push(answers[i])
   -for(var i in users)
-    h3 #{i}
     -var student_answers = users[i]
-    table
-      tr
-        th Question
-        th Type
-        th Category
-        th Difficulty
-        th Correct Answer
-        th Student Answer
-        th Time Taken
-      -for(var j in student_answers)
-        -var ans = student_answers[j]
-        -var question = questions[ans.questid]
-        tr
-          td #{question.question}
-          td #{question.type}
-          td #{question.category}
-          -if (question.difficulty == 1)
-            td Easy
-          -else if(question.difficulty == 2)
-            td Medium
-          -else
-            td Hard
-          correctAnswers = JSON.parse(question['correct_answer'])
-          td
-            table
-              -correctAnswers.forEach(function(answer){
-                tr
-                  td #{answer}
-              -})
-          -var answersLowered = new Array()
-          -for(var index in correctAnswers){
-            -corr=correctAnswers[index]
-            -answersLowered.push(corr.toLowerCase())
-          -}
-          -if (answersLowered.indexOf(ans.saved_answer.toLowerCase()) != -1)
-            td.correct #{ans.saved_answer}
-          -else
-            td.incorrect #{ans.saved_answer}
-          td #{ans.time_spent}
+      .grade-link.input-prepend.input-append
+        a.btn(data-toggle='modal', data-target="#user-attempts-" + i) View Grade
+        h4.add-on #{i}
+    .modal.fade(id="user-attempts-" + i)
+      .modal-header
+        h3 #{i} Answers
+      .modal-body
+        table.table.table-bordered.table-striped
+          thead
+            tr
+              th Question
+              th Type
+              th Category
+              th Difficulty
+              th Correct Answer
+              th Student Answer
+              th Time Taken (Seconds)
+          tbody
+            -for(var j in student_answers)
+              -var ans = student_answers[j]
+              -var question = questions[ans.questid]
+              tr
+                td
+                  em #{question.question}
+                td 
+                  if question.type == 'multi'
+                    span.label.label-inverse Multiple Choice
+                  if question.type == 'tf'
+                    span.label.label-inverse True/False
+                  if question.type == 'short'
+                    span.label.label-inverse Short Answer
+
+                td #{question.category}
+                -if (question.difficulty == 1)
+                  td
+                    span.label.label-success Easy
+                -else if(question.difficulty == 2)
+                  td
+                    span.label.label-warning Medium
+                -else
+                  td
+                    span.label.label-important Difficult
+                correctAnswers = JSON.parse(question['correct_answer'])
+                td
+                  -correctAnswers.forEach(function(answer){
+                    .corr-answer #{answer}
+                  -})
+                -var answersLowered = new Array()
+                -for(var index in correctAnswers){
+                  -corr=correctAnswers[index]
+                  -answersLowered.push(corr.toLowerCase())
+                -}
+                -if (answersLowered.indexOf(ans.saved_answer.toLowerCase()) != -1)
+                  td.correct #{ans.saved_answer}
+                -else
+                  td.incorrect #{ans.saved_answer}
+                td #{ans.time_spent}
+      .modal-footer
+              a.btn.btn-danger(href='#', data-dismiss='modal') Close
+
+script
+  $('.modal').modal({show:false,backdrop:false});
