@@ -1,15 +1,15 @@
-form(method="post", action="/student")
- table
-  tr
-   td Class:
-    select(name='cid')
-     for c in classes
-      option(value="#{c.cid}") #{c.name}
-  tr
-   td Student:
-    select(id="list", name='user')
-      for student in students
-        option(value=student.uid)=student.username
-  tr
-   td
-    input(type="submit", value="Add")
+h1 Add Student to Class
+form(method="post", action="/student").horizontal-form
+  .control-group
+    .control-label Class
+    .controls
+      select(name='cid')
+        for c in classes
+          option(value="#{c.cid}") #{c.name}
+  .control-group
+    .control-label Student
+    .controls
+      select(id="list", name='user')
+        for student in students
+          option(value=student.uid)=student.username
+  input.btn.btn-primary(type="submit", value="Add")

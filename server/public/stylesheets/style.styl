@@ -27,20 +27,47 @@ html,body
     -webkit-border-radius:0;
 a
   color: #00B7FF
-#error-box
-  background-color:#FCC
-  padding:20px
 tr.correct, td.correct
-  background:#DFD
+  background:#DFD !important
 tr.incorrect, td.incorrect
-  background:#E77
+  background:#E77 !important
+#quest-count
+  width:300px;
 #grades-table
   font-size:12px
 td.pass
   color:green
 td.fail
   color:red
+.quiz-status
+  .disabled
+    color:red
+  .enabled
+    color:green
 th
   font-style:italic
 .right
   float:right
+.del
+  height:28px;
+th.header
+    background-image: url(../img/bg.gif)
+    cursor: pointer
+    font-weight: bold
+    background-repeat: no-repeat
+    background-position: center left
+    padding-left: 20px
+    border-right: 1px solid #dad9c7
+    margin-left: 5px
+
+th.headerSortUp
+    background-image: url(../img/asc.gif)
+th.headerSortDown
+    background-image: url(../img/desc.gif)
+.grade-link
+  margin-left: 5px
+  margin-bottom: 5px
+  .add-on
+    background-color: #F
+    padding:4px 10px
+    font-size:14pt

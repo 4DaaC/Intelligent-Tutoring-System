@@ -184,6 +184,7 @@ function addQuestionForm(req, res) {
     questid: '-1',
     quest: '{}',
     add: true,
+    type: req.query.type,
     name: ''
   });
 }
@@ -210,28 +211,36 @@ function editQuestionForm(req, res) {
   qString = client.format(qString, [qid, questid]);
   console.log(qString);
   client.query(qString, function(err, results, fields) {
-    var pass = {
-      title : '',
-      qid: qid,
-      action: 'editQuestion',
-      answers: results[0].answers,
-      questid: questid,
-      quest: results[0],
-      name : results[0].question,
-      add: false
-    };
+    if(err || results.length < 1){
+      console.log(err);
+      res.send(503);
+    }else{
+    var type = 'undefined';
     if(results[0].type == 'short') {
-      res.render('short', pass);
+      type = 'short';
     }
     else if(results[0].type == 'multi') {
-      res.render('multi', pass)
+      type = 'multi';
     }
     else if(results[0].type == 'tf') {
-      res.render('tf', pass);
+      type = 'tf';
     }
-    else {
+    if(type != 'undefined'){
+      res.render(type,{
+        title : '',
+        qid: qid,
+        action: 'editQuestion',
+        answers: results[0].answers,
+        questid: questid,
+        quest: results[0],
+        name : results[0].question,
+        type: type,
+        add: false
+      });
+    }else {
       console.log('Could not find questid = '+questid+' and qid = '+qid);
       res.send(503);
+    }
     }
   });
 }

@@ -1,4 +1,27 @@
 $(document).ready(function() {
+  $.tablesorter.addParser({
+    id: 'difficulty',
+    is: function(s) {
+      return false;
+    },
+    format: function(s){
+      return s.toLowerCase().replace(/easy/,0).replace(/medium/,1).replace(/difficult/,2);
+    },
+  type: 'numeric'
+  });
+  $.tablesorter.addParser({
+    id: 'attempts',
+    is: function(s) {
+      return false;
+    },
+    format: function(s){
+      console.log(s);
+      var test = s.replace(/^.+Close/,'').replace(/View Attempts$/,'');
+      console.log(test);
+      return test;
+    },
+  type: 'numeric'
+  });
   $('#cb').click(clear);
   $('#submit').click(function() {
     $.ajax({
@@ -11,6 +34,7 @@ $(document).ready(function() {
       }
     });
   });
+  $('.default-sort').tablesorter();
   $('#qform').submit(function() {
     $('textarea[name="ans"]').each(function(index, element){
       var text = $(element);
@@ -18,10 +42,10 @@ $(document).ready(function() {
     });
   });
   $('#add').click(function() {
-    $('#choices').append('<li><textarea name="ans"></textarea><input type="checkbox" name="correct"/><button type="button" class="del">Del</button></li>');
+    $('#choices').append('<div class="input-prepend input-append"><span class="add-on"><input type="checkbox" name="correct"/></span><input type="text" name="ans" class="span8"/><button type="button" class="btn btn-danger del"><i class="icon-remove-sign"></i></button></div>');
   });
   $('#addno').click(function() {
-    $('#choices').append('<li><textarea name="correct"></textarea><button type="button", class="del">Del</button></li>');
+    $('#choices').append('<div class="input-append"><input type="text" class="span8" name="correct"/><button type="button" class="btn btn-danger del"><i class="icon-remove-sign"></i></button></div>');
   });
   $('.del').live("click", function() {
     $(this).parent().empty().remove(); 

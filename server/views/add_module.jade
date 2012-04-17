@@ -2,26 +2,23 @@ if typeof(module) == 'undefined'
   h1 Create a Learning Module
 else
   h1 Edit Learning Module
-form(method="post", enctype="multipart/form-data")
- table
-  tr
-    td Module Name:
+form(method="post", enctype="multipart/form-data").horizontal-form
+  .control-group
+    .control-label Module Name
+    .controls
       input(type="text", name="mname")
-  tr
-   td Class:
-    select(id="cid", name="cid")
-      for class in classes
-        -if (class.cid == select)
-          option(value="#{class.cid}", selected="selected")= class.name
-        -else
-          option(value="#{class.cid}")= class.name
-  tr
-    td 
-      |Module PDF:
-      br
-      |(.pdf must be less than 10Mb)
-      br
+  .control-group
+    .control-label Class
+    .controls
+      select(id="cid", name="cid")
+        for class in classes
+          -if (class.cid == select)
+            option(value="#{class.cid}", selected="selected")= class.name
+          -else
+            option(value="#{class.cid}")= class.name
+  .control-group
+    .control-label Module PDF
+    .controls
       input(type="file", name="pdf-file", accept="application/pdf")
-  tr
-    td
-      input(type="submit", value="Add")
+      p.help-block (.pdf must be less than 10Mb)
+  input.btn.btn-primary(type="submit", value="Add")

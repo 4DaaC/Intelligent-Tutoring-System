@@ -1,19 +1,19 @@
 h1 Add a User
-form(method="post", action="/addUser")
- table
-  tr
-   td(colspan=6) Username:
-    input(type="text", name="user")
-  tr
-   td Admin
-   td
-    input(type="radio", name="auth", value="2")
-   td Professor
-   td
-    input(type="radio", name="auth", value="1")
-   td Student
-   td
-    input(type="radio", name="auth", value="0", checked)
-  tr
-   td(colspan=6)
-    input(type="submit", value="Add")
+form(method="post", action="/addUser").form-horizontal
+  .control-group
+    .control-label Username
+    .controls 
+      input(type="text", name="user")
+  .control-group
+    .control-label User Type
+    .controls
+      label.radio
+        input(type="radio", name="auth", value="2")
+        | Admin
+      label.radio
+        input(type="radio", name="auth", value="1")
+        | Professor
+      label.radio
+        input(type="radio", name="auth", value="0", checked)
+        | Student
+  input.btn-primary(type="submit", value="Add")
