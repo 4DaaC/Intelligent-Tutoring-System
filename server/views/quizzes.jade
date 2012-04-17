@@ -28,10 +28,10 @@
           td
             .btn-group
               a.btn(href="/viewQuiz?qid=#{quiz.qid}") View Questions
-              a.btn(href="/editQuiz?qid=#{quiz.qid}") Edit Quiz
+              a.btn(onclick="formModal('/editQuiz?qid=#{quiz.qid}')") Edit Quiz
               a.btn.btn(href="quizGrades?qid=#{quiz.qid}") Grades
               a.btn.btn-danger(href="/remQuiz?qid=#{quiz.qid}", onClick="return confirm('Are you sure you want to delete this Quiz?');") Delete
-a.btn.btn-primary.right(href="/addQuiz?cid=#{cid}") Add a Quiz
+a.btn.btn-primary.right(onclick="formModal('/addQuiz?cid=#{cid}')") Add a Quiz
 br
 br
 -if(modules.length == 0)
@@ -44,8 +44,6 @@ br
         th
           |Name
         th
-          |Class
-        th
           |State
         th
     tbody
@@ -53,7 +51,6 @@ br
         tr
           td
             a(href="#{module.filepath}")=module.title
-          td=module.title
           td
             if module.active
               span.label.label-success Active
@@ -66,7 +63,7 @@ br
               else
                 a.btn(href="/enableModule?mid=#{module.mid}") Enable
               a.btn.btn-danger(href="/remModule?mid=#{module.mid}", onClick="return confirm('Are you sure you want to delete this Module?');") Delete
-a.btn.btn-primary.right(href="/addModule?cid=#{cid}") Add a Module
+a.btn.btn-primary.right(onclick="formModal('/addModule?cid=#{cid}')") Add a Module
 br
 br
 -if(students.length == 0)
@@ -84,4 +81,4 @@ br
           =student.username
         td
           a.btn.btn-danger(href="/remStud?cid=#{cid}&uid=#{student.uid}", onClick="return confirm('Are you sure you want to remove this student from the class');") Remove
-a.btn.btn-primary.right(href='/student?cid=#{cid}') Add Student to Class
+a.btn.btn-primary.right(onclick="formModal('/student?cid=#{cid}')") Add Student to Class

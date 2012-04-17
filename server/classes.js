@@ -32,9 +32,11 @@ function addClassForm(req, res) {
       req.flash("error", err2);
       res.redirect('/classes');
     }
+    console.log("TEST");
     client.query("SELECT * FROM Users WHERE auth_level > 0",function(err3,profs){
       res.render('edit_class', {
         title: 'Add Class',
+        layout:false,
         theClass: classes[0],
         professors: profs
       });
@@ -62,6 +64,7 @@ function editClassForm(req, res) {
     client.query("SELECT * FROM Users WHERE auth_level > 0",function(err3,profs){
       res.render('edit_class', {
         title: 'Edit Class',
+        layout: false,
         theClass: classes[0],
         professors:profs
       });
@@ -122,6 +125,7 @@ function addStudentToClassForm(req, res) {
     client.query("SELECT * FROM Users", function(err2, students){
       res.render('student_class', {
         title: 'Add student to class',
+        layout:false,
         classes: results,
         students:students
       });

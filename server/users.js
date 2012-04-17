@@ -17,7 +17,8 @@ exports.validateUpdateUser = validateUpdateUser;
 // Routes
 function addUserForm(req, res) {
   res.render('control_panel', {
-    title: 'Admin Panel'
+    title: 'Admin Panel',
+    layout:false
   });
 }
 
