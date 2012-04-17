@@ -38,6 +38,7 @@ function addQuizForm(req, res) {
     else {
       res.render('edit_quiz', {
         title:'Add Quiz',
+        layout:false,
         classes: results,
         select: req.query.cid
       });
@@ -87,6 +88,7 @@ function editQuizForm(req, res) {
         else {
           res.render('edit_quiz', {
             title:'Edit Quiz',
+            layout:false,
             classes: results,
             select: req.query.cid,
             quiz: quizzes[0]
@@ -178,6 +180,7 @@ function addQuestionForm(req, res) {
   var qid = req.query.qid;
   res.render(req.query.type, {
     title: '',
+    layout:false,
     qid: qid,
     action: 'addQuestion',
     answers: '{}',
@@ -228,6 +231,7 @@ function editQuestionForm(req, res) {
     if(type != 'undefined'){
       res.render(type,{
         title : '',
+        layout:false,
         qid: qid,
         action: 'editQuestion',
         answers: results[0].answers,

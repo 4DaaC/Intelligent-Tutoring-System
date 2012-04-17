@@ -25,11 +25,11 @@ var current_user = function(req){
   }else return undefined;
 }
 
-var loadSessionInfo = function(req, callback) {
-  client.query('SELECT uid, auth_level FROM Users WHERE username = ?', [req.body.username], function(err, rows) {
+var loadSessionInfo = function(req,username, callback) {
+  client.query('SELECT uid, auth_level FROM Users WHERE username = ?', [username], function(err, rows) {
     if(rows.length == 1) {
       req.session.user = new Object();
-      req.session.user.username = req.body.username;
+      req.session.user.username = username;
       req.session.user.userid = parseInt(rows[0].uid);
       req.session.user.auth = parseInt(rows[0].auth_level);
     }
@@ -273,24 +273,28 @@ app.get('/studentList', function(req, res) {
 });
 
 app.get('/login',function(req,res) {
-  console.log('req');
-  if(typeof(current_user(req)) != 'undefined') {
+  console.log('COOKIE:');
+  console.log(req.cookies);
+  loadSessionInfo(req,req.cookies['its-login-username'],function(err){
+    if(!err){
     res.redirect("/");
-  }
-  else {
-    res.render('login',{
-      title:'Login',
-      layout:false
-    });
-  }
+    }
+    else {
+      res.render('login',{
+        title:'Login',
+        layout:false
+      });
+    }
+  });
 });
 
 app.post('/test-login',function(req,res) {
   if(config.requireLogin) {
     res.redirect('/login');
   }
+
   else {
-    loadSessionInfo(req, function(err) {
+    loadSessionInfo(req,req.body.username, function(err) {
       if(err) {
         res.redirect('/login');
       }

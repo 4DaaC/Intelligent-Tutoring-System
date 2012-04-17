@@ -1,9 +1,10 @@
 - var isEdit = typeof(quiz) != 'undefined'
+-var action = isEdit ? '/editQuiz' : '/addQuiz'
 if isEdit
-  h1 Create a Quiz
+  h1.form-title Edit Quiz
 else
-  h1 Edit Quiz
-form(method="post").form-horizontal
+  h1.form-title Create a Quiz
+form(method="post", action=action).form-horizontal
   .control-group
     .control-label Quiz Name
     .controls
@@ -30,4 +31,6 @@ form(method="post").form-horizontal
       p.help-block Number of questions students answer.  You must provide this many questions at each difficulty level before enabling the quiz.
   if isEdit
     input(type="hidden",name="qid", value="#{quiz.qid}")
-  input.btn.btn-primary(type="submit", value="Save Changes")
+    input.btn.btn-primary(type="submit", value="Save Changes")
+  else
+    input.btn.btn-primary(type="submit", value="Create Quiz")

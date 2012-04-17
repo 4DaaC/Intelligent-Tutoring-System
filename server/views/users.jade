@@ -6,7 +6,7 @@
     if(isAdmin)
       .btn-group
         input.btn.btn-primary(type='submit', value='Update Changes')
-        a.btn(href="/admin") Add a User
+        a.btn(onclick="formModal('/admin')") Add a User
     br
     table.table.table-bordered.table-striped.default-sort
       thead

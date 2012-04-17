@@ -65,7 +65,7 @@ form(method="post", action="/question")
           td #{question.category}
           td
             .btn-group
-              a.btn(href="/editQuestion?qid=#{qid}&questid=#{question.questid}") Edit Question
+              a.btn(onclick="formModal('/editQuestion?qid=#{qid}&questid=#{question.questid}')") Edit Question
               button.btn.btn-danger.rem(type="button", value="#{question.questid}") Del
   input(type="hidden", value="add", name="action")
   input(type="hidden", value="#{qid}", name="qid")
@@ -74,6 +74,6 @@ select(id="type", style="margin-bottom:0")
   option(value="tf") True/False
   option(value="short") Short Answer
 br
-button.btn.btn-primary(onclick="window.location='/addQuestion?qid=#{qid}&type='+$('#type').val()") Add Question
+button.btn.btn-primary(onclick="formModal('/addQuestion?qid=#{qid}&type='+$('#type').val())") Add Question
 br
 

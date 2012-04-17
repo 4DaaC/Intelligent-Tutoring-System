@@ -1,6 +1,10 @@
-h1 Create a Class
 - var isEdit = typeof(theClass) != 'undefined'
-form(method="post").form-horizontal
+-var action = isEdit ? '/editClass' : '/addClass'
+if isEdit
+  h1.form-title Edit Class
+else
+  h1.form-title Create a Class
+form(method="post",action= action).form-horizontal
   .control-group
     .control-label Class Name
     .controls
@@ -43,4 +47,6 @@ form(method="post").form-horizontal
           option(value="1") private
   if(isEdit)
     input(type="hidden", name="cid", value="#{theClass.cid}")
-  input.btn.btn-primary(type="submit", value="Add")
+    input.btn.btn-primary(type="submit", value="Save Edit")
+  else
+    input.btn.btn-primary(type="submit", value="Add New Class")

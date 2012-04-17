@@ -1,8 +1,8 @@
 if typeof(module) == 'undefined'
-  h1 Create a Learning Module
+  h1.form-title Create a Learning Module
 else
-  h1 Edit Learning Module
-form(method="post", enctype="multipart/form-data").horizontal-form
+  h1.form-title Edit Learning Module
+form(method="post", action='/addModule', enctype="multipart/form-data").horizontal-form
   .control-group
     .control-label Module Name
     .controls

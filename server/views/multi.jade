@@ -2,32 +2,33 @@ include question
   .control-group
     .control-label Choices
       br
-      button.btn#add(type="button") Add Choice
     #choices.controls
+      button.btn#add(type="button") Add Choice
+      br
       if add
         .input-prepend.input-append
           span.add-on
             input(type="checkbox", name="correct")
-          input.span8(type='text', name="ans")
+          input.span3(type='text', name="ans")
           button.btn.btn-danger(type="button", class="del")
             i.icon-remove-sign
         
         .input-prepend.input-append
           span.add-on
             input(type="checkbox", name="correct")
-          input.span8(type='text', name="ans")
+          input.span3(type='text', name="ans")
           button.btn.btn-danger(type="button", class="del")
             i.icon-remove-sign
         .input-prepend.input-append
           span.add-on
             input(type="checkbox", name="correct")
-          input.span8(type='text', name="ans")
+          input.span3(type='text', name="ans")
           button.btn.btn-danger(type="button", class="del")
             i.icon-remove-sign
         .input-prepend.input-append
           span.add-on
             input(type="checkbox", name="correct")
-          input.span8(type='text', name="ans")
+          input.span3(type='text', name="ans")
           button.btn.btn-danger(type="button", class="del")
             i.icon-remove-sign
 
@@ -47,6 +48,6 @@ include question
                 input(type="checkbox", name="correct", value="#{choice}", checked="checked")
               else 
                 input(type="checkbox", name="correct", value="#{choice}")
-            input.span8(type='text',name="ans", value="#{choice}")
+            input.span3(type='text',name="ans", value="#{choice}")
             button.btn.btn-danger(type="button", class="del")
               i.icon-remove-sign

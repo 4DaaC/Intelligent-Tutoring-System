@@ -30,6 +30,7 @@ function addModuleForm(req, res) {
     else {
       res.render('add_module', {
         title:'Add Module',
+        layout:false,
         classes: results,
         select: req.query.cid
       });

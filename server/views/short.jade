@@ -2,16 +2,17 @@ include question
   .control-group
     .control-label Answers
       br
-      button.btn#addno(type="button") Add Answer
     #choices.controls 
+      button.btn#addno(type="button") Add Answer
+      br
       if add
         .input-append
-          input.span8(type='text', name="correct")
+          input.span3(type='text', name="correct")
           button.btn.btn-danger(type="button", class="del")
             i.icon-remove-sign
       else
         each choice in JSON.parse(quest.correct_answer)
           .input-append
-            input.span8(type="text",name="correct", value="#{choice}")
+            input.span3(type="text",name="correct", value="#{choice}")
             button.btn.btn-danger(type="button", class="del")
               i.icon-remove-sign
