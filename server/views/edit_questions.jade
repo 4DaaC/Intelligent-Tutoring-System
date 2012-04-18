@@ -1,13 +1,19 @@
 h1 Edit #{title}
-if quiz.active
-  a(href="/disableQuiz?qid=#{qid}") Disable Quiz
-else
-  a(href="/enableQuiz?qid=#{qid}") Enable Quiz
 br
+.quiz-status
+  if quiz.active
+    h2.enabled Quiz Enabled
+  else
+    h2.disabled Quiz Disabled
 span Questions required to enable: #{quiz['question_amount']}
-table(id="quest-count")
+table.table.table-bordered.table-condensed(id="quest-count")
   tr
-    th(colspan=2) Question Count
+    th
+      if quiz.active
+        a.btn.btn-danger(href="/disableQuiz?qid=#{qid}") Disable Quiz
+      else
+        a.btn.btn-primary(href="/enableQuiz?qid=#{qid}") Enable Quiz
+    th Question Count
   tr
     td Easy
     if diffArray[1] >= quiz['question_amount']
@@ -26,62 +32,48 @@ table(id="quest-count")
       td.pass #{diffArray[3]}
     else
       td.fail #{diffArray[3]}
-select(id="type")
+
+h2 Questions
+form(method="post", action="/question")
+  table(id="qtable").table.table-bordered.table-striped.default-sort
+    thead
+      tr
+        th Type
+        th Question
+        th Difficulty
+        th Category
+        th
+    tbody
+      each question in questions
+        tr
+          td
+            if question.type == 'multi'
+              span.label.label-inverse Multiple Choice
+            if question.type == 'tf'
+              span.label.label-inverse True/False
+            if question.type == 'short'
+              span.label.label-inverse Short Answer
+          td 
+            em #{question.question}
+          td
+            if (question.difficulty == 1)
+              span.label.label-success Easy
+            else if(question.difficulty == 2)
+              span.label.label-warning Medium
+            else
+              span.label.label-important Difficult
+          td #{question.category}
+          td
+            .btn-group
+              a.btn(onclick="formModal('/editQuestion?qid=#{qid}&questid=#{question.questid}')") Edit Question
+              button.btn.btn-danger.rem(type="button", value="#{question.questid}") Del
+  input(type="hidden", value="add", name="action")
+  input(type="hidden", value="#{qid}", name="qid")
+select(id="type", style="margin-bottom:0")
   option(value="multi") Multiple Choice
   option(value="tf") True/False
   option(value="short") Short Answer
-button(onclick="window.location='/addQuestion?qid=#{qid}&type='+$('#type').val()") Add
-form(method="post", action="/question")
-  table(id="qtable")
-    tr
-      th Type
-      th Difficulty
-      th Category
-      th Question
-      th Possible Answers
-      th Correct Answer
-      th
-    each question in questions
-      tr
-        if question.type == 'multi'
-          td Multiple Choice
-        if question.type == 'tf'
-          td True/False
-        if question.type == 'short'
-          td Short Answer
-        td
-          if question.difficulty == 1
-            |Easy
-          if question.difficulty == 2
-            |Medium
-          if question.difficulty == 3
-            |Difficult
-        td #{question.category}
-        td
-          a(href="/editQuestion?qid=#{qid}&questid=#{question.questid}") #{question.question}
-        if question.type == 'multi'
-          td
-            table
-              each choice in JSON.parse(question.answers)
-                tr
-                  td #{choice} 
-          td
-            table
-              each answer in JSON.parse(question.correct_answer)
-                tr
-                  td #{answer}
-        if question.type == 'tf'
-          td
-          td #{JSON.parse(question.correct_answer)}
-        if question.type == 'short'
-          td
-          td
-            table
-              each answer in JSON.parse(question.correct_answer)
-                tr
-                  td #{answer}
-        td
-          button.rem(type="button", value="#{question.questid}")
-            |Del
-  input(type="hidden", value="add", name="action")
-  input(type="hidden", value="#{qid}", name="qid")
+br
+button.btn.btn-primary(onclick="formModal('/addQuestion?qid=#{qid}&type='+$('#type').val())") Add Question
+br
+

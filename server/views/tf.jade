@@ -1,55 +1,25 @@
-h3 #{name}
-form(id="qform", action="#{action}", method="POST")
-  |Category
-  if add
-    input(type="text", name="cat")
-  else
-    input(type="text", name="cat", value="#{quest.category}")
-  br
-  |Difficulty
-  select(name="diff")
-    if quest.difficulty == 1
-      option(value=1, selected="selected") Easy
-    else
-      option(value=1) Easy
-    if quest.difficulty == 2
-      option(value=1, selected="selected") Medium
-    else
-      option(value=2) Medium
-    if quest.difficulty == 3
-      option(value=1, selected="selected") Hard
-    else
-      option(value=3) Hard
-  br
-  br
-  |Question
-  br
-  if add
-    textarea(name="question")
-    ul
-      li
-        |True
-        input(type="radio", name="correct", value="true") 
-      li
-        |False
-        input(type="radio", name="correct", value="false")
-  else
-    textarea(name="question") #{quest.question}
-    ul
-      li
-        |True
-        if JSON.parse(quest.correct_answer)[0] == 'true'
-          input(type="radio", name="correct", value="true", checked="checked")
-        else
-          input(type="radio", name="correct", value="true")
-      li
-        |False
-        if JSON.parse(quest.correct_answer)[0] == 'false'
-          input(type="radio", name="correct", value="false", checked="checked")
-        else
+include question
+  .control-group
+    .control-label True/False
+    .controls
+      if add
+        label.radio
+          input(type="radio", name="correct", value="true") 
+          |True
+        label.radio
           input(type="radio", name="correct", value="false")
-  input(type="submit", value="Save")
-  input(type="hidden", name="ans", value="")
-  input(type="hidden", name="type", value="tf")
-  input(type="hidden", name="qid", value="#{qid}")
-  input(type="hidden", name="questid", value="#{questid}")
+          |False
+      else
+        label.radio
+          if JSON.parse(quest.correct_answer)[0] == 'true'
+            input(type="radio", name="correct", value="true", checked="checked")
+           else
+            input(type="radio", name="correct", value="true")
+          |True
+        label.radio
+          if JSON.parse(quest.correct_answer)[0] == 'false'
+            input(type="radio", name="correct", value="false", checked="checked")
+          else
+            input(type="radio", name="correct", value="false")
+          |False
+

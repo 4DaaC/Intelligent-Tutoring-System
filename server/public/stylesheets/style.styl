@@ -1,72 +1,73 @@
-body
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
-  background-color:#002649
+html,body
+  background-color:#EEE
+  height:100%
+#bd
+  padding: 20px 10px
+  background-color:#FFF
+  border:1px solid #555
+  border-top:0
+  -webkit-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  position:relative;
+  z-index:2;
+#navbar
+  -webkit-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 50px rgba(0, 0, 0, 0.5);
+  position:relative;
+  z-index:1;
+  margin-bottom:0;
+  width:960px;
+  border-left:1px solid #555
+  border-right:1px solid #555
+  .navbar-inner
+    border-radius:0;
+    -moz-border-radius:0;
+    -webkit-border-radius:0;
 a
   color: #00B7FF
-#wrapper
-  width: 800px
-  background-color: #FFF
-  margin:0 auto 0
-  height:100%
-#header
-  background-color:#E01
-  color: #FFF
-  width: 100%
-  min-height: 70px
-  #title-wrap
-    float: left
-    margin: 10px
-  .title
-    font-size: 200%
-    padding: 0px
-    text-decoration: none
-    color: #FFF
-  .subtitle
-    margin-left: 20px
-#user-info
-  margin: 10px
-  float: right
-  text-align: right
-  a
-    color: #CCC
-#bd
-  float: right
-  width:600px
-  padding: 15px
-.clear
- clear: both
-.center
-  margin: 0 auto 0
-table
-  border-collapse: collapse
-th,td
-  padding:5px
-tr:nth-child(2n)
-  background-color: #EEE
-table,th,td
-  border: 1px solid #002649
-#sidebar
-  float: left
-  background-color: #DDD
-  width:150px
-  height: 100%
-  ul
-    padding-left 20px
-  a
-    color:#E01
-  ul ul
-    padding-left: 0
-    list-style-type: none
-#error-box
-  background-color:#FCC
-  padding:20px
 tr.correct, td.correct
-  background:#DFD
+  background:#DFD !important
 tr.incorrect, td.incorrect
-  background:#E77
+  background:#E77 !important
+#quest-count
+  width:300px;
 #grades-table
   font-size:12px
 td.pass
   color:green
 td.fail
   color:red
+.quiz-status
+  .disabled
+    color:red
+  .enabled
+    color:green
+th
+  font-style:italic
+.right
+  float:right
+.del
+  height:28px;
+th.header
+    background-image: url(../img/bg.gif)
+    cursor: pointer
+    font-weight: bold
+    background-repeat: no-repeat
+    background-position: center left
+    padding-left: 20px
+    border-right: 1px solid #dad9c7
+    margin-left: 5px
+
+th.headerSortUp
+    background-image: url(../img/asc.gif)
+th.headerSortDown
+    background-image: url(../img/desc.gif)
+.grade-link
+  margin-left: 5px
+  margin-bottom: 5px
+  .add-on
+    background-color: #F
+    padding:4px 10px
+    font-size:14pt

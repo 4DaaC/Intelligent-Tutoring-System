@@ -1,21 +1,15 @@
-script
- $(document).ready(function() {
- $.get("/studentList", function(data) {
-   for(var i = 0;i < data.length;i++) {
-    $('#list').append("<option value='"+data[i].uid+"'>"+data[i].username+"</option>");
-   }
-  })
- });
-form(method="post", action="/student")
- table
-  tr
-   td Class:
-    select(name='cid')
-     for c in classes
-      option(value="#{c.cid}") #{c.name}
-  tr
-   td Student:
-    select(id="list", name='user')
-  tr
-   td
-    input(type="submit", value="Add")
+h1.form-title Add Student to Class
+form(method="post", action="/student").horizontal-form
+  .control-group
+    .control-label Class
+    .controls
+      select(name='cid')
+        for c in classes
+          option(value="#{c.cid}") #{c.name}
+  .control-group
+    .control-label Student
+    .controls
+      select(id="list", name='user')
+        for student in students
+          option(value=student.uid)=student.username
+  input.btn.btn-primary(type="submit", value="Add")

@@ -1,1 +1,38 @@
-h3 #{title}
+h3.form-title #{name}
+form(id="qform", action="#{action}", method="POST").form-horizontal
+  .control-group
+    .control-label Category
+    .controls
+      if add
+        input(type="text", name="cat")
+      else
+        input(type="text", name="cat", value="#{quest.category}")
+  .control-group
+    .control-label Difficulty
+    .controls
+      select(name="diff")
+        if quest.difficulty == 1
+          option(value=1, selected="selected") Easy
+        else
+          option(value=1) Easy
+        if quest.difficulty == 2
+          option(value=1, selected="selected") Medium
+        else
+          option(value=2) Medium
+        if quest.difficulty == 3
+          option(value=1, selected="selected") Difficult
+        else
+          option(value=3) Hard
+  .control-group
+    .control-label Question
+    .controls
+      if add
+        textarea(name="question", rows="5", cols="40")
+      else
+        textarea(name="question", rows="5", cols="40") #{quest.question} 
+  yield
+  input(type="hidden", name="ans", value="")
+  input(type="hidden", name="type", value="#{type}")
+  input(type="hidden", name="qid", value="#{qid}")
+  input(type="hidden", name="questid", value="#{questid}")
+  input.btn.btn-primary(type="submit", value="Save")

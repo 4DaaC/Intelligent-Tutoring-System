@@ -3,48 +3,52 @@
 -else
   h1 Users
   form(action='/updateUser', method='POST')
-    table.center
-      tr
-        th
-          |Id
-        th
-          |Username
-        th
-          |Auth Level
-        if(isAdmin)
-          th
-      for user in users
-        tr
-          td
-            =user.uid
-          td
-            =user.username
-          td
-            -if (!isAdmin)
-              -if (user.auth_level == 0)
-                |Student
-              -if (user.auth_level == 1)
-                |Professor
-              -if (user.auth_level == 2)
-                |Admin
-            -else
-              select(name=user.username)
-                -if (user.auth_level == 2)
-                  option(selected='selected') Admin
-                -else
-                  option Admin
-                -if (user.auth_level == 1)
-                  option(selected='selected') Professor
-                -else
-                  option Professor
-                -if (user.auth_level == 0)
-                  option(selected='selected') Student
-                -else
-                  option Student
-          if(isAdmin)
-            td
-              a(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
     if(isAdmin)
-      input(type='submit', value='Update')
-if(isAdmin)
-  a(href="/admin") Add a User
+      .btn-group
+        input.btn.btn-primary(type='submit', value='Update Changes')
+        a.btn(onclick="formModal('/admin')") Add a User
+    br
+    table.table.table-bordered.table-striped.default-sort
+      thead
+        tr
+          th
+            |Id
+          th
+            |Username
+          th
+            |Auth Level
+          if(isAdmin)
+            th
+      tbody
+        for user in users
+          tr
+            td
+              =user.uid
+            td
+              =user.username
+            td
+              -if (!isAdmin)
+                -if (user.auth_level == 0)
+                  |Student
+                -if (user.auth_level == 1)
+                  |Professor
+                -if (user.auth_level == 2)
+                  |Admin
+              -else
+                select(name=user.username)
+                  -if (user.auth_level == 2)
+                    option(selected='selected') Admin
+                  -else
+                    option Admin
+                  -if (user.auth_level == 1)
+                    option(selected='selected') Professor
+                  -else
+                    option Professor
+                  -if (user.auth_level == 0)
+                    option(selected='selected') Student
+                  -else
+                    option Student
+            if(isAdmin)
+              td
+                a.btn.btn-danger(href="/remUser?uid=#{user.uid}",onClick="return confirm('Are you sure you want to delete?');") Delete
+    
