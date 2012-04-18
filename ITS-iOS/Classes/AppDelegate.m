@@ -36,8 +36,6 @@
     #import "PGURLProtocol.h"
 #endif
 
-#import "ChildBrowserCommand.h"
-#import "ChildBrowserViewController.h"
 
 
 @implementation AppDelegate
