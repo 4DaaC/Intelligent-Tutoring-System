@@ -114,10 +114,8 @@ function editQuizSubmit(req, res) {
 function viewQuiz(req, res) {
   var qid = parseInt(req.query.qid);
   var qString = "SELECT * FROM Quizzes WHERE qid = ?";
-  console.log(qString);
   client.query(qString, [qid], function(err, quiz, fields) {
     client.query("SELECT * FROM Questions WHERE qid = ?", [qid], function(err, results, fields) {
-      console.log(results);
       difficulty = [0,0,0,0];
       for(idx in results){
         difficulty[results[idx].difficulty] ++;
@@ -137,7 +135,6 @@ function enableQuizSubmit(req, res) {
   var qid = parseInt(req.query.qid);
   enableQuiz(qid, function(err) {
     if(err) {
-      console.log(err)
       req.flash("error", err);
     }
     res.redirect('/viewQuiz?qid=' + qid);
@@ -148,7 +145,6 @@ function disableQuizSubmit(req, res) {
   var qid = parseInt(req.query.qid);
   disableQuiz(qid, function(err) {
     if(err) {
-      console.log(err);
       req.flash("error", err);
     }
     res.redirect('/viewQuiz?qid=' + qid);
@@ -198,7 +194,6 @@ function addQuestionSubmit(req, res) {
   var cor = stringify(req.body.correct);
   addQuestion(qid, req.body.type, req.body.question, ans, cor, req.body.cat, req.body.diff, function(err) {
     if(err) {
-      console.log(err);
       res.send(503);
     }
     else {
@@ -212,10 +207,8 @@ function editQuestionForm(req, res) {
   var qid = req.query.qid;
   var qString = 'SELECT * FROM Questions WHERE qid = ? AND questid = ?';
   qString = client.format(qString, [qid, questid]);
-  console.log(qString);
   client.query(qString, function(err, results, fields) {
     if(err || results.length < 1){
-      console.log(err);
       res.send(503);
     }else{
     var type = 'undefined';
@@ -242,7 +235,6 @@ function editQuestionForm(req, res) {
         add: false
       });
     }else {
-      console.log('Could not find questid = '+questid+' and qid = '+qid);
       res.send(503);
     }
     }
@@ -257,7 +249,6 @@ function editQuestionSubmit(req, res) {
   editQuestion(questid, req.body.question, req.body.type, ans, cor, req.body.cat,
       req.body.diff, function(err) {
     if(err) {
-      console.log(err);
       res.send(503);
     }
     else {
@@ -268,10 +259,8 @@ function editQuestionSubmit(req, res) {
 
 function deleteQuestionSubmit(req, res) {
   var questid = req.body.questid;
-  console.log(questid);
   deleteQuestion(questid, function(err) {
     if(err) {
-      console.log(err);
       res.send(503);
     }
     else {

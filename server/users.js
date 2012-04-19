@@ -36,7 +36,6 @@ function addUserSubmit(req, res) {
 
 function removeUserSubmit(req, res) {
   removeUser(req.query.uid, function(err) {
-    if(err) console.log(err);
     res.redirect('/users');
   });
 }
@@ -51,7 +50,6 @@ function updateUserSubmit(req, res) {
 function viewUsers(req, res) {
   var qString = "select * from Users";
   client.query(qString, function(err,results,fields) {
-    console.log('render');
     res.render('users', {
       title: 'Users',
       users: results

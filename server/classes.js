@@ -32,7 +32,6 @@ function addClassForm(req, res) {
       req.flash("error", err2);
       res.redirect('/classes');
     }
-    console.log("TEST");
     client.query("SELECT * FROM Users WHERE auth_level > 0",function(err3,profs){
       res.render('edit_class', {
         title: 'Add Class',
@@ -47,7 +46,6 @@ function addClassForm(req, res) {
 function addClassSubmit(req, res) {
   addClass(req.body.tuser, req.body.cname, req.body.limit, req.body.priv, function(err) {
     if(err) {
-      console.log(err);
       req.flash("error", err);
     }
     res.redirect('/classes');
@@ -76,7 +74,6 @@ function editClassSubmit(req, res) {
   var frm = req.body;
   editClass(frm.cname, frm.limit, frm.priv, frm.tuser, frm.cid, function(err) {
     if(err) {
-      console.log(err);
       req.flash("error", err);
     }
     res.redirect('/classes');
@@ -121,7 +118,6 @@ function addStudentToClassForm(req, res) {
     qString = client.format(qString, [req.session.user.username]);
   }
   client.query(qString, function(err, results, fields) {
-    console.log(results);
     client.query("SELECT * FROM Users", function(err2, students){
       res.render('student_class', {
         title: 'Add student to class',
@@ -139,7 +135,6 @@ function viewClasses(req, res) {
     qString += " AND Users.username = ?";
     qString = client.format(qString, [req.session.user.username]);
   }
-  console.log(qString);
   client.query(qString, function(err, results, fields) {
     res.render('classes', {
       title: 'Classes',
@@ -152,19 +147,13 @@ function viewClass(req, res) {
   var cid = req.query.cid;
   var qString = "select Quizzes.*, Classes.name AS className FROM Quizzes, Classes WHERE Classes.cid = Quizzes.cid " +
     "AND Quizzes.cid = ?";
-  console.log(qString);
   client.query(qString, [cid], function(err, results, fields) {
-    console.log(results);
     qString = "select mid, Modules.active,Modules.title, Modules.filepath, Classes.name AS className FROM Modules, Classes WHERE Classes.cid = Modules.cid " +
     "AND Modules.cid = ?";
     client.query(qString,[cid],function(err3,modules){
-      console.log(modules);
-      console.log(err);
       qString = "select Users.username, Users.uid FROM Class_List, Users WHERE Class_List.uid = Users.uid AND " +
       " Class_List.cid = ?";
-      console.log(qString);
       client.query(qString, [cid], function(err2, results2, fields2) {
-        console.log(results2);
         res.render('quizzes', {
           title:"Quizzes",
           quizzes: results,
