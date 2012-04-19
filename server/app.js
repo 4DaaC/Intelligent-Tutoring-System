@@ -89,6 +89,8 @@ var requireLogin = function(req,res,next){
      typeof(current_user(req)) !='undefined' || 
      req.route.params[0] == '/login' || 
      req.route.params[0] == '/test-login' ||
+     req.route.params[0] == '/login-mobile' ||
+     req.route.params[0] == '/logout-mobile' ||
      req.route.params[0] == '/stylesheets/style.css'){
     next();
   }else{
@@ -287,6 +289,34 @@ app.get('/login',function(req,res) {
     }
   });
 });
+
+app.get('/login-mobile', function(req,res){
+  var action = '';
+  if(req.cookies['its-login-username']){
+    console.log('cookie set');
+    console.log(req.cookies['its-login-username']);
+    action='display';
+  }else{
+    console.log('cookie not set');
+    action='login';
+  }
+  res.render('login-mobile',{title:'Login',action:action,username:req.cookies['its-login-username'],layout:false});
+});
+
+app.get('/logout-mobile',function(req,res) {
+  res.cookie('its-login-username', '', {
+    expires: new Date(Date.now() - 1000),
+  });
+  res.cookie('its-login-username', '', {
+    expires: new Date(Date.now() - 1000),
+    path:'/',
+    domain:'.radford.edu',
+    httponly:'1'
+  });
+  req.session.destroy();
+  res.redirect('/login-mobile');
+});
+
 
 app.post('/test-login',function(req,res) {
   if(config.requireLogin) {
