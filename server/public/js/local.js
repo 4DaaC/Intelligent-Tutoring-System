@@ -15,9 +15,7 @@ $(document).ready(function() {
       return false;
     },
     format: function(s){
-      console.log(s);
       var test = s.replace(/^.+Close/,'').replace(/View Attempts$/,'');
-      console.log(test);
       return test;
     },
   type: 'numeric'
