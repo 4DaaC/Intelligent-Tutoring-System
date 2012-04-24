@@ -54,7 +54,18 @@ app.get('/mobile/quiz', function(req,res){
             console.log(errors);
             res.send(500);
           }else{
-            res.send({questions:questions, answers:answers});
+            client.query("SELECT * FROM Quizzes WHERE qid = ?", [qid],function(err2,quizzes){
+              if(err2){
+                console.log(err2);
+                res.send(500);
+              }else{
+                var quiz = quizzes[0];
+                quiz['questions'] = questions;
+                quiz['answers'] = answers;
+                console.log(quiz);
+                res.send(quiz);
+              }
+            });
           }
         });
       }
