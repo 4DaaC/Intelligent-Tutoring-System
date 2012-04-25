@@ -36,7 +36,7 @@
       $('#login').bind('pageshow',function(){
         var storage = window.localStorage;
         if (!loggedIn()){
-          $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/login.php');
+          $('#login-frame').attr('src',baseUrl + "/login-mobile");
         }else{
           itsLogin(getUsername());
         }
@@ -44,7 +44,7 @@
 
       $('#logout-button').bind('click',function(){
         logoutUser();
-        $('#login-frame').attr('src','https://php.radford.edu/~softeng11/its/logout.php').show();
+        $('#login-frame').attr('src',baseUrl + "/logout-mobile").show();
         $('#logged').hide();
         $('#logout-button').hide();
       }); 
@@ -55,7 +55,7 @@
     <h1>Login</h1>
   </div>
   <div data-role="content">
-    <iframe id="login-frame" src="" width="100%" onload="iframeOnload();"><p>Not Supported</p> </iframe>
+    <iframe id="login-frame" src="" style="width:100%"  width="100%" onload="iframeOnload();"><p>Not Supported</p></iframe>
     <h2 id="logged" style="display:none;">Logged in as <span></span></h2>
     <div id="logout-button" data-role="button" style="display:none;">Logout</div>
     

@@ -33,7 +33,7 @@
 
   <div data-role="page" id="quiz">
       <div data-role="header">
-        <a data-rel="back" data-icon="home" data-iconpos="notext"></a>
+        <a href="index.html" data-icon="home" data-iconpos="notext"></a>
         <h1 id="quiz-title">Quiz</h1>
       </div>
       <div id="quiz-content" data-role="content">
@@ -49,12 +49,15 @@
         <div data-role="button" id="save-answer" onclick="saveAnswer();">Save Answer</div>
         <div data-role="button" id="next-question" onclick="prepQuestion();" style="display:none">Next Question</div>
         <script>
-        $(document).on('deviceready',function(){
-        var qid = getParameterByName("qid");
-        var qname = getParameterByName("name");
-        $('#quiz-title').html(qname);
-        var questAmount = parseInt(getParameterByName("amount"),10);
+        $('#quiz').on('pageshow',function(){
+        var qid = getCurrentQid();
+        console.log(qid);
         var quiz = getQuiz(qid);
+        console.log(quiz);
+        var qname = quiz['name'];
+        $('#quiz-title').html(qname);
+        var questAmount = quiz["question_amount"];
+        
         console.log(JSON.stringify(quiz,null,2));
         var currentQuestion = new Object();
         if(typeof(quiz.currentDiff) == 'undefined'){

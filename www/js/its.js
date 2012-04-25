@@ -1,11 +1,12 @@
 var cname = 'its-login-username'; 
-baseUrl = "http://itutor.radford.edu:3002";
+baseUrl = "http://itutor.radford.edu:3000";
 itsLogin = function(user){
     setUsername(user);
     $('#login-frame').attr('src','').hide();
     $('#logged span').html(user);
     $('#logged').show();
     $('#logout-button').show();
+    window.scroll(0,0);s
 }
 
 iframeOnload = function(){
@@ -15,6 +16,16 @@ iframeOnload = function(){
     if(username != null){
       itsLogin(username);
     }
+}
+
+setCurrentQid = function(qid){
+  var storage = window.localStorage;
+  storage.setItem('curr-quiz',qid);
+}
+
+getCurrentQid = function(){
+  var storage = window.localStorage;
+  return storage.getItem('curr-quiz');
 }
 
 getUsername = function(){

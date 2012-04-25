@@ -124,6 +124,8 @@
         return NO; 
     }
     
+    NSLog(@"%@",[url path]);
+    
 	// calls into javascript global function 'handleOpenURL'
     NSString* jsString = [NSString stringWithFormat:@"handleOpenURL(\"%@\");", url];
     [self.viewController.webView stringByEvaluatingJavaScriptFromString:jsString];
@@ -181,10 +183,14 @@
 
 - (BOOL) webView:(UIWebView*)theWebView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
 {
+    
     NSURL *url = [request URL];
     // Intercept the external http requests and forward to Safari.app
     // Otherwise forward to the PhoneGap WebView
-    if ([[url scheme] isEqualToString:@"http"] || [[url scheme] isEqualToString:@"https"]) {
+    if([[url path] isEqualToString:@"/login-mobile"] || [[url path] isEqualToString:@"/logout-mobile"] || [[url path] isEqualToString:@"/~it-auth/vsp09/login.php"] || [[url path] isEqualToString:@"/~it-auth/vsp09/auth.php"]){
+        return YES;
+    }
+    else if ([[url scheme] isEqualToString:@"http"] || [[url scheme] isEqualToString:@"https"]) {
         [[UIApplication sharedApplication] openURL:url];
         return NO;
     } else {
