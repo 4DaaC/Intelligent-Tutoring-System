@@ -48,6 +48,11 @@ $(document).ready(function() {
   $('.del').live("click", function() {
     $(this).parent().empty().remove(); 
   });
+  $('#qform').live("submit",function(){
+    $(this).find('input[name="correct"]').each(idx,function(){
+      $(this).val($(this).parent().siblings('input[name="ans"]').val());
+    });
+  });
   $('.rem').click(function() {
     if(confirm("Are you sure you want to delete this question?")) {
       $.ajax({
