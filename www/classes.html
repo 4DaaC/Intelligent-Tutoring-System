@@ -69,7 +69,7 @@
                     var quiz = quizzes[idx3];
                     var questions = getQuiz(quiz.qid);
                     console.log(questions);
-                    markup += "<a href='quiz.html' data-role='button' name='" + quiz.name+ "' question-amount='" + quiz['question_amount'] + "' qid='" + quiz.qid + "' class='quiz-link ";
+                    markup += "<a href='quiz.html' data-role='button' qid='" + quiz.qid + "' class='quiz-link ";
                     if(questions.taken || !quiz.active){
                       markup += "ui-disabled ";
                     }
