@@ -6,7 +6,7 @@ itsLogin = function(user){
     $('#logged span').html(user);
     $('#logged').show();
     $('#logout-button').show();
-    window.scroll(0,0);s
+    window.scroll(0,0);
 }
 
 iframeOnload = function(){

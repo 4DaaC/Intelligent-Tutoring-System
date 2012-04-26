@@ -185,6 +185,7 @@
 {
     
     NSURL *url = [request URL];
+    NSLog(@"%@", url);
     // Intercept the external http requests and forward to Safari.app
     // Otherwise forward to the PhoneGap WebView
     if([[url path] isEqualToString:@"/login-mobile"] || [[url path] isEqualToString:@"/logout-mobile"] || [[url path] isEqualToString:@"/~it-auth/vsp09/login.php"] || [[url path] isEqualToString:@"/~it-auth/vsp09/auth.php"]){

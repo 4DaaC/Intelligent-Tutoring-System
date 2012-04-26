@@ -22,6 +22,13 @@
   $(document).bind("mobileinit", function(){
     $.mobile.page.prototype.options.addBackBtn = true;
   });
+      document.addEventListener("deviceready", onDeviceReady, false);
+      
+      // PhoneGap is ready
+      //
+      function onDeviceReady() {
+          // Empty
+      }
 </script>
 <script src="js/childbrowser.js"></script>
   <script src="js/crypt.js"></script>

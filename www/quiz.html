@@ -23,6 +23,13 @@
   $(document).bind("mobileinit", function(){
     $.mobile.page.prototype.options.addBackBtn = true;
   });
+      document.addEventListener("deviceready", onDeviceReady, false);
+      
+      // PhoneGap is ready
+      //
+      function onDeviceReady() {
+          // Empty
+      }
 </script>
 
   <script src="js/crypt.js"></script>
@@ -49,6 +56,10 @@
         <div data-role="button" id="save-answer" onclick="saveAnswer();">Save Answer</div>
         <div data-role="button" id="next-question" onclick="prepQuestion();" style="display:none">Next Question</div>
         <script>
+            showMessage = function(msg){
+                $('#quiz-content').children().hide();
+                $('#quiz-content').append('<h3>' + msg + '</h3>');
+            }
         $('#quiz').on('pageshow',function(){
         var qid = getCurrentQid();
         console.log(qid);
@@ -90,8 +101,7 @@
             var bank = questions[difficulties[diff]];
             var keys = Object.keys(bank);
             if(keys.length == 0){
-              navigator.notification.alert('Quiz is out of questions for your difficulty level.  Try again once your professor has added more.');
-              window.location = 'index.html';
+              showMessage('Quiz is out of questions for your difficulty level.  Try again once your professor has added more.');
             }else{
               var questid;
               if(keys.length == 1){
@@ -134,8 +144,7 @@
             quiz.inProgress = false;
             quiz.taken = true;
             setQuiz(qid,quiz);
-            navigator.notification.alert('Quiz is Complete!');
-            window.location = 'index.html';
+            showMessage('Quiz is Complete!');
           }
         }
         
