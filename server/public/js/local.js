@@ -33,7 +33,8 @@ $(document).ready(function() {
     });
   });
   $('.default-sort').tablesorter();
-  $('#qform').submit(function() {
+
+  $('#qform').live('submit',function() {
     $('textarea[name="ans"]').each(function(index, element){
       var text = $(element);
       text.next().val(text.val());
@@ -49,8 +50,11 @@ $(document).ready(function() {
     $(this).parent().empty().remove(); 
   });
   $('#qform').live("submit",function(){
-    $(this).find('input[name="correct"]').each(idx,function(){
-      $(this).val($(this).parent().siblings('input[name="ans"]').val());
+    $(this).find('input[name="correct"]').each(function(idx){
+      var input = $(this).parent().siblings('input[name="ans"]');
+      if(input.length > 0){
+        $(this).val(input.val());
+      }
     });
   });
   $('.rem').click(function() {
