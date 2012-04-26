@@ -31,7 +31,6 @@ form(id="qform", action="#{action}", method="POST").form-horizontal
       else
         textarea(name="question", rows="5", cols="40") #{quest.question} 
   yield
-  input(type="hidden", name="ans", value="")
   input(type="hidden", name="type", value="#{type}")
   input(type="hidden", name="qid", value="#{qid}")
   input(type="hidden", name="questid", value="#{questid}")
